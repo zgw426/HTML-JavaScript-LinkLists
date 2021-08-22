@@ -2,6 +2,10 @@
 
 サイトやファイルのリンクを検索／表示します。
 
+## デモ動画
+
+[![](https://img.youtube.com/vi/AxJkSmBLeFU/0.jpg)](https://www.youtube.com/watch?v=AxJkSmBLeFU)
+
 ## ファイル構成
 
 |ファイル|説明|
@@ -46,8 +50,6 @@
     "note"     : "検索サイト"
   }
 ```
-
-
 
 |パラメータ|説明|
 |--------|--------|
