@@ -4,12 +4,15 @@
 
 ## ファイル構成
 
-|||
+|ファイル|説明|
 |---|---|
 |linklists.html|アプリ本体|
 |links_01.json.js|リンク情報を含むjsファイル|
 |links_02.json.js|リンク情報を含むjsファイル|
 |links_03.json.js|リンク情報を含むjsファイル|
+|linklists_99.html|links_99.json.jsファイルを追加したアプリ|
+|links_99.json.js|リンク情報を含むjsファイル|
+
 
 ## アプリ起動方法
 
