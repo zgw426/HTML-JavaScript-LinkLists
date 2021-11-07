@@ -115,6 +115,22 @@ div.area100 {
     float : left;
     cursor: pointer;
 }
+
+.div_url{
+    width : calc(100%);
+    padding     : 2px;
+    margin-top  : 0px;
+    margin-left : 0px;
+    text-align  : left;
+    background-color : #ffffff;
+    border : solid 1px;
+    float  : left;
+    cursor : pointer;
+
+}
+
+
+
 </style>
 </head>
 <body>
@@ -218,6 +234,8 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote){
   let tgtStr = tgtName + "," + tgtCategory + "," + tgtNote;
   let rFlg = new Array();
 
+  tgtStr = tgtStr.toLowerCase(); // 小文字変換
+
   // rFlg 初期化
   rFlg.length = 0;
   for (let i = 0; i < c1key.length; i++) {
@@ -277,8 +295,17 @@ function showAreaD()
       wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
       wStr += list[lp0]["Name"];
       wStr += "</a><BR />";
+
+
+      decoUrl = decodeURI( list[lp0]["URL"] );
+
+      wStr += "<small>";
+      wStr += "<div class='div_url'>";
+      wStr += decoUrl;
+      wStr += "</div>" + "<BR /><BR />";
       wStr += list[lp0]["note"] + "<BR />";
       wStr += cateStr;
+      wStr += "</small>";
       wStr += "</div>";
     }
   }
@@ -294,10 +321,14 @@ function set_C1key_B1key(){
 
   for (let i = 0; i < areaB.length; i++) {
     if (areaB[i].checked) {
+      //tmpStr = areaB[i].value.toLowerCase(); // 小文字変換
+      //areaB1.push(tmpStr);
       areaB1.push(areaB[i].value);
     }
   }
   b1key = b1key.concat(areaB1);
+
+  console.log("b1key = " + b1key);
 
   // 検索欄の文字列をc1keyに格納する
   keyStr = document.getElementById("inputKey").value;
@@ -306,12 +337,15 @@ function set_C1key_B1key(){
     keyStr = keyStr.replace(/　/g, ' ');  // 全角空白→半角空白
     keyStr = keyStr.replace(/,/g, ' ');   // , (コロン)→半角空白
     keyStr = keyStr.replace(/\\/g, ' ');  // ￥ →半角空白
-    iptkey = keyStr.split(" ");           // 検索欄の文字列を半角空白で分割し配列に格納
+    keyStr = keyStr.toLowerCase();        // 小文字変換
+    iptkey = keyStr.split(" ");           // 検索欄の文字列を半角空白で分割し配列に格納    
     c1key.length = 0;
     for (let i = 0; i < iptkey.length; i++) {
       c1key.push(iptkey[i]);
     }
   }
+
+  console.log("iptkey = " + iptkey);
 
   for (let i = 0; i < areaC.length; i++) {
     if (areaC[i].checked) {
@@ -334,7 +368,7 @@ function selectEventFlowB()
 // areaC (カテゴリ一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowC()
 {
-  set_Initial();      // 変数を初期化
+  set_Initial();     // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
   showAreaD();       // サイト一覧を表示
