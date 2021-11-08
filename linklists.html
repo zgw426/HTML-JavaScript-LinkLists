@@ -117,7 +117,7 @@ div.area100 {
 }
 
 .div_url{
-    width : calc(100%);
+    width : calc(99%);
     padding     : 2px;
     margin-top  : 0px;
     margin-left : 0px;
@@ -135,14 +135,14 @@ div.area100 {
 </head>
 <body>
 <div class="areaA">
-  <input type="text" id="inputKey" size="50"> 
+  <input type="text" id="inputKey" size="50">
   <input type="button" value="検索" onclick="selectEventFlowC();" />
   　<input type="button" value="リセット" onclick="pageReload();" />
 </div>
 <main>
-  <div class="areaB" id="areaB">※list単位※</div>
-  <div class="areaC" id="areaC">※category※</div>
-  <div class="areaD" id="areaD">※リンク※</div>
+  <div class="areaB" id="areaB">※AreaB※</div>
+  <div class="areaC" id="areaC">※AreaC※</div>
+  <div class="areaD" id="areaD">※AreaD※</div>
 </main>
 <div class="area100" id="area100"></div>
 <script>
@@ -229,9 +229,9 @@ function showAreaC(){
   document.getElementById("areaC").innerHTML = wStr;
 }
 
-function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote){
+function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rtn = ctn = 0;
-  let tgtStr = tgtName + "," + tgtCategory + "," + tgtNote;
+  let tgtStr = tgtName + "," + tgtCategory + "," + tgtNote + "," + tgtDecoUrl;
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
@@ -244,7 +244,8 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote){
 
   for (let i = 0; i < c1key.length; i++) {
     rtn = 0;
-    if( tgtStr.indexOf( c1key[i] ) != -1 ){
+    tmpKey = c1key[i].toLowerCase(); // 小文字変換
+    if( tgtStr.indexOf( tmpKey ) != -1 ){
       rtn += 1;
     }
     rFlg[i] = rtn;
@@ -254,8 +255,10 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote){
   for (let i = 0; i < rFlg.length; i++) {
     ctn *= rFlg[i];
   }
+  //console.log("ctn = " + ctn + ", tgtStr = " + tgtStr);
   return(ctn);
 }
+
 
 function showAreaD()
 {
@@ -280,7 +283,8 @@ function showAreaD()
       if( lpf != 0 ) cateStr += ", ";  
       cateStr += list[lp0]["category"][lpf]["key"];
     }
-    sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"] );
+    decoUrl = decodeURI( list[lp0]["URL"] );
+    sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(sFlg == 1)
     {
@@ -291,14 +295,25 @@ function showAreaD()
         wStr += "<B>" + tmpStr + "</B>";
         wStr += "</div>"
       }
+
+
       wStr += "<div class='div_f1'>";
+      wStr += "<table>";
+      wStr += "<tr>";
+
+      // アイコン情報あれば表示
+      if(typeof list[lp0]["aicon"] !== 'undefined'){
+        wStr += "<td>";
+        wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
+        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='100'>";
+        wStr += "</a>";
+        wStr += "</td>";
+        //console.log("aicon: " + list[lp0]["aicon"]);
+      }
+      wStr += "<td>";
       wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
       wStr += list[lp0]["Name"];
       wStr += "</a><BR />";
-
-
-      decoUrl = decodeURI( list[lp0]["URL"] );
-
       wStr += "<small>";
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
@@ -306,6 +321,8 @@ function showAreaD()
       wStr += list[lp0]["note"] + "<BR />";
       wStr += cateStr;
       wStr += "</small>";
+      wStr += "</td>";
+      wStr += "</table>";
       wStr += "</div>";
     }
   }

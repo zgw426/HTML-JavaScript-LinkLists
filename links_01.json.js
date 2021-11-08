@@ -1,6 +1,7 @@
 let list01_info = [{"Title":"検索サイト","ID":"01"}];
 let list01 = [
   {
+    "aicon"    : "google.png",
     "kana"     : "google",
     "Name"     : "Google",
     "URL"      : "https://www.google.com/",
@@ -10,6 +11,7 @@ let list01 = [
     "note"     : "検索サイト"
   },
   {
+    "aicon"    : "yahoo.png",
     "kana"     : "yahoo",
     "Name"     : "Yahoo!JAPAN",
     "URL"      : "https://www.yahoo.co.jp/",
@@ -21,6 +23,7 @@ let list01 = [
     "note"     : "Yahoo!の由来は「ヤッホー！」「やったー！」を意味する英語の感動詞「yahoo」とかけているとかいないとか"
   },
   {
+    "aicon"    : "bing.png",
     "kana"     : "bing",
     "Name"     : "Bing",
     "URL"      : "https://www.bing.com/",
