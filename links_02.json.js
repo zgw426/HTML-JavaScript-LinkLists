@@ -1,6 +1,7 @@
 let list02_info = [{"Title":"サイト","ID":"02"}];
 let list02 = [
   {
+    "aicon"    : "amazon.png",
     "kana"     : "amazon",
     "Name"     : "Amazon",
     "URL"      : "https://www.amazon.co.jp/",
