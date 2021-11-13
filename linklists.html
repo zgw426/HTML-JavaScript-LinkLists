@@ -124,12 +124,15 @@ div.area100 {
     text-align  : left;
     background-color : #ffffff;
     border : solid 1px;
-    float  : left;
     cursor : pointer;
+    overflow : scroll;
 
 }
 
-
+textarea{
+  width: calc(99%);
+  height:30px;
+}
 
 </style>
 </head>
@@ -296,33 +299,27 @@ function showAreaD()
         wStr += "</div>"
       }
 
-
       wStr += "<div class='div_f1'>";
-      wStr += "<table>";
-      wStr += "<tr>";
+      wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
 
       // アイコン情報あれば表示
       if(typeof list[lp0]["aicon"] !== 'undefined'){
-        wStr += "<td valign='top'>";
         wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
-        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='70'>";
-        wStr += "</a>";
-        wStr += "</td>";
-        //console.log("aicon: " + list[lp0]["aicon"]);
+        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='70' align='middle'>";
       }
-      wStr += "<td>";
-      wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
       wStr += list[lp0]["Name"];
-      wStr += "</a><BR />";
+      wStr += "</a>";
+      wStr += "<hr width='100%'>";
       wStr += "<small>";
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
-      wStr += "</div>" + "<BR /><BR />";
-      wStr += list[lp0]["note"] + "<BR />";
+      wStr += "</div>";
+      wStr += "<hr width='100%'>";
+      wStr += "<textarea>";
+      wStr += list[lp0]["note"];
+      wStr += "</textarea><BR />";
       wStr += cateStr;
       wStr += "</small>";
-      wStr += "</td>";
-      wStr += "</table>";
       wStr += "</div>";
     }
   }
@@ -338,8 +335,6 @@ function set_C1key_B1key(){
 
   for (let i = 0; i < areaB.length; i++) {
     if (areaB[i].checked) {
-      //tmpStr = areaB[i].value.toLowerCase(); // 小文字変換
-      //areaB1.push(tmpStr);
       areaB1.push(areaB[i].value);
     }
   }
