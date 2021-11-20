@@ -2,7 +2,7 @@ let list01_info = [{"Title":"検索サイト","ID":"01"}];
 let list01 = [
   {
     "aicon"    : "google.png",
-    "kana"     : "google",
+    "kana"     : "グーグル",
     "Name"     : "Google",
     "URL"      : "https://www.google.com/",
     "category" : [
@@ -12,7 +12,7 @@ let list01 = [
   },
   {
     "aicon"    : "yahoo.png",
-    "kana"     : "yahoo",
+    "kana"     : "ヤフー",
     "Name"     : "Yahoo!JAPAN",
     "URL"      : "https://www.yahoo.co.jp/",
     "category" : 
@@ -24,7 +24,7 @@ let list01 = [
   },
   {
     "aicon"    : "bing.png",
-    "kana"     : "bing",
+    "kana"     : "ヒング",
     "Name"     : "Bing",
     "URL"      : "https://www.bing.com/",
     "category" : 

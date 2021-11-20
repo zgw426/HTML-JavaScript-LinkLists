@@ -2,48 +2,62 @@ let list02_info = [{"Title":"サイト","ID":"02"}];
 let list02 = [
   {
     "aicon"    : "amazon.png",
-    "kana"     : "amazon",
+    "kana"     : "アマゾン",
     "Name"     : "Amazon",
     "URL"      : "https://www.amazon.co.jp/",
     "category" : 
       [
-        { "key": "ネットショップ", "kana": "ねっとしょっぷ"}
+        { "key": "買い物", "kana": "かいもの"}
       ],
-      "note"     : "メモ"
+      "note"     : "Amazon.com, Inc.は、ワシントン州シアトルに本拠地を置くアメリカの多国籍テクノロジー企業らしい by Wikipedia\n\nログインID：hoge\nログインパスワード：hogefuga?123"
   },
+
   {
-    "kana"     : "gyao",
+    "kana"     : "らくてんいちば",
+    "Name"     : "楽天市場",
+    "URL"      : "https://www.rakuten.co.jp/",
+    "category" : 
+      [
+        { "key": "買い物", "kana": "かいもの"},
+        { "key": "楽天", "kana": "らくてん"}
+      ],
+      "note"     : "楽天"
+  },
+
+  {
+    "kana"     : "キャオ",
     "Name"     : "Gyao!",
     "URL"      : "https://gyao.yahoo.co.jp/",
     "category" : 
       [
-        { "key": "動画", "kana": "どうが"}
+        { "key": "動画", "kana": "とうが"}
       ],
       "note"     : "メモ"
   },
   {
     "aicon"    : "youtube.png",
-    "kana"     : "youtube",
+    "kana"     : "ユーチューブ",
     "Name"     : "YouTube",
     "URL"      : "https://www.youtube.com/",
     "category" : 
       [
-        { "key": "動画", "kana": "どうが"}
+        { "key": "動画", "kana": "とうが"},
+        { "key": "YouTube", "kana": "ユーチューブ"}
       ],
     "note"     : "メモ"
   },
   {
-    "kana"     : "twitter",
+    "kana"     : "ツイッター",
     "Name"     : "Twitter",
     "URL"      : "https://twitter.com/",
     "category" : 
       [
-        { "key": "SNS", "kana": "sns"}
+        { "key": "SNS", "kana": "エスエヌエス"}
       ],
     "note"     : "メモ"
   },
   {
-    "kana"     : "codezine",
+    "kana"     : "コードジン",
     "Name"     : "CodeZine（コードジン）",
     "URL"      : "https://codezine.jp/",
     "category" : 
@@ -64,8 +78,6 @@ let list02 = [
       ],
     "note"     : "検索キー:拡張現実"
   },
-
-
 
 ];
 

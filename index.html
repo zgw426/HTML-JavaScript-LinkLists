@@ -116,6 +116,19 @@ div.area100 {
     cursor: pointer;
 }
 
+.div_f3{
+    padding : 5px;
+    margin-top : 5px;
+    margin-left : 5px;
+    text-align : center;
+    background-color : #474747;
+    cursor : pointer;
+    border : solid 1px;
+    float : left;
+    cursor: pointer;
+}
+
+
 .div_url{
     width : calc(99%);
     padding     : 2px;
@@ -130,17 +143,19 @@ div.area100 {
 }
 
 textarea{
-  width: calc(99%);
-  height:30px;
+  width: calc(90%);
+  height: 100px;
 }
 
 </style>
 </head>
 <body>
 <div class="areaA">
-  <input type="text" id="inputKey" size="50">
-  <input type="button" value="検索" onclick="selectEventFlowC();" />
-  　<input type="button" value="リセット" onclick="pageReload();" />
+  <form action="" onsubmit="selectEventFlowC();return false;">
+    <input type="text" id="inputKey" size="50">
+    <input type="button" value="検索" onclick="selectEventFlowC();" />
+    <input type="button" value="リセット" onclick="pageReload();" />
+  </form>
 </div>
 <main>
   <div class="areaB" id="areaB">※AreaB※</div>
@@ -165,9 +180,17 @@ function pageReload(){ // ページ再読み込み
   window.location.reload();
 }
 
+function test()
+{
+  console.log("test desu");
+  alert("test");
+}
+
 function showAreaB()
 {
     let wStr = "";
+    //wStr += "<form name='areaB' method='post' onsubmit='return true;'>";
+    //wStr += "<form name='areaB' onsubmit='return test();'>";
     wStr += "<form name='areaB'>";
     for(lp0=0; lp0<listinfo.length; lp0++){
         wStr += "<label>";
@@ -180,22 +203,40 @@ function showAreaB()
     document.getElementById("areaB").innerHTML = wStr;
 }
 
-function showAreaC(){
+function showAreaC(showFlg){
+  // showFlg 0:チェックボックス付けるか判定しない, 1:判定する
   let wStr = "";
   let words = new Array();
   let kanas = new Array();
   words.length = kanas.length = 0;
   let wdcount = {};
+  let sFlg = 1;
   for(lpa=0; lpa<list.length; lpa++){
-    for(lpf=0; lpf<list[lpa]["category"].length; lpf++){
-      words.push( list[lpa]["category"][lpf]["key"] );
-      let tmpKana = "";
-      tmpKana = list[lpa]["category"][lpf]["kana"].toLowerCase(); // 半角小文字に変換
-      tmpKana = hiraToKana(tmpKana); // ひらがな→カタカナに変換
-      kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
+    lp0 = lpa;
+    let decoUrl = "";
+    if(typeof list[lp0]["URL"] !== 'undefined'){
+      decoUrl = decodeURI( list[lp0]["URL"] );
+    } 
+
+    let cateStr = "";
+    for(lpf=0; lpf<list[lp0]["category"].length; lpf++){
+      if( lpf != 0 ) cateStr += ", ";  
+      cateStr += list[lp0]["category"][lpf]["key"];
     }
-    for (let i = 0; i < words.length; i++) {
-      wdcount[ words[i] ] = kanas[i];
+    sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+
+    if(sFlg == 1)
+    {
+      for(lpf=0; lpf<list[lpa]["category"].length; lpf++){
+        words.push( list[lpa]["category"][lpf]["key"] );
+        let tmpKana = "";
+        tmpKana = list[lpa]["category"][lpf]["kana"].toLowerCase(); // 半角小文字に変換
+        tmpKana = hiraToKana(tmpKana); // ひらがな→カタカナに変換
+        kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
+      }
+      for (let i = 0; i < words.length; i++) {
+        wdcount[ words[i] ] = kanas[i];
+      }
     }
   }
 
@@ -214,7 +255,18 @@ function showAreaC(){
 
   let headStr = "";
   wStr += "<form name='areaC'>";
+
   for(let o in arr){
+    tgtName     = arr[o]["key"];
+
+    // チェックボックスを "選択" にするか判定
+    sFlg = setSelectFlg2(tgtName);
+    checkedStr = "";
+    if(sFlg == 1 && showFlg == 1)
+    {
+      checkedStr = "checked='checked'"; // チェックを付ける
+    }
+
     if ( hiraToKana(headStr.toUpperCase()) != hiraToKana(arr[o]["value"][0].toUpperCase()) ){
       headStr = arr[o]["value"][0];
       tmpStr = hiraToKana(headStr.toUpperCase());
@@ -224,7 +276,7 @@ function showAreaC(){
     }
     wStr += "<label>";
     wStr += "<div class='div_f2'>";
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()'>" + arr[o]["key"];
+    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+ checkedStr +" >" + arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
   }
@@ -262,6 +314,21 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   return(ctn);
 }
 
+// カテゴリ一覧に表示するカテゴリにチェックボックスを "選択" にするか判定
+function setSelectFlg2(tgtStr){
+  let rtn = 0;
+  tgtStr = tgtStr.toLowerCase(); // 小文字変換
+  for (let i = 0; i < c1key.length; i++) {
+    tmpKey = c1key[i].toLowerCase(); // 小文字変換
+    //console.log("tmpKey = " + tmpKey);
+    if( tgtStr.indexOf( tmpKey ) != -1 ){
+      rtn = 1;
+      break;
+    }
+  } // ------ for (let i = 0; i < c1key.length; i++)
+  //console.log("[setSelectFlg2] rtn = " + rtn + ", tgtStr = " + tgtStr);
+  return(rtn);
+}
 
 function showAreaD()
 {
@@ -286,7 +353,12 @@ function showAreaD()
       if( lpf != 0 ) cateStr += ", ";  
       cateStr += list[lp0]["category"][lpf]["key"];
     }
-    decoUrl = decodeURI( list[lp0]["URL"] );
+
+    let decoUrl;
+    if(typeof list[lp0]["URL"] !== 'undefined'){
+      decoUrl = decodeURI( list[lp0]["URL"] );
+    } 
+    
     sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(sFlg == 1)
@@ -305,19 +377,24 @@ function showAreaD()
       // アイコン情報あれば表示
       if(typeof list[lp0]["aicon"] !== 'undefined'){
         wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
-        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='70' align='middle'>";
+        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='70' align='middle' hspace='3px' vspace='3px'>";
       }
       wStr += list[lp0]["Name"];
       wStr += "</a>";
-      wStr += "<hr width='100%'>";
+      //wStr += "<hr width='100%'>";
+
       wStr += "<small>";
+
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
       wStr += "</div>";
+
       wStr += "<hr width='100%'>";
+
       wStr += "<textarea>";
       wStr += list[lp0]["note"];
       wStr += "</textarea><BR />";
+
       wStr += cateStr;
       wStr += "</small>";
       wStr += "</div>";
@@ -340,10 +417,13 @@ function set_C1key_B1key(){
   }
   b1key = b1key.concat(areaB1);
 
-  console.log("b1key = " + b1key);
+  //console.log("b1key = " + b1key);
 
   // 検索欄の文字列をc1keyに格納する
   keyStr = document.getElementById("inputKey").value;
+
+  console.log("keyStr = " + keyStr);
+
   if(keyStr.length > 0)
   {
     keyStr = keyStr.replace(/　/g, ' ');  // 全角空白→半角空白
@@ -356,8 +436,6 @@ function set_C1key_B1key(){
       c1key.push(iptkey[i]);
     }
   }
-
-  console.log("iptkey = " + iptkey);
 
   for (let i = 0; i < areaC.length; i++) {
     if (areaC[i].checked) {
@@ -373,24 +451,26 @@ function selectEventFlowB()
   set_Initial();      // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
-  showAreaC();       // カテゴリ一覧を表示
+  showAreaC(0);       // カテゴリ一覧を表示
   showAreaD();       // サイト一覧を表示
 }
 
 // areaC (カテゴリ一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowC()
 {
+  console.log("key = " + document.getElementById("inputKey").value);
   set_Initial();     // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
   showAreaD();       // サイト一覧を表示
+  showAreaC(1);       // カテゴリ一覧を表示
 }
 
 //-----------------------------------
 // ROOTフロー：起動時の処理
 set_List();
 showAreaB();
-showAreaC();
+showAreaC(0);
 showAreaD();
 </script>
 </body>
