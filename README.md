@@ -4,10 +4,7 @@
 
 ## デモ動画
 
-[![](https://img.youtube.com/vi/AxJkSmBLeFU/0.jpg)](https://www.youtube.com/watch?v=AxJkSmBLeFU)
-
 [![](https://img.youtube.com/vi/gzVICp4xvZs/0.jpg)](https://www.youtube.com/watch?v=gzVICp4xvZs)
-
 
 ## ファイル構成
 
@@ -44,6 +41,7 @@
 
 ```
   {
+    "aicon"    : "google.png",
     "kana"     : "google",
     "Name"     : "Google",
     "URL"      : "https://www.google.com/",
@@ -56,6 +54,7 @@
 
 |パラメータ|説明|
 |--------|--------|
+|aicon|(オプション)表示する画像ファイル名。|
 |kana|Nameの読み仮名。情報の表示順序に影響|
 |Name|リンクを表示する際のタイトル|
 |URL|リンクのURL|
@@ -64,6 +63,20 @@
 |category-kana|カテゴリ欄に表示する単語の読み仮名|
 |note|備考欄|
 
+※ パラメータ aicon について
+
+パラメータ `aicon` には表示する画像ファイル名を記載します。
+画像ファイルは、`aicon`フォルダ配下に格納しておきます。
+サンプルとして以下の画像ファイルを格納しています。
+
+- ./HTML-JavaScript-LinkLists/aicon
+  - amazon.png
+  - bing.png
+  - file.png
+  - folder.png
+  - google.png
+  - yahoo.png
+  - youtube.png
 
 ## リンクファイル(links_xx.json.js)追加方法
 
