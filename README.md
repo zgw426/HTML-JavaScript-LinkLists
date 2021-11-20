@@ -6,7 +6,7 @@
 
 [![](https://img.youtube.com/vi/AxJkSmBLeFU/0.jpg)](https://www.youtube.com/watch?v=AxJkSmBLeFU)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/gzVICp4xvZs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![](https://img.youtube.com/vi/gzVICp4xvZs/0.jpg)](https://www.youtube.com/watch?v=gzVICp4xvZs)
 
 
 ## ファイル構成
