@@ -144,7 +144,6 @@ div.area100 {
 
 textarea{
   width: calc(90%);
-  height: 20px;
 }
 
 </style>
@@ -391,7 +390,10 @@ function showAreaD()
 
       wStr += "<hr width='100%'>";
 
-      wStr += "<textarea>";
+      // note の改行(\n)を数えて textarea タグの高さを設定する
+      let CRcount = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
+      console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
+      wStr += "<textarea rows='"+ CRcount +"'>";
       wStr += list[lp0]["note"];
       wStr += "</textarea><BR />";
 
