@@ -1,5 +1,6 @@
-let list03_info = [{"Title":"ローカルファイル","ID":"03"}];
-let list03 = [
+let list03 = {
+  "info": {"Title":"ローカルファイル","ID":"03"},
+  "list": [
   {
     "aicon"    : "file.png",
     "kana"     : "ホスツ",
@@ -11,5 +12,6 @@ let list03 = [
         { "key": "ローカルファイル", "kana": "ローカルファイル"}
       ],
     "note"     : "Windows Cドライブの配下の hosts ファイル"
-  }];
-
+  },
+]
+};
