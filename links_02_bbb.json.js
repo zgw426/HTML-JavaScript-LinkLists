@@ -1,5 +1,6 @@
-let list02_info = [{"Title":"サイト","ID":"02"}];
-let list02 = [
+let list02 = {
+"info": {"Title":"サイト","ID":"02"},
+"list": [
   {
     "aicon"    : "amazon.png",
     "kana"     : "アマゾン",
@@ -78,6 +79,5 @@ let list02 = [
       ],
     "note"     : "検索キー:拡張現実"
   },
-
-];
-
+]
+};

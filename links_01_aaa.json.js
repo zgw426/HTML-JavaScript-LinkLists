@@ -1,5 +1,6 @@
-let list01_info = [{"Title":"検索サイト","ID":"01"}];
-let list01 = [
+let list01 = {
+"info": {"Title":"開発","ID":"01"},
+"list": [
   {
     "aicon"    : "google.png",
     "kana"     : "グーグル",
@@ -34,6 +35,6 @@ let list01 = [
         { "key": "マイクロソフト", "kana": "まいくろそふと"}
       ],
     "note"     : "メモ"
-  }
-];
-
+  },
+]
+};

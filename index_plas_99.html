@@ -8,6 +8,7 @@
   <script src="links_01_aaa.json.js"></script>
   <script src="links_02_bbb.json.js"></script>
   <script src="links_03_ccc.json.js"></script>
+  <script src="links_99_zzz.json.js"></script>
 <script>
 let list = [];
 let listinfo = [];
@@ -22,14 +23,17 @@ function set_List(){
     list = list.concat(list01["list"]);
     list = list.concat(list02["list"]);
     list = list.concat(list03["list"]);
+    list = list.concat(list99["list"]);
     listinfo = listinfo.concat(list01["info"]);
     listinfo = listinfo.concat(list02["info"]);
     listinfo = listinfo.concat(list03["info"]);
+    listinfo = listinfo.concat(list99["info"]);
   }else{
     for (let i = 0; i < b1key.length; i++) {
       if(list01["info"]["ID"] == b1key[i]){ list = list.concat(list01["list"]); }
       if(list02["info"]["ID"] == b1key[i]){ list = list.concat(list02["list"]); }
       if(list03["info"]["ID"] == b1key[i]){ list = list.concat(list03["list"]); }
+      if(list99["info"]["ID"] == b1key[i]){ list = list.concat(list99["list"]); }
     }
   }
 }

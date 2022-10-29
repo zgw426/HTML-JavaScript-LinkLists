@@ -1,5 +1,6 @@
-let list99_info = [{"Title":"９９","ID":"99"}];
-let list99 = [
+let list99 = {
+"info": {"Title":"９９","ID":"99"},
+"list": [
   {
     "kana"     : "ヤフーてんき",
     "Name"     : "Yahoo!天気",
@@ -21,6 +22,5 @@ let list99 = [
       ],
     "note"     : "検索キー:拡張現実"
   },
-  
-
-];
+]
+};
