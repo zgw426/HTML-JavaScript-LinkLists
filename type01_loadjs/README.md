@@ -10,13 +10,13 @@
 
 |ファイル|説明|
 |---|---|
-|linklists.html|アプリ本体|
-|links_01.json.js|リンク情報を含むjsファイル|
-|links_02.json.js|リンク情報を含むjsファイル|
-|links_03.json.js|リンク情報を含むjsファイル|
-|linklists_99.html|links_99_zzz.json.jsファイルを追加したアプリ|
+|index.html|アプリ本体|
+|links_01_aaa.json.js|リンク情報を含むjsファイル|
+|links_02_bbb.json.js|リンク情報を含むjsファイル|
+|links_03_ccc.json.js|リンク情報を含むjsファイル|
+|index_plas_99.html|links_99_zzz.json.jsファイルを追加したアプリ|
 |links_99_zzz.json.js|リンク情報を含むjsファイル|
-
+|make_json_js.html|json.jsファイルの更新補助ツール|
 
 ## アプリ起動方法
 
@@ -156,3 +156,16 @@ function set_List(){
     - `if(list99["info"]["ID"] == b1key[i]){ list = list.concat(list99["list"]); }`
 
 以上で設定は完了です。ファイルを保存し`linklists.html`を起動し`links_99_zzz.json.js`内のリンク情報が表示されれば成功です。
+
+## XXXX.json.jsファイルの更新
+
+- リンク情報を格納している `XXXX.json.js` ファイルの更新は、ツール `make_json_js.html` を使用します。
+- ツール `make_json_js.html`をブラウザで開くと、ボタン `links_01`,`links_02`,`links_03`が表示されます。
+- ボタン `links_01` をクリックすると `links_01_aaa.json.js` の情報をもとにしたフォームが表示されます。
+- 表示されたホームの情報を更新し、フォーム下にあるボタン `jsファイル作成` をクリックするとjson.jsに登録する形式の情報が表示されます。
+- `jsファイル作成`ボタンをクリックすると、json.jsに登録する形式の情報がクリップボードにもコピーされます。
+- `links_01_aaa.json.js`をテキストエディタで開きクリップボードの内容に置き換えると更新完了です。
+- リンク情報を新規登録する場合は、フォームの値が登録されていない箇所にそれら情報を登録します。
+- 新規登録するリンク情報が多い場合は、ボタン `links_xx`クリック前に、`新規登録枠数`の値を変更します（デフォルト3）
+
+
