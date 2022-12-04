@@ -1,5 +1,6 @@
 <html>
 <head>
+  <meta charset="UTF-8">
   <script src="links_01_aaa.json.js"></script>
   <script src="links_02_bbb.json.js"></script>
   <script src="links_03_ccc.json.js"></script>
@@ -8,11 +9,14 @@
 <input type="button" value="links_01" onclick='root_flow("list01");' />
 <input type="button" value="links_02" onclick='root_flow("list02");' />
 <input type="button" value="links_03" onclick='root_flow("list03");' />
+<HR>
+
 <BR />
 <label for="number_of_blank_cells">新規登録枠数</label>
 <input type="text" id="number_of_blank_cells" name="number_of_blank_cells" value="3">
 
 <div id="form_area">※既存のjson.jsファイルを読み込みフォーム形式で表示※</div>
+<div id="savebutton_area">※保存ボタンを表示※</div>
 <div id="message_area">※警告メッセージなどを表示※</div>
 <textarea id="json_area" cols="80" rows="10">※新規のjson.js情報※</textarea>
 
@@ -41,6 +45,10 @@ list_no = "";
 list_str = "";  // list 情報
 info_str = "";  // info 情報
 
+js_file_name = new Array();
+js_file_name["list01"] = "links_01_aaa.json.js";
+js_file_name["list02"] = "links_02_bbb.json.js";
+js_file_name["list03"] = "links_03_ccc.json.js";
 
 // 更新対象のjson.js変数
 list_target = "";
@@ -112,8 +120,6 @@ function make_data_to_jsformat(){
   // フォームの情報を取得
   const form_elements = document.forms.linklist;
 
-  //info_out += '"info": {"Title":"' + list01["info"]["Title"] + '","ID":"' + list01["info"]["ID"] + '"}';
-
   for(index = 0; index < form_elements.length; index++){
     name_out = form_elements.elements.item(index).name;
     value_out= form_elements.elements.item(index).value;
@@ -174,7 +180,7 @@ function make_data_to_jsformat(){
   let text = document.getElementById("json_area");
   text.select();
   document.execCommand("copy");
-
+  document.getElementById("savebutton_area").innerHTML = "<input type='button' value='ファイル出力' onclick='outputText();' />";
 }
 
 
@@ -275,6 +281,18 @@ function root_flow(arg_no){
   wstr += '<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat();" />';
 
   document.getElementById("form_area").innerHTML = wstr;
+}
+
+function outputText(){
+  // 作成したリンク集をファイル出力する
+  let str = "";
+  str += document.getElementById("json_area").innerHTML;
+  let ary = str.split(''); // 配列形式に変換（後述のBlobで全要素出力）
+  let blob = new Blob(ary,{type:"text/plan"}); // テキスト形式でBlob定義
+  let link = document.createElement('a'); // HTMLのaタグを作成
+  link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
+  link.download = js_file_name[list_no]; // aタグのdownload属性を作成
+  link.click(); // 定義したaタグをクリック（実行）
 }
 
 // ----------------------------------- //
