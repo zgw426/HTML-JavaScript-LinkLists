@@ -4,11 +4,13 @@
   <script src="links_01_aaa.json.js"></script>
   <script src="links_02_bbb.json.js"></script>
   <script src="links_03_ccc.json.js"></script>
+  <script src="links_99_zzz.json.js"></script>
 </head>
 <body>
 <input type="button" value="links_01" onclick='root_flow("list01");' />
 <input type="button" value="links_02" onclick='root_flow("list02");' />
 <input type="button" value="links_03" onclick='root_flow("list03");' />
+<input type="button" value="links_99" onclick='root_flow("list99");' />
 <HR>
 
 <BR />
@@ -49,6 +51,7 @@ js_file_name = new Array();
 js_file_name["list01"] = "links_01_aaa.json.js";
 js_file_name["list02"] = "links_02_bbb.json.js";
 js_file_name["list03"] = "links_03_ccc.json.js";
+js_file_name["list99"] = "links_99_zzz.json.js";
 
 // 更新対象のjson.js変数
 list_target = "";
@@ -241,6 +244,10 @@ function set_links_no(arg_no){
         list_str_lo = 'list03["list"]';
         info_str_lo = 'list03["info"]';
         break;
+      case "list99":
+        list_str_lo = 'list99["list"]';
+        info_str_lo = 'list99["info"]';
+        break;
   }
 }
 
@@ -256,6 +263,7 @@ function root_flow(arg_no){
       case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
       case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
       case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
+      case "list99": list_str = 'list99["list"]'; info_str = 'list99["info"]'; break;
   }
 
   list_target = eval(list_str);
