@@ -17,10 +17,12 @@
 |index_plas_99.html|links_99_zzz.json.jsファイルを追加したアプリ|
 |links_99_zzz.json.js|リンク情報を含むjsファイル|
 |make_json_js.html|json.jsファイルの更新補助ツール|
+|make_json_js_plas_99.html|json.jsファイルの更新補助ツールにlinks_99_zzz.json.js追加|
+
 
 ## アプリ起動方法
 
-4つのファイル(linklists.html,links_01.json.js,links_02.json.js,links_03.json.js)をダウンロードし、linklists.htmlをブラウザアプリで起動するだけです。Webサーバは不要です。
+4つのファイル(index.html,links_01.json.js,links_02.json.js,links_03.json.js)をダウンロードし、index.htmlをブラウザアプリで起動するだけです。Webサーバは不要です。
 
 ＜Windows10環境：ブラウザの稼働確認結果＞
 
@@ -31,7 +33,15 @@
 |Edge|動作しました|
 
 ※ 確認日 2021/8/22
-※ ブラウザの設定などにより動作しない場合もあると思います
+
+＜Windows11環境：ブラウザの稼働確認結果＞
+
+|ブラウザ|確認結果|
+|------|------|
+|Chrome|動作しました|
+|Edge|動作しました|
+
+※ 確認日 2022/12/04
 
 ## リンク情報の追加/編集方法
 
@@ -103,7 +113,7 @@ let list99 = {
 
 新規リンクファイル`links_99_zzz.json.js`内の変数名`list99`は、他の`links_xx.json.js`ファイルと重複しないよう注意ください。
 
-(2) `linklists.html`ファイルを以下のように編集します。（編集したファイルは`linklists_99.html`として保存しています）
+(2) `index.html`ファイルを以下のように編集します。（編集したファイルは`linklists_99.html`として保存しています）
 
 ```
 <!doctype html>
@@ -150,12 +160,12 @@ function set_List(){
 ```
 
 - 以下の4行を追記しています
-    - `<script src="links_99_zzz.json.js"></script>`
-    - `list = list.concat(list99["list"]);`
-    - `listinfo = listinfo.concat(list99["info"]);`
-    - `if(list99["info"]["ID"] == b1key[i]){ list = list.concat(list99["list"]); }`
+  - `<script src="links_99_zzz.json.js"></script>`
+  - `list = list.concat(list99["list"]);`
+  - `listinfo = listinfo.concat(list99["info"]);`
+  - `if(list99["info"]["ID"] == b1key[i]){ list = list.concat(list99["list"]); }`
 
-以上で設定は完了です。ファイルを保存し`linklists.html`を起動し`links_99_zzz.json.js`内のリンク情報が表示されれば成功です。
+以上で設定は完了です。ファイルを保存し`index.html`を起動し`links_99_zzz.json.js`内のリンク情報が表示されれば成功です。
 
 ## XXXX.json.jsファイルの更新
 
@@ -164,8 +174,165 @@ function set_List(){
 - ボタン `links_01` をクリックすると `links_01_aaa.json.js` の情報をもとにしたフォームが表示されます。
 - 表示されたホームの情報を更新し、フォーム下にあるボタン `jsファイル作成` をクリックするとjson.jsに登録する形式の情報が表示されます。
 - `jsファイル作成`ボタンをクリックすると、json.jsに登録する形式の情報がクリップボードにもコピーされます。
-- `links_01_aaa.json.js`をテキストエディタで開きクリップボードの内容に置き換えると更新完了です。
-- リンク情報を新規登録する場合は、フォームの値が登録されていない箇所にそれら情報を登録します。
-- 新規登録するリンク情報が多い場合は、ボタン `links_xx`クリック前に、`新規登録枠数`の値を変更します（デフォルト3）
+  - さらに、`ファイル出力`ボタンが表示されます
+- `links_01_aaa.json.js`ファイルを手動で更新する場合
+  - `links_01_aaa.json.js`をテキストエディタで開きクリップボードの内容に置き換えると更新完了です。
+  - リンク情報を新規登録する場合は、フォームの値が登録されていない箇所にそれら情報を登録します。
+  - 新規登録するリンク情報が多い場合は、ボタン `links_xx`クリック前に、`新規登録枠数`の値を変更します（デフォルト3）
+- `links_01_aaa.json.js`ファイルを`ファイル出力`ボタンで更新する場合
+  - `ファイル出力`ボタンをクリックします。
+    - `名前を付けて保存`ウィンドウが開きます。
+  - 更新するファイル(例 `links_01_aaa.json.js`)に上書き保存します。
+    - 注意：上書きするファイルを誤ると情報が消える可能性がありますので注意ください。
 
+## make_json_js.htmlの修正方法
 
+`links_xx_xxx.json.js`ファイルを追加する場合は`make_json_js.html`ファイルの更新が必要になります。
+
+## make_json_js.htmlに`links_99_zzz.json.js`ファイルを追加する場合
+
+以下追記①～追記⑥のように情報を追記します。実際に追加したものが`make_json_js_plas_99.html`です。
+（`make_json_js.html`と`make_json_js_plas_99.html`のdiffを確認した方がわかりやすいかも）
+
+- 追記①
+
+追記前
+
+```
+  <script src="links_01_aaa.json.js"></script>
+  <script src="links_02_bbb.json.js"></script>
+  <script src="links_03_ccc.json.js"></script>
+```
+
+追記後
+
+```
+  <script src="links_01_aaa.json.js"></script>
+  <script src="links_02_bbb.json.js"></script>
+  <script src="links_03_ccc.json.js"></script>
+  <script src="links_99_zzz.json.js"></script>
+```
+
+- 追記②
+
+追記前
+
+```
+<input type="button" value="links_01" onclick='root_flow("list01");' />
+<input type="button" value="links_02" onclick='root_flow("list02");' />
+<input type="button" value="links_03" onclick='root_flow("list03");' />
+```
+
+追記後
+
+```
+<input type="button" value="links_01" onclick='root_flow("list01");' />
+<input type="button" value="links_02" onclick='root_flow("list02");' />
+<input type="button" value="links_03" onclick='root_flow("list03");' />
+<input type="button" value="links_99" onclick='root_flow("list99");' />
+```
+
+- 追記③
+
+追記前
+
+```
+js_file_name["list01"] = "links_01_aaa.json.js";
+js_file_name["list02"] = "links_02_bbb.json.js";
+js_file_name["list03"] = "links_03_ccc.json.js";
+```
+
+追記後
+
+```
+js_file_name["list01"] = "links_01_aaa.json.js";
+js_file_name["list02"] = "links_02_bbb.json.js";
+js_file_name["list03"] = "links_03_ccc.json.js";
+js_file_name["list99"] = "links_99_zzz.json.js";
+```
+
+- 追記④
+
+追記前
+
+```
+js_file_name["list01"] = "links_01_aaa.json.js";
+js_file_name["list02"] = "links_02_bbb.json.js";
+js_file_name["list03"] = "links_03_ccc.json.js";
+```
+
+追記後
+
+```
+js_file_name["list01"] = "links_01_aaa.json.js";
+js_file_name["list02"] = "links_02_bbb.json.js";
+js_file_name["list03"] = "links_03_ccc.json.js";
+js_file_name["list99"] = "links_99_zzz.json.js";
+```
+
+- 追記⑤
+
+追記前
+
+```
+  switch (arg_no){
+      case "list01": 
+        list_str_lo = 'list01["list"]';
+        info_str_lo = 'list01["info"]';
+        break;
+      case "list02":
+        list_str_lo = 'list02["list"]';
+        info_str_lo = 'list02["info"]';
+        break;
+      case "list03":
+        list_str_lo = 'list03["list"]';
+        info_str_lo = 'list03["info"]';
+        break;
+  }
+```
+
+追記後
+
+```
+  switch (arg_no){
+      case "list01": 
+        list_str_lo = 'list01["list"]';
+        info_str_lo = 'list01["info"]';
+        break;
+      case "list02":
+        list_str_lo = 'list02["list"]';
+        info_str_lo = 'list02["info"]';
+        break;
+      case "list03":
+        list_str_lo = 'list03["list"]';
+        info_str_lo = 'list03["info"]';
+        break;
+      case "list99":
+        list_str_lo = 'list99["list"]';
+        info_str_lo = 'list99["info"]';
+        break;
+  }
+```
+
+- 追記⑥
+
+追記前
+
+```
+  switch (arg_no){
+      case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
+      case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
+      case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
+  }
+```
+
+追記後
+
+```
+  switch (arg_no){
+      case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
+      case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
+      case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
+      case "list99": list_str = 'list99["list"]'; info_str = 'list99["info"]'; break;
+  }
+```
