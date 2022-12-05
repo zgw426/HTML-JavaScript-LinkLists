@@ -1,14 +1,29 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <script src="links_01_aaa.json.js"></script>
-  <script src="links_02_bbb.json.js"></script>
-  <script src="links_03_ccc.json.js"></script>
+  <script src="links_01.json.js"></script>
+  <script src="links_02.json.js"></script>
+  <script src="links_03.json.js"></script>
+  <script src="links_04.json.js"></script>
+  <script src="links_05.json.js"></script>
+  <script src="links_06.json.js"></script>
+  <script src="links_07.json.js"></script>
+  <script src="links_08.json.js"></script>
+  <script src="links_09.json.js"></script>
+  <script src="links_10.json.js"></script>
+
 </head>
 <body>
 <input type="button" value="links_01" onclick='root_flow("list01");' />
 <input type="button" value="links_02" onclick='root_flow("list02");' />
 <input type="button" value="links_03" onclick='root_flow("list03");' />
+<input type="button" value="links_04" onclick='root_flow("list04");' />
+<input type="button" value="links_05" onclick='root_flow("list05");' />
+<input type="button" value="links_06" onclick='root_flow("list06");' />
+<input type="button" value="links_07" onclick='root_flow("list07");' />
+<input type="button" value="links_08" onclick='root_flow("list08");' />
+<input type="button" value="links_09" onclick='root_flow("list09");' />
+<input type="button" value="links_10" onclick='root_flow("list10");' />
 <HR>
 
 <BR />
@@ -32,7 +47,7 @@ const item_jsn = [
   {"item": "Name", "line_flg": 0},
   {"item": "URL", "line_flg": 0},
   {"item": "category", "line_flg": 1},
-  {"item": "note", "line_flg": 1},
+  {"item": "note", "line_flg": 2},
 ];
 
 // json.js の info 情報
@@ -46,9 +61,16 @@ list_str = "";  // list 情報
 info_str = "";  // info 情報
 
 js_file_name = new Array();
-js_file_name["list01"] = "links_01_aaa.json.js";
-js_file_name["list02"] = "links_02_bbb.json.js";
-js_file_name["list03"] = "links_03_ccc.json.js";
+js_file_name["list01"] = "links_01.json.js";
+js_file_name["list02"] = "links_02.json.js";
+js_file_name["list03"] = "links_03.json.js";
+js_file_name["list04"] = "links_04.json.js";
+js_file_name["list05"] = "links_05.json.js";
+js_file_name["list06"] = "links_06.json.js";
+js_file_name["list07"] = "links_07.json.js";
+js_file_name["list08"] = "links_08.json.js";
+js_file_name["list09"] = "links_09.json.js";
+js_file_name["list10"] = "links_10.json.js";
 
 // 更新対象のjson.js変数
 list_target = "";
@@ -62,8 +84,10 @@ function set_form_cell(form_flg, line_flg, elemnet, item_val){
   lo_str+= '<label for="'+elemnet+'">'+elemnet+'</label>';
   if(line_flg == 0){
     lo_str+= '<input type="text" id="'+elemnet+'" name="'+elemnet+'" value="'+ item_val +'">';
+  }else if(line_flg == 1){
+    lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="50" rows="7">'+ item_val +'</textarea>';
   }else{
-    lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="30" rows="3">'+ item_val +'</textarea>';
+    lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="160" rows="5">'+ item_val +'</textarea>';
   }
   lo_str+= '</div>';
   return(lo_str);
@@ -229,19 +253,17 @@ function set_links_no(arg_no){
   list_str_lo = "";
   info_str_lo = "";
   switch (arg_no){
-      case "list01": 
-        list_str_lo = 'list01["list"]';
-        info_str_lo = 'list01["info"]';
-        break;
-      case "list02":
-        list_str_lo = 'list02["list"]';
-        info_str_lo = 'list02["info"]';
-        break;
-      case "list03":
-        list_str_lo = 'list03["list"]';
-        info_str_lo = 'list03["info"]';
-        break;
-  }
+      case "list01": list_str_lo = 'list01["list"]'; info_str_lo = 'list01["info"]'; break;
+      case "list02": list_str_lo = 'list02["list"]'; info_str_lo = 'list02["info"]'; break;
+      case "list03": list_str_lo = 'list03["list"]'; info_str_lo = 'list03["info"]'; break;
+      case "list04": list_str_lo = 'list04["list"]'; info_str_lo = 'list04["info"]'; break;
+      case "list05": list_str_lo = 'list05["list"]'; info_str_lo = 'list05["info"]'; break;
+      case "list06": list_str_lo = 'list06["list"]'; info_str_lo = 'list06["info"]'; break;
+      case "list07": list_str_lo = 'list07["list"]'; info_str_lo = 'list07["info"]'; break;
+      case "list08": list_str_lo = 'list08["list"]'; info_str_lo = 'list08["info"]'; break;
+      case "list09": list_str_lo = 'list09["list"]'; info_str_lo = 'list09["info"]'; break;
+      case "list10": list_str_lo = 'list10["list"]'; info_str_lo = 'list10["info"]'; break;
+    }
 }
 
 function root_flow(arg_no){
@@ -249,14 +271,18 @@ function root_flow(arg_no){
   list_no = arg_no;
   wstr += '<form name="linklist" action="" onsubmit="">'
 
-  //list_str = 'list01["list"]';
-  //info_str = 'list01["info"]';
-
   switch (arg_no){
       case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
       case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
       case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
-  }
+      case "list04": list_str = 'list04["list"]'; info_str = 'list04["info"]'; break;
+      case "list05": list_str = 'list05["list"]'; info_str = 'list05["info"]'; break;
+      case "list06": list_str = 'list06["list"]'; info_str = 'list06["info"]'; break;
+      case "list07": list_str = 'list07["list"]'; info_str = 'list07["info"]'; break;
+      case "list08": list_str = 'list08["list"]'; info_str = 'list08["info"]'; break;
+      case "list09": list_str = 'list09["list"]'; info_str = 'list09["info"]'; break;
+      case "list10": list_str = 'list10["list"]'; info_str = 'list10["info"]'; break;
+    }
 
   list_target = eval(list_str);
   info_target = eval(info_str)

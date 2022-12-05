@@ -5,10 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
-  <script src="links_01_aaa.json.js"></script>
-  <script src="links_02_bbb.json.js"></script>
-  <script src="links_03_ccc.json.js"></script>
+  <script src="links_01.json.js"></script>
+  <script src="links_02.json.js"></script>
+  <script src="links_03.json.js"></script>
+  <script src="links_04.json.js"></script>
+  <script src="links_05.json.js"></script>
+  <script src="links_06.json.js"></script>
+  <script src="links_07.json.js"></script>
+  <script src="links_08.json.js"></script>
+  <script src="links_09.json.js"></script>
+  <script src="links_10.json.js"></script>
 <script>
+let MAXNO = 5;  // links_xx.json.js ファイルを表示する数(最大 10)
+
 let list = [];
 let listinfo = [];
 let b1key  = new Array(); // list02_infoの情報
@@ -19,17 +28,33 @@ let iptkey = new Array(); // 検索欄の情報
 function set_List(){
   list.length = 0;
   if( b1key.length == 0 ){
-    list = list.concat(list01["list"]);
-    list = list.concat(list02["list"]);
-    list = list.concat(list03["list"]);
-    listinfo = listinfo.concat(list01["info"]);
-    listinfo = listinfo.concat(list02["info"]);
-    listinfo = listinfo.concat(list03["info"]);
+    for(let lp=0; lp < MAXNO; lp++){
+      switch (lp){
+        case 0: list = list.concat(list01["list"]);  listinfo = listinfo.concat(list01["info"]); break;
+        case 1: list = list.concat(list02["list"]);  listinfo = listinfo.concat(list02["info"]); break;
+        case 2: list = list.concat(list03["list"]);  listinfo = listinfo.concat(list03["info"]); break;
+        case 3: list = list.concat(list04["list"]);  listinfo = listinfo.concat(list04["info"]); break;
+        case 4: list = list.concat(list05["list"]);  listinfo = listinfo.concat(list05["info"]); break;
+        case 5: list = list.concat(list06["list"]);  listinfo = listinfo.concat(list06["info"]); break;
+        case 6: list = list.concat(list07["list"]);  listinfo = listinfo.concat(list07["info"]); break;
+        case 7: list = list.concat(list08["list"]);  listinfo = listinfo.concat(list08["info"]); break;
+        case 8: list = list.concat(list09["list"]);  listinfo = listinfo.concat(list09["info"]); break;
+        case 9: list = list.concat(list10["list"]);  listinfo = listinfo.concat(list10["info"]); break;
+      }
+    }
   }else{
-    for (let i = 0; i < b1key.length; i++) {
+    //for (let i = 0; i < b1key.length; i++) {
+    for (let i = 0; i < MAXNO; i++) {
       if(list01["info"]["ID"] == b1key[i]){ list = list.concat(list01["list"]); }
       if(list02["info"]["ID"] == b1key[i]){ list = list.concat(list02["list"]); }
       if(list03["info"]["ID"] == b1key[i]){ list = list.concat(list03["list"]); }
+      if(list04["info"]["ID"] == b1key[i]){ list = list.concat(list04["list"]); }
+      if(list05["info"]["ID"] == b1key[i]){ list = list.concat(list05["list"]); }
+      if(list06["info"]["ID"] == b1key[i]){ list = list.concat(list06["list"]); }
+      if(list07["info"]["ID"] == b1key[i]){ list = list.concat(list07["list"]); }
+      if(list08["info"]["ID"] == b1key[i]){ list = list.concat(list08["list"]); }
+      if(list09["info"]["ID"] == b1key[i]){ list = list.concat(list09["list"]); }
+      if(list10["info"]["ID"] == b1key[i]){ list = list.concat(list10["list"]); }
     }
   }
 }
@@ -188,20 +213,22 @@ function test()
 function showAreaB()
 {
     let wStr = "";
+    let linksno = 0;
     wStr += "<form name='areaB'>";
-    for(lp0=0; lp0<listinfo.length; lp0++){
+    //for(lp0=0; lp0<listinfo.length; lp0++){
+    for(lp0=0; lp0< MAXNO; lp0++){
+        linksno = lp0 + 1;
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
         wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["Title"];
+        wStr += "<BR />　<small>links_" + linksno.toString().padStart(2, '0') + ".json.js</small>";
         wStr += "</div>";
         wStr += "</label>";
     }
     wStr += "</form>";
     wStr += "<HR>";
 
-    wStr += "<a href='make_json_js.html' target='_blank'>リンク情報更新</a>";
-
-
+    wStr += "<center><a href='make_json_js.html' target='_blank'>リンク情報更新</a></center>";
 
     document.getElementById("areaB").innerHTML = wStr;
 }
@@ -273,6 +300,7 @@ function showAreaC(showFlg){
     if ( hiraToKana(headStr.toUpperCase()) != hiraToKana(arr[o]["value"][0].toUpperCase()) ){
       headStr = arr[o]["value"][0];
       tmpStr = hiraToKana(headStr.toUpperCase());
+      tmpStr = tmpStr.normalize('NFD')[0];  // 濁音→静音
       wStr += "<div class='div_f0'>";
       wStr += "<B>" + tmpStr + "</B>";
       wStr += "</div>";
@@ -293,6 +321,7 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
+  //tgtStr = tgtStr.normalize('NFD')[0];
 
   // rFlg 初期化
   rFlg.length = 0;
@@ -303,6 +332,7 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < c1key.length; i++) {
     rtn = 0;
     tmpKey = c1key[i].toLowerCase(); // 小文字変換
+    //tmpKey = tmpKey.normalize('NFD')[0];
     if( tgtStr.indexOf( tmpKey ) != -1 ){
       rtn += 1;
     }
@@ -313,7 +343,7 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < rFlg.length; i++) {
     ctn *= rFlg[i];
   }
-  //console.log("ctn = " + ctn + ", tgtStr = " + tgtStr);
+  console.log("ctn = " + ctn + ", tgtStr = " + tgtStr + ", tgtName = " + tgtName);
   return(ctn);
 }
 
@@ -366,9 +396,10 @@ function showAreaD()
 
     if(sFlg == 1)
     {
-      if( hiraToKana(list[lp0]["kana"][0].toUpperCase()) != hiraToKana(headStr.toUpperCase())){
+      if( hiraToKana(list[lp0]["kana"][0].toUpperCase()).normalize('NFD')[0] != hiraToKana(headStr.toUpperCase()).normalize('NFD')[0]){
         headStr = list[lp0]["kana"][0];
         tmpStr = hiraToKana( headStr.toUpperCase() );
+        tmpStr = tmpStr.normalize('NFD')[0];  // 濁音→静音
         wStr += "<div class='div_f0'>";
         wStr += "<B>" + tmpStr + "</B>";
         wStr += "</div>"
@@ -384,14 +415,10 @@ function showAreaD()
       }
       wStr += list[lp0]["Name"];
       wStr += "</a>";
-      //wStr += "<hr width='100%'>";
-
       wStr += "<small>";
-
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
       wStr += "</div>";
-
       wStr += "<hr width='100%'>";
 
       // note の改行(\n)を数えて textarea タグの高さを設定する
