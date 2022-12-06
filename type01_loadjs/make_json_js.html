@@ -30,6 +30,8 @@
 <label for="number_of_blank_cells">新規登録枠数</label>
 <input type="text" id="number_of_blank_cells" name="number_of_blank_cells" value="3">
 
+<HR>
+
 <div id="form_area">※既存のjson.jsファイルを読み込みフォーム形式で表示※</div>
 <div id="savebutton_area">※保存ボタンを表示※</div>
 <div id="message_area">※警告メッセージなどを表示※</div>
@@ -83,11 +85,11 @@ function set_form_cell(form_flg, line_flg, elemnet, item_val){
   lo_str+= '<div>';
   lo_str+= '<label for="'+elemnet+'">'+elemnet+'</label>';
   if(line_flg == 0){
-    lo_str+= '<input type="text" id="'+elemnet+'" name="'+elemnet+'" value="'+ item_val +'">';
+    lo_str+= '<input type="text" id="'+elemnet+'" name="'+elemnet+'" value="'+ item_val +'" size="100%" >';
   }else if(line_flg == 1){
     lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="50" rows="7">'+ item_val +'</textarea>';
   }else{
-    lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="160" rows="5">'+ item_val +'</textarea>';
+    lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="100%" rows="5">'+ item_val +'</textarea>';
   }
   lo_str+= '</div>';
   return(lo_str);

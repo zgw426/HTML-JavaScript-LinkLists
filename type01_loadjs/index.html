@@ -43,7 +43,6 @@ function set_List(){
       }
     }
   }else{
-    //for (let i = 0; i < b1key.length; i++) {
     for (let i = 0; i < MAXNO; i++) {
       if(list01["info"]["ID"] == b1key[i]){ list = list.concat(list01["list"]); }
       if(list02["info"]["ID"] == b1key[i]){ list = list.concat(list02["list"]); }
@@ -193,7 +192,6 @@ function set_Initial(){
 }
 
 function hiraToKana(str) {
-    // こちらから拝借 -> https://qiita.com/mimoe/items/855c112625d39b066c9a
     return str.replace(/[\u3041-\u3096]/g, function(match) {
         var chr = match.charCodeAt(0) + 0x60;
         return String.fromCharCode(chr);
@@ -215,7 +213,6 @@ function showAreaB()
     let wStr = "";
     let linksno = 0;
     wStr += "<form name='areaB'>";
-    //for(lp0=0; lp0<listinfo.length; lp0++){
     for(lp0=0; lp0< MAXNO; lp0++){
         linksno = lp0 + 1;
         wStr += "<label>";
@@ -227,10 +224,18 @@ function showAreaB()
     }
     wStr += "</form>";
     wStr += "<HR>";
-
-    wStr += "<center><a href='make_json_js.html' target='_blank'>リンク情報更新</a></center>";
+    
+    wStr += "<center><input type='button' value='リンク情報の更新' onclick='editLinkInfo()' /></center>";
 
     document.getElementById("areaB").innerHTML = wStr;
+}
+
+function editLinkInfo(){
+  eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
+  aStr = "<iframe id='aiconArea' width='100%' height='100%' src='aicon_list.html'></iframe>";
+  document.getElementById("areaC").innerHTML = aStr;
+  document.getElementById("areaD").innerHTML = eStr;
+
 }
 
 function showAreaC(showFlg){
@@ -321,7 +326,6 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
-  //tgtStr = tgtStr.normalize('NFD')[0];
 
   // rFlg 初期化
   rFlg.length = 0;
@@ -332,7 +336,6 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < c1key.length; i++) {
     rtn = 0;
     tmpKey = c1key[i].toLowerCase(); // 小文字変換
-    //tmpKey = tmpKey.normalize('NFD')[0];
     if( tgtStr.indexOf( tmpKey ) != -1 ){
       rtn += 1;
     }
@@ -359,7 +362,6 @@ function setSelectFlg2(tgtStr){
       break;
     }
   } // ------ for (let i = 0; i < c1key.length; i++)
-  //console.log("[setSelectFlg2] rtn = " + rtn + ", tgtStr = " + tgtStr);
   return(rtn);
 }
 
@@ -450,8 +452,6 @@ function set_C1key_B1key(){
   }
   b1key = b1key.concat(areaB1);
 
-  //console.log("b1key = " + b1key);
-
   // 検索欄の文字列をc1keyに格納する
   keyStr = document.getElementById("inputKey").value;
 
@@ -505,15 +505,6 @@ set_List();
 showAreaB();
 showAreaC(0);
 showAreaD();
-
-
-//let hoge_01 = {"hoge": [{"a1":"b1","a2":"b2"}],"fuga": [{"Title":"開発","ID":"01"}]};
-let hoge_01 = {"hoge": {"a1":"b1","a2":"b2"},"fuga": [{"Title":"開発","ID":"01"}]};
-
-console.log(hoge_01["hoge"]);
-console.log(hoge_01["fuga"]);
-
-
 
 </script>
 </body>
