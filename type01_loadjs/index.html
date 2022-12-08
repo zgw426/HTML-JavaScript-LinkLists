@@ -20,9 +20,10 @@ let MAXNO = 5;  // links_xx.json.js ファイルを表示する数(最大 10)
 
 let list = [];
 let listinfo = [];
-let b1key  = new Array(); // list02_infoの情報
-let c1key  = new Array(); // categoryの情報
-let iptkey = new Array(); // 検索欄の情報
+let b1key  = new Array();  // list02_infoの情報
+let c1key  = new Array();  // categoryの情報
+let iptkey = new Array();  // 検索欄の情報
+let aicons = new Array();  // 画像ファイル名
 
 // 読み込むjsonを変数 list に追加
 function set_List(){
@@ -231,11 +232,23 @@ function showAreaB()
 }
 
 function editLinkInfo(){
-  eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
-  aStr = "<iframe id='aiconArea' width='100%' height='100%' src='aicon_list.html'></iframe>";
-  document.getElementById("areaC").innerHTML = aStr;
-  document.getElementById("areaD").innerHTML = eStr;
+  aicon_wstr = "";
+  aicon_wstr += "<center>";
+  // アイコン情報を表示
+  for (let aicon_name in aicons) {
+    console.log(aicons[aicon_name]);
+    //aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' width='80'>";
+    //aicon_wstr += "<BR/>";
+    //aicon_wstr += aicon_name + "<HR>";
+  }
+  aicon_wstr += "</center>";
+  document.getElementById("areaC").innerHTML = aicon_wstr;
 
+  //aStr = "<iframe id='aiconArea' width='100%' height='100%' src='aicon_list.html'></iframe>";
+  //document.getElementById("areaC").innerHTML = aStr;
+
+  eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
+  document.getElementById("areaD").innerHTML = eStr;
 }
 
 function showAreaC(showFlg){
@@ -243,7 +256,7 @@ function showAreaC(showFlg){
   let wStr = "";
   let words = new Array();
   let kanas = new Array();
-  words.length = kanas.length = 0;
+  words.length = kanas.length = aicons.length = 0;
   let wdcount = {};
   let sFlg = 1;
   for(lpa=0; lpa<list.length; lpa++){
@@ -268,7 +281,14 @@ function showAreaC(showFlg){
         tmpKana = list[lpa]["category"][lpf]["kana"].toLowerCase(); // 半角小文字に変換
         tmpKana = hiraToKana(tmpKana); // ひらがな→カタカナに変換
         kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
+
+        // ------------------- アイコン -------------------
+        if(typeof list[lpa]["aicon"] !== 'undefined'){
+          aicons[list[lpa]["aicon"]] = list[lpa]["aicon"];
+        }
+        // ------------------- アイコン -------------------
       }
+      // 重複削除
       for (let i = 0; i < words.length; i++) {
         wdcount[ words[i] ] = kanas[i];
       }
@@ -278,7 +298,7 @@ function showAreaC(showFlg){
   // キーと値にそれぞれキーをつけた連想配列を格納した配列の作成
   arr = Object.keys(wdcount).map((e)=>({key:e,value:wdcount[e]}))
 
-  //昇順ソート
+  //昇順ソート(キー)
   arr.sort(function(a,b){
     let exA = exB = "";
     exA = hiraToKana( a["value"].toLowerCase() );
@@ -288,11 +308,30 @@ function showAreaC(showFlg){
     return 0;
   });
 
+  //昇順ソート(アイコン)
+  //console.log(aicons.sort() );
+  aicons = Object.keys(aicons).map((k)=>({ key: k, value: aicons[k] }));
+  console.log(aicons);
+  /*
+  aicons.sort(function(a,b){
+    let exA = exB = "";
+    exA = a["value"];
+    exB = b["value"];
+    if(exA < exB ) return -1;
+    if(exA > exB ) return 1;
+    return 0;
+  });
+  */
+
+
+
+
   let headStr = "";
   wStr += "<form name='areaC'>";
 
   for(let o in arr){
     tgtName     = arr[o]["key"];
+    //console.log("tgtName = " + tgtName);
 
     // チェックボックスを "選択" にするか判定
     sFlg = setSelectFlg2(tgtName);
@@ -315,6 +354,8 @@ function showAreaC(showFlg){
     wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+ checkedStr +" >" + arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
+
+    // console.log("key = " + arr[o]["key"]);
   }
   wStr += "</form>";
   document.getElementById("areaC").innerHTML = wStr;
@@ -346,7 +387,6 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < rFlg.length; i++) {
     ctn *= rFlg[i];
   }
-  console.log("ctn = " + ctn + ", tgtStr = " + tgtStr + ", tgtName = " + tgtName);
   return(ctn);
 }
 
@@ -356,8 +396,7 @@ function setSelectFlg2(tgtStr){
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
   for (let i = 0; i < c1key.length; i++) {
     tmpKey = c1key[i].toLowerCase(); // 小文字変換
-    //console.log("tmpKey = " + tmpKey);
-    if( tgtStr.indexOf( tmpKey ) != -1 ){
+    if( tgtStr == tmpKey ){
       rtn = 1;
       break;
     }
@@ -425,7 +464,7 @@ function showAreaD()
 
       // note の改行(\n)を数えて textarea タグの高さを設定する
       let CRcount = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
-      console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
+      // console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
       wStr += "<textarea rows='"+ CRcount +"'>";
       wStr += list[lp0]["note"];
       wStr += "</textarea><BR />";
@@ -454,8 +493,6 @@ function set_C1key_B1key(){
 
   // 検索欄の文字列をc1keyに格納する
   keyStr = document.getElementById("inputKey").value;
-
-  console.log("keyStr = " + keyStr);
 
   if(keyStr.length > 0)
   {
