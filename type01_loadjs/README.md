@@ -11,6 +11,7 @@
 |ファイル|説明|
 |---|---|
 |index.html|アプリ本体|
+|aicon_mapinfo.js|カテゴリキーアイコンのマップ情報|
 |links_01.json.js|リンク情報を含むjsファイル|
 |links_02.json.js|リンク情報を含むjsファイル|
 |links_03.json.js|リンク情報を含むjsファイル|
