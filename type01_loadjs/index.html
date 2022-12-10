@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
+  <script src="aicon_mapinfo.js"></script>
   <script src="links_01.json.js"></script>
   <script src="links_02.json.js"></script>
   <script src="links_03.json.js"></script>
@@ -236,16 +237,14 @@ function editLinkInfo(){
   aicon_wstr += "<center>";
   // アイコン情報を表示
   for (let aicon_name in aicons) {
-    console.log(aicons[aicon_name]);
-    //aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' width='80'>";
-    //aicon_wstr += "<BR/>";
-    //aicon_wstr += aicon_name + "<HR>";
+    aicon_wstr += "<div class='div_f2'>";
+    aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' width='80'>";
+    aicon_wstr += "<BR/>";
+    aicon_wstr += aicon_name;
+    aicon_wstr += "</div>";
   }
   aicon_wstr += "</center>";
   document.getElementById("areaC").innerHTML = aicon_wstr;
-
-  //aStr = "<iframe id='aiconArea' width='100%' height='100%' src='aicon_list.html'></iframe>";
-  //document.getElementById("areaC").innerHTML = aStr;
 
   eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
   document.getElementById("areaD").innerHTML = eStr;
@@ -256,15 +255,19 @@ function showAreaC(showFlg){
   let wStr = "";
   let words = new Array();
   let kanas = new Array();
-  words.length = kanas.length = aicons.length = 0;
+  let tmp_aicons = new Array();
+  words.length = kanas.length = aicons.length = tmp_aicons.length = 0;
   let wdcount = {};
   let sFlg = 1;
+
+  tmp_aicons = set_tmp_aicons_default(tmp_aicons);
+
   for(lpa=0; lpa<list.length; lpa++){
     lp0 = lpa;
     let decoUrl = "";
     if(typeof list[lp0]["URL"] !== 'undefined'){
       decoUrl = decodeURI( list[lp0]["URL"] );
-    } 
+    }
 
     let cateStr = "";
     for(lpf=0; lpf<list[lp0]["category"].length; lpf++){
@@ -284,7 +287,7 @@ function showAreaC(showFlg){
 
         // ------------------- アイコン -------------------
         if(typeof list[lpa]["aicon"] !== 'undefined'){
-          aicons[list[lpa]["aicon"]] = list[lpa]["aicon"];
+          tmp_aicons.push(list[lpa]["aicon"]);
         }
         // ------------------- アイコン -------------------
       }
@@ -309,24 +312,13 @@ function showAreaC(showFlg){
   });
 
   //昇順ソート(アイコン)
-  //console.log(aicons.sort() );
-  aicons = Object.keys(aicons).map((k)=>({ key: k, value: aicons[k] }));
-  console.log(aicons);
-  /*
-  aicons.sort(function(a,b){
-    let exA = exB = "";
-    exA = a["value"];
-    exB = b["value"];
-    if(exA < exB ) return -1;
-    if(exA > exB ) return 1;
-    return 0;
-  });
-  */
-
-
-
+  tmp_aicons.sort();
+  for(let aicon_i=0; aicon_i < tmp_aicons.length; aicon_i++){
+    aicons[ tmp_aicons[aicon_i] ] = tmp_aicons[aicon_i];
+  }
 
   let headStr = "";
+  let lo_aicon_name = "";
   wStr += "<form name='areaC'>";
 
   for(let o in arr){
@@ -351,11 +343,19 @@ function showAreaC(showFlg){
     }
     wStr += "<label>";
     wStr += "<div class='div_f2'>";
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+ checkedStr +" >" + arr[o]["key"];
+
+    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedStr +" >" ;
+
+    lo_aicon_name = arr[o]["key"].toLowerCase(); // 小文字変換
+
+    if(typeof aicon_mapinfo[ lo_aicon_name ] !== 'undefined'){
+      //------カテゴリキーに画像貼り付け------//
+      wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' width='20'> ";
+    }
+    wStr += arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
-
-    // console.log("key = " + arr[o]["key"]);
+    lo_aicon_name = "";
   }
   wStr += "</form>";
   document.getElementById("areaC").innerHTML = wStr;
@@ -388,6 +388,25 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
     ctn *= rFlg[i];
   }
   return(ctn);
+}
+
+function set_tmp_aicons_default(lo_aicons){
+  lo_aicons.push("analytics.png");
+  lo_aicons.push("cloud.png");
+  lo_aicons.push("console.png");
+  lo_aicons.push("dashborad.png");
+  lo_aicons.push("mng.png");
+  lo_aicons.push("program.png");
+  lo_aicons.push("schedule.png");
+  lo_aicons.push("search.png");
+  lo_aicons.push("study.png");
+  lo_aicons.push("user.png");
+
+  for(let lo_aicon_i=0; lo_aicon_i< aicon_default.length; lo_aicon_i++){
+    lo_aicons.push(aicon_default[lo_aicon_i]);
+  }
+
+  return lo_aicons;
 }
 
 // カテゴリ一覧に表示するカテゴリにチェックボックスを "選択" にするか判定
