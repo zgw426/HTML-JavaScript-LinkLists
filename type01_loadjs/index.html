@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
+  <script src="aicon_mapinfo.js"></script>
   <script src="links_01.json.js"></script>
   <script src="links_02.json.js"></script>
   <script src="links_03.json.js"></script>
@@ -20,9 +21,10 @@ let MAXNO = 5;  // links_xx.json.js ファイルを表示する数(最大 10)
 
 let list = [];
 let listinfo = [];
-let b1key  = new Array(); // list02_infoの情報
-let c1key  = new Array(); // categoryの情報
-let iptkey = new Array(); // 検索欄の情報
+let b1key  = new Array();  // list02_infoの情報
+let c1key  = new Array();  // categoryの情報
+let iptkey = new Array();  // 検索欄の情報
+let aicons = new Array();  // 画像ファイル名
 
 // 読み込むjsonを変数 list に追加
 function set_List(){
@@ -43,7 +45,6 @@ function set_List(){
       }
     }
   }else{
-    //for (let i = 0; i < b1key.length; i++) {
     for (let i = 0; i < MAXNO; i++) {
       if(list01["info"]["ID"] == b1key[i]){ list = list.concat(list01["list"]); }
       if(list02["info"]["ID"] == b1key[i]){ list = list.concat(list02["list"]); }
@@ -193,7 +194,6 @@ function set_Initial(){
 }
 
 function hiraToKana(str) {
-    // こちらから拝借 -> https://qiita.com/mimoe/items/855c112625d39b066c9a
     return str.replace(/[\u3041-\u3096]/g, function(match) {
         var chr = match.charCodeAt(0) + 0x60;
         return String.fromCharCode(chr);
@@ -215,7 +215,6 @@ function showAreaB()
     let wStr = "";
     let linksno = 0;
     wStr += "<form name='areaB'>";
-    //for(lp0=0; lp0<listinfo.length; lp0++){
     for(lp0=0; lp0< MAXNO; lp0++){
         linksno = lp0 + 1;
         wStr += "<label>";
@@ -227,10 +226,28 @@ function showAreaB()
     }
     wStr += "</form>";
     wStr += "<HR>";
-
-    wStr += "<center><a href='make_json_js.html' target='_blank'>リンク情報更新</a></center>";
+    
+    wStr += "<center><input type='button' value='リンク情報の更新' onclick='editLinkInfo()' /></center>";
 
     document.getElementById("areaB").innerHTML = wStr;
+}
+
+function editLinkInfo(){
+  aicon_wstr = "";
+  aicon_wstr += "<center>";
+  // アイコン情報を表示
+  for (let aicon_name in aicons) {
+    aicon_wstr += "<div class='div_f2'>";
+    aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' width='80'>";
+    aicon_wstr += "<BR/>";
+    aicon_wstr += aicon_name;
+    aicon_wstr += "</div>";
+  }
+  aicon_wstr += "</center>";
+  document.getElementById("areaC").innerHTML = aicon_wstr;
+
+  eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
+  document.getElementById("areaD").innerHTML = eStr;
 }
 
 function showAreaC(showFlg){
@@ -238,15 +255,19 @@ function showAreaC(showFlg){
   let wStr = "";
   let words = new Array();
   let kanas = new Array();
-  words.length = kanas.length = 0;
+  let tmp_aicons = new Array();
+  words.length = kanas.length = aicons.length = tmp_aicons.length = 0;
   let wdcount = {};
   let sFlg = 1;
+
+  tmp_aicons = set_tmp_aicons_default(tmp_aicons);
+
   for(lpa=0; lpa<list.length; lpa++){
     lp0 = lpa;
     let decoUrl = "";
     if(typeof list[lp0]["URL"] !== 'undefined'){
       decoUrl = decodeURI( list[lp0]["URL"] );
-    } 
+    }
 
     let cateStr = "";
     for(lpf=0; lpf<list[lp0]["category"].length; lpf++){
@@ -263,7 +284,14 @@ function showAreaC(showFlg){
         tmpKana = list[lpa]["category"][lpf]["kana"].toLowerCase(); // 半角小文字に変換
         tmpKana = hiraToKana(tmpKana); // ひらがな→カタカナに変換
         kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
+
+        // ------------------- アイコン -------------------
+        if(typeof list[lpa]["aicon"] !== 'undefined'){
+          tmp_aicons.push(list[lpa]["aicon"]);
+        }
+        // ------------------- アイコン -------------------
       }
+      // 重複削除
       for (let i = 0; i < words.length; i++) {
         wdcount[ words[i] ] = kanas[i];
       }
@@ -273,7 +301,7 @@ function showAreaC(showFlg){
   // キーと値にそれぞれキーをつけた連想配列を格納した配列の作成
   arr = Object.keys(wdcount).map((e)=>({key:e,value:wdcount[e]}))
 
-  //昇順ソート
+  //昇順ソート(キー)
   arr.sort(function(a,b){
     let exA = exB = "";
     exA = hiraToKana( a["value"].toLowerCase() );
@@ -283,11 +311,19 @@ function showAreaC(showFlg){
     return 0;
   });
 
+  //昇順ソート(アイコン)
+  tmp_aicons.sort();
+  for(let aicon_i=0; aicon_i < tmp_aicons.length; aicon_i++){
+    aicons[ tmp_aicons[aicon_i] ] = tmp_aicons[aicon_i];
+  }
+
   let headStr = "";
+  let lo_aicon_name = "";
   wStr += "<form name='areaC'>";
 
   for(let o in arr){
     tgtName     = arr[o]["key"];
+    //console.log("tgtName = " + tgtName);
 
     // チェックボックスを "選択" にするか判定
     sFlg = setSelectFlg2(tgtName);
@@ -307,9 +343,19 @@ function showAreaC(showFlg){
     }
     wStr += "<label>";
     wStr += "<div class='div_f2'>";
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+ checkedStr +" >" + arr[o]["key"];
+
+    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedStr +" >" ;
+
+    lo_aicon_name = arr[o]["key"].toLowerCase(); // 小文字変換
+
+    if(typeof aicon_mapinfo[ lo_aicon_name ] !== 'undefined'){
+      //------カテゴリキーに画像貼り付け------//
+      wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' width='20'> ";
+    }
+    wStr += arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
+    lo_aicon_name = "";
   }
   wStr += "</form>";
   document.getElementById("areaC").innerHTML = wStr;
@@ -321,7 +367,6 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
-  //tgtStr = tgtStr.normalize('NFD')[0];
 
   // rFlg 初期化
   rFlg.length = 0;
@@ -332,7 +377,6 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < c1key.length; i++) {
     rtn = 0;
     tmpKey = c1key[i].toLowerCase(); // 小文字変換
-    //tmpKey = tmpKey.normalize('NFD')[0];
     if( tgtStr.indexOf( tmpKey ) != -1 ){
       rtn += 1;
     }
@@ -343,8 +387,26 @@ function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   for (let i = 0; i < rFlg.length; i++) {
     ctn *= rFlg[i];
   }
-  console.log("ctn = " + ctn + ", tgtStr = " + tgtStr + ", tgtName = " + tgtName);
   return(ctn);
+}
+
+function set_tmp_aicons_default(lo_aicons){
+  lo_aicons.push("analytics.png");
+  lo_aicons.push("cloud.png");
+  lo_aicons.push("console.png");
+  lo_aicons.push("dashborad.png");
+  lo_aicons.push("mng.png");
+  lo_aicons.push("program.png");
+  lo_aicons.push("schedule.png");
+  lo_aicons.push("search.png");
+  lo_aicons.push("study.png");
+  lo_aicons.push("user.png");
+
+  for(let lo_aicon_i=0; lo_aicon_i< aicon_default.length; lo_aicon_i++){
+    lo_aicons.push(aicon_default[lo_aicon_i]);
+  }
+
+  return lo_aicons;
 }
 
 // カテゴリ一覧に表示するカテゴリにチェックボックスを "選択" にするか判定
@@ -353,13 +415,11 @@ function setSelectFlg2(tgtStr){
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
   for (let i = 0; i < c1key.length; i++) {
     tmpKey = c1key[i].toLowerCase(); // 小文字変換
-    //console.log("tmpKey = " + tmpKey);
-    if( tgtStr.indexOf( tmpKey ) != -1 ){
+    if( tgtStr == tmpKey ){
       rtn = 1;
       break;
     }
   } // ------ for (let i = 0; i < c1key.length; i++)
-  //console.log("[setSelectFlg2] rtn = " + rtn + ", tgtStr = " + tgtStr);
   return(rtn);
 }
 
@@ -423,7 +483,7 @@ function showAreaD()
 
       // note の改行(\n)を数えて textarea タグの高さを設定する
       let CRcount = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
-      console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
+      // console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
       wStr += "<textarea rows='"+ CRcount +"'>";
       wStr += list[lp0]["note"];
       wStr += "</textarea><BR />";
@@ -450,12 +510,8 @@ function set_C1key_B1key(){
   }
   b1key = b1key.concat(areaB1);
 
-  //console.log("b1key = " + b1key);
-
   // 検索欄の文字列をc1keyに格納する
   keyStr = document.getElementById("inputKey").value;
-
-  console.log("keyStr = " + keyStr);
 
   if(keyStr.length > 0)
   {
@@ -505,15 +561,6 @@ set_List();
 showAreaB();
 showAreaC(0);
 showAreaD();
-
-
-//let hoge_01 = {"hoge": [{"a1":"b1","a2":"b2"}],"fuga": [{"Title":"開発","ID":"01"}]};
-let hoge_01 = {"hoge": {"a1":"b1","a2":"b2"},"fuga": [{"Title":"開発","ID":"01"}]};
-
-console.log(hoge_01["hoge"]);
-console.log(hoge_01["fuga"]);
-
-
 
 </script>
 </body>
