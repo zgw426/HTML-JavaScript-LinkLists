@@ -238,7 +238,7 @@ function editLinkInfo(){
   // アイコン情報を表示
   for (let aicon_name in aicons) {
     aicon_wstr += "<div class='div_f2'>";
-    aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' width='80'>";
+    aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' height='40'>";
     aicon_wstr += "<BR/>";
     aicon_wstr += aicon_name;
     aicon_wstr += "</div>";
@@ -350,7 +350,7 @@ function showAreaC(showFlg){
 
     if(typeof aicon_mapinfo[ lo_aicon_name ] !== 'undefined'){
       //------カテゴリキーに画像貼り付け------//
-      wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' width='20'> ";
+      wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' height='16'> ";
     }
     wStr += arr[o]["key"];
     wStr += "</div>";
