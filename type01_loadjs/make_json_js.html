@@ -12,6 +12,118 @@
   <script src="links_09.json.js"></script>
   <script src="links_10.json.js"></script>
 
+  <style>
+    html { height: 100%; }
+    body { height: 100%; margin: 0; }
+    main {
+        height: calc(100% - 60px);
+        -js-display: flex;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        padding: 0px;
+    }
+    div.areaA {
+      padding : 0px;
+      width: calc(100%);
+      height: 30px;
+      margin: 0px;
+      overflow: hidden;
+      background-color: #D3D3D3;
+    }
+    main div.areaB {
+        width: calc(20% - 10px);
+        height: calc(100% - 10px);
+        margin: 5px;
+        overflow-x: hidden;
+        background-color: #D3D3D3;
+    }
+    main div.areaC {
+        width: calc(20% - 10px);
+        height: calc(100% - 10px);
+        margin: 5px;
+        overflow-x: hidden;
+        background-color: #FFFFFF;
+    }
+    main div.areaD {
+        width: calc(60% - 10px);
+        height: calc(100% - 10px);
+        margin: 5px;
+        overflow-x: hidden;
+        background-color: #D3D3D3;
+    }
+    div.area100 {
+        width:  calc(100%);
+        height: 30px;
+        margin: 0px;
+        overflow: hidden;
+        background-color: #D3D3D3;
+    }
+    
+    .div_f0{
+        background-color : #D3D3D3;
+        clear: both;
+    }
+    
+    .div_f1{
+        padding : 5px;
+        margin-top : 5px;
+        margin-left : 5px;
+        margin-right : 5px;
+        text-align : left;
+        background-color : #ffffff;
+        cursor : pointer;
+        border : solid 1px;
+        float : none;
+        cursor: pointer;
+    }
+    .div_f2{
+        padding : 5px;
+        margin-top : 5px;
+        margin-left : 5px;
+        text-align : center;
+        background-color : #ffffff;
+        cursor : pointer;
+        border : solid 1px;
+        float : left;
+        cursor: pointer;
+    }
+    
+    .div_f3{
+        padding : 5px;
+        margin-top : 5px;
+        margin-left : 5px;
+        text-align : center;
+        background-color : #474747;
+        cursor : pointer;
+        border : solid 1px;
+        float : left;
+        cursor: pointer;
+    }
+    
+    
+    .div_url{
+        width : calc(99%);
+        padding     : 2px;
+        margin-top  : 0px;
+        margin-left : 0px;
+        text-align  : left;
+        background-color : #ffffff;
+        border : solid 1px;
+        cursor : pointer;
+        overflow : scroll;
+    
+    }
+    
+    textarea{
+      width: calc(90%);
+    }
+    
+  </style>
 </head>
 <body>
 <input type="button" value="links_01" onclick='root_flow("list01");' />
@@ -82,7 +194,7 @@ info_target = "";
 function set_form_cell(form_flg, line_flg, elemnet, item_val){
   // 1項目の入力フォームを作る
   lo_str = "";
-  lo_str+= '<div>';
+  //lo_str+= "<div>";
   lo_str+= '<label for="'+elemnet+'">'+elemnet+'</label>';
   if(line_flg == 0){
     lo_str+= '<input type="text" id="'+elemnet+'" name="'+elemnet+'" value="'+ item_val +'" size="100%" >';
@@ -91,7 +203,7 @@ function set_form_cell(form_flg, line_flg, elemnet, item_val){
   }else{
     lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="100%" rows="5">'+ item_val +'</textarea>';
   }
-  lo_str+= '</div>';
+  //lo_str+= '</div>';
   return(lo_str);
 }
 
@@ -126,7 +238,10 @@ function set_form_flow(item_jsn, list_elem){
       tmp_val = tmp_val.trim();  // 最後の改行コードを削除
       item_val = tmp_val;
     }
+    //wstr_lo += "<div class='div_f2'>";
     wstr_lo += set_form_cell(form_flg, line_flg, item_name, item_val);
+    wstr_lo += "<BR />";
+    //wstr_lo += "</div>";
   }
   return(wstr_lo);
 }
@@ -293,7 +408,9 @@ function root_flow(arg_no){
 
   for (const elem in list_target) {
     // jsonデータを設定値にしてフォームを作る
+    //wstr += "<div class='div_f2'>";
     wstr += set_form_flow(item_jsn,list_target[elem]);
+    //wstr += "</div>";
     wstr += "<HR />";
   }
 
