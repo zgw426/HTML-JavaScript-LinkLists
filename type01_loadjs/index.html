@@ -19,7 +19,11 @@
 <script>
 
 //let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
-let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
+//let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
+let load_arr = [list01,list04,list10];
+
+
+
 
 let list = [];
 let listinfo = [];
@@ -200,7 +204,7 @@ function showAreaB()
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
         wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["Title"];
-        wStr += "<BR />　<small>links_" + linksno.toString().padStart(2, '0') + ".json.js</small>";
+        wStr += "<BR />　<small>ID-" + listinfo[lp0]["ID"] + ", Title-" + listinfo[lp0]["Title"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
     }
