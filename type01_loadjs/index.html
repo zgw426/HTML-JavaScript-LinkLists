@@ -17,7 +17,9 @@
   <script src="links_09.json.js"></script>
   <script src="links_10.json.js"></script>
 <script>
-let MAXNO = 5;  // links_xx.json.js ファイルを表示する数(最大 10)
+
+//let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
+let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
 
 let list = [];
 let listinfo = [];
@@ -29,33 +31,17 @@ let aicons = new Array();  // 画像ファイル名
 // 読み込むjsonを変数 list に追加
 function set_List(){
   list.length = 0;
-  if( b1key.length == 0 ){
-    for(let lp=0; lp < MAXNO; lp++){
-      switch (lp){
-        case 0: list = list.concat(list01["list"]);  listinfo = listinfo.concat(list01["info"]); break;
-        case 1: list = list.concat(list02["list"]);  listinfo = listinfo.concat(list02["info"]); break;
-        case 2: list = list.concat(list03["list"]);  listinfo = listinfo.concat(list03["info"]); break;
-        case 3: list = list.concat(list04["list"]);  listinfo = listinfo.concat(list04["info"]); break;
-        case 4: list = list.concat(list05["list"]);  listinfo = listinfo.concat(list05["info"]); break;
-        case 5: list = list.concat(list06["list"]);  listinfo = listinfo.concat(list06["info"]); break;
-        case 6: list = list.concat(list07["list"]);  listinfo = listinfo.concat(list07["info"]); break;
-        case 7: list = list.concat(list08["list"]);  listinfo = listinfo.concat(list08["info"]); break;
-        case 8: list = list.concat(list09["list"]);  listinfo = listinfo.concat(list09["info"]); break;
-        case 9: list = list.concat(list10["list"]);  listinfo = listinfo.concat(list10["info"]); break;
-      }
+  if( b1key.length == 0 ){ // index.htmlを開いたときに実施する処理
+    for(let lp=0; lp < load_arr.length; lp++){
+      list = list.concat(load_arr[lp]["list"]);
+      listinfo = listinfo.concat(load_arr[lp]["info"]);
     }
-  }else{
-    for (let i = 0; i < MAXNO; i++) {
-      if(list01["info"]["ID"] == b1key[i]){ list = list.concat(list01["list"]); }
-      if(list02["info"]["ID"] == b1key[i]){ list = list.concat(list02["list"]); }
-      if(list03["info"]["ID"] == b1key[i]){ list = list.concat(list03["list"]); }
-      if(list04["info"]["ID"] == b1key[i]){ list = list.concat(list04["list"]); }
-      if(list05["info"]["ID"] == b1key[i]){ list = list.concat(list05["list"]); }
-      if(list06["info"]["ID"] == b1key[i]){ list = list.concat(list06["list"]); }
-      if(list07["info"]["ID"] == b1key[i]){ list = list.concat(list07["list"]); }
-      if(list08["info"]["ID"] == b1key[i]){ list = list.concat(list08["list"]); }
-      if(list09["info"]["ID"] == b1key[i]){ list = list.concat(list09["list"]); }
-      if(list10["info"]["ID"] == b1key[i]){ list = list.concat(list10["list"]); }
+  }else{ // ShowAreaB(json.jsファイル一覧)のチェックボックスをクリックしたときの処理
+    for(let lp=0; lp < load_arr.length; lp++){
+      if (b1key.includes(load_arr[lp]["info"]["ID"])) {
+        list = list.concat(load_arr[lp]["list"]);
+        listinfo = listinfo.concat(load_arr[lp]["info"]);
+      }
     }
   }
 }
@@ -204,18 +190,12 @@ function pageReload(){ // ページ再読み込み
   window.location.reload();
 }
 
-function test()
-{
-  console.log("test desu");
-  alert("test");
-}
-
 function showAreaB()
 {
     let wStr = "";
     let linksno = 0;
     wStr += "<form name='areaB'>";
-    for(lp0=0; lp0< MAXNO; lp0++){
+    for(lp0=0; lp0< load_arr.length; lp0++){
         linksno = lp0 + 1;
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
@@ -323,7 +303,6 @@ function showAreaC(showFlg){
 
   for(let o in arr){
     tgtName     = arr[o]["key"];
-    //console.log("tgtName = " + tgtName);
 
     // チェックボックスを "選択" にするか判定
     sFlg = setSelectFlg2(tgtName);
@@ -537,6 +516,7 @@ function set_C1key_B1key(){
 // areaB (jsファイル一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowB()
 {
+  console.log("----0000---");
   set_Initial();      // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
@@ -552,7 +532,7 @@ function selectEventFlowC()
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
   showAreaD();       // サイト一覧を表示
-  showAreaC(1);       // カテゴリ一覧を表示
+  showAreaC(1);      // カテゴリ一覧を表示
 }
 
 //-----------------------------------
