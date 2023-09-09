@@ -1,5 +1,5 @@
 let list04 = {
-"info": {"Title":"統計学","ID":"04"},
+"info": {"Title":"統計学","ID":"04","NOTE":"たちつてと"},
 "list": [
 {
 	"aicon": "study.png",
