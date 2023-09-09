@@ -1,5 +1,5 @@
 let list07 = {
-  "info": {"Title":"links_07リスト","ID":"07"},
+  "info": {"Title":"links_07リスト","ID":"07","NOTE":"まみむめも"},
   "list": [
   {
     "kana"     : "ゼロナナ",

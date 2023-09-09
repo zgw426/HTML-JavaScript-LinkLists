@@ -8,3 +8,7 @@
     - WebStorageを利用したリンクリストを開発予定です。
     - リンク情報を気が向いたときに開発します。
 
+
+# 操作デモ
+
+![gif](https://youtu.be/gzVICp4xvZs?si=8JqzpwKU8rqCQwcR)

@@ -404,7 +404,8 @@ function root_flow(arg_no){
   list_target = eval(list_str);
   info_target = eval(info_str)
 
-  info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '"}';
+  //info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '"}';
+  info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '","NOTE":"' + info_target["NOTE"] + '"}';
 
   for (const elem in list_target) {
     // jsonデータを設定値にしてフォームを作る

@@ -1,5 +1,5 @@
 let list01 = {
-"info": {"Title":"開発","ID":"01"},
+"info": {"Title":"開発","ID":"01","NOTE":"あいうえお"},
 "list": [
 {
 	"aicon": "google.png",

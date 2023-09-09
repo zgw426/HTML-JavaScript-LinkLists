@@ -19,8 +19,8 @@
 <script>
 
 //let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
-//let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
-let load_arr = [list01,list04,list10];
+let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
+//let load_arr = [list01,list04,list10];
 
 
 
@@ -203,14 +203,13 @@ function showAreaB()
         linksno = lp0 + 1;
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["Title"];
-        wStr += "<BR />　<small>ID-" + listinfo[lp0]["ID"] + ", Title-" + listinfo[lp0]["Title"] +"</small>";
+        wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
+        wStr += "<BR />　<small>"+ listinfo[lp0]["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
     }
     wStr += "</form>";
     wStr += "<HR>";
-    
     wStr += "<center><input type='button' value='リンク情報の更新' onclick='editLinkInfo()' /></center>";
 
     document.getElementById("areaB").innerHTML = wStr;
