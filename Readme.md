@@ -11,4 +11,4 @@
 
 # 操作デモ
 
-[![](https://img.youtube.com/vi/8JqzpwKU8rqCQwcR/0.jpg)](https://www.youtube.com/watch?v=8JqzpwKU8rqCQwcR)
+[![](https://img.youtube.com/vi/gzVICp4xvZs/0.jpg)](https://www.youtube.com/watch?v=gzVICp4xvZs)
