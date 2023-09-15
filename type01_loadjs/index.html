@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
-  <script src="aicon_mapinfo.js"></script>
+  <script src="areac_aicon_mapinfo.js"></script>
+  <script src="areac_key_hightlight.js"></script>
   <script src="links_01.json.js"></script>
   <script src="links_02.json.js"></script>
   <script src="links_03.json.js"></script>
@@ -132,6 +133,17 @@ div.area100 {
     cursor: pointer;
 }
 
+.div_f2_HightLight{
+  padding : 5px;
+  margin-top : 5px;
+  margin-left : 5px;
+  text-align : center;
+  cursor : pointer;
+  border : solid 1px;
+  float : left;
+  cursor: pointer;
+}
+
 .div_f3{
     padding : 5px;
     margin-top : 5px;
@@ -143,7 +155,6 @@ div.area100 {
     float : left;
     cursor: pointer;
 }
-
 
 .div_url{
     width : calc(99%);
@@ -319,12 +330,22 @@ function showAreaC(showFlg){
       headStr = arr[o]["value"][0];
       tmpStr = hiraToKana(headStr.toUpperCase());
       tmpStr = tmpStr.normalize('NFD')[0];  // 濁音→静音
+
       wStr += "<div class='div_f0'>";
+      
+
+
       wStr += "<B>" + tmpStr + "</B>";
       wStr += "</div>";
     }
     wStr += "<label>";
-    wStr += "<div class='div_f2'>";
+
+    if(typeof key_hightlight[ arr[o]["key"] ] !== 'undefined'){
+      //---- 強調表示 ----//
+      wStr += "<div class='div_f2_HightLight' style='background-color:"+key_hightlight[ arr[o]["key"] ]+"'>";
+    }else{
+      wStr += "<div class='div_f2'>";
+    }
 
     wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedStr +" >" ;
 
@@ -334,6 +355,7 @@ function showAreaC(showFlg){
       //------カテゴリキーに画像貼り付け------//
       wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' height='16'> ";
     }
+
     wStr += arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
