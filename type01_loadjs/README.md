@@ -12,6 +12,7 @@
 |---|---|
 |index.html|アプリ本体|
 |aicon_mapinfo.js|カテゴリキーアイコンのマップ情報|
+|areac_key_hightlight.js|強調表示するカテゴリキーの設定|
 |links_01.json.js|リンク情報を含むjsファイル|
 |links_02.json.js|リンク情報を含むjsファイル|
 |links_03.json.js|リンク情報を含むjsファイル|

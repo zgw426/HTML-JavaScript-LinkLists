@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
   <script src="areac_aicon_mapinfo.js"></script>
-  <script src="areac_key_hightlight.js"></script>
+  <script src="function_enhancement.js"></script>
   <script src="links_01.json.js"></script>
   <script src="links_02.json.js"></script>
   <script src="links_03.json.js"></script>
@@ -19,11 +19,12 @@
   <script src="links_10.json.js"></script>
 <script>
 
+//---- ↓↓ 左側に表示するリストの設定 ↓↓ ----//
+
 //let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
 let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
-//let load_arr = [list01,list04,list10];
 
-
+//---- ↑↑ 左側に表示するリストの設定 ↑↑ ----//
 
 
 let list = [];
@@ -173,6 +174,30 @@ textarea{
   width: calc(90%);
 }
 
+
+.image-checkbox {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.image-checkbox img {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+}
+
+.image-checkbox input[type="checkbox"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 34px;
+    opacity: 0.3;
+}
+
+
+
 </style>
 </head>
 <body>
@@ -222,9 +247,56 @@ function showAreaB()
     wStr += "</form>";
     wStr += "<HR>";
     wStr += "<center><input type='button' value='リンク情報の更新' onclick='editLinkInfo()' /></center>";
+    wStr += "<HR>";
+
+    //------------//
+    wStr += addFilterAiconOnAreaB();
+    //------------//
 
     document.getElementById("areaB").innerHTML = wStr;
 }
+
+
+function addFilterAiconOnAreaB(){
+  //アイコンを使ったフィルタ用のキーのアイコンを表示する
+  rtnStr = "";
+  checkedStr = "";
+  rtnStr += "<form name='areaB-FilterAicon'>";
+  for (let key in key_aicon) {
+      rtnStr += "<div class='div_f2'>";
+      rtnStr += "<div class='image-checkbox'>";
+      rtnStr += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' height='40'>";
+      rtnStr += "<input type='checkbox' id='FilterAicon"+ key +"' value='"+ key_aicon[key] +"' onclick='selectEventFilterAicon(\""+ key +"\")'>";      
+      rtnStr += "</div>";
+      rtnStr += "</div>";
+  }
+  rtnStr += "</form>";
+  return rtnStr;
+}
+
+function selectEventFilterAicon(argKey){
+  //フィルター用アイコンをクリックしたときにチェックボックスの有無を変更する
+  let resultStr = "";
+  let checkbox = document.getElementById("FilterAicon"+argKey);
+
+  // 検索欄の文字列を取得する
+  let inputKey = document.getElementById("inputKey").value;
+  inputKey = inputKey.trim();
+
+  if(checkbox.checked){
+    //チェックボックスにチェック有
+    resultStr = inputKey + " " + key_aicon[argKey];
+  }else{
+    //チェックボックスにチェック無
+    resultStr = inputKey.split(key_aicon[argKey]).join(' ');
+  }
+  document.getElementById("inputKey").value = resultStr;
+  selectEventFlowC();
+}
+
+
+
+
 
 function editLinkInfo(){
   aicon_wstr = "";
@@ -268,7 +340,9 @@ function showAreaC(showFlg){
       if( lpf != 0 ) cateStr += ", ";  
       cateStr += list[lp0]["category"][lpf]["key"];
     }
-    sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+
+    //sFlg = setSelectFlg( list[lp0]["aicon"]+list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    sFlg = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(sFlg == 1)
     {
@@ -365,9 +439,9 @@ function showAreaC(showFlg){
   document.getElementById("areaC").innerHTML = wStr;
 }
 
-function setSelectFlg(tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
+function setSelectFlg(tgtAicon, tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rtn = ctn = 0;
-  let tgtStr = tgtName + "," + tgtCategory + "," + tgtNote + "," + tgtDecoUrl;
+  let tgtStr = tgtAicon + "," + tgtName + "," + tgtCategory + "," + tgtNote + "," + tgtDecoUrl;
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
@@ -456,7 +530,7 @@ function showAreaD()
       decoUrl = decodeURI( list[lp0]["URL"] );
     } 
     
-    sFlg = setSelectFlg( list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    sFlg = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(sFlg == 1)
     {
@@ -541,7 +615,6 @@ function set_C1key_B1key(){
 // areaB (jsファイル一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowB()
 {
-  console.log("----0000---");
   set_Initial();      // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
@@ -552,7 +625,7 @@ function selectEventFlowB()
 // areaC (カテゴリ一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowC()
 {
-  console.log("key = " + document.getElementById("inputKey").value);
+  //console.log("key = " + document.getElementById("inputKey").value);
   set_Initial();     // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
