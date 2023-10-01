@@ -175,26 +175,6 @@ textarea{
 }
 
 
-.image-checkbox {
-    position: relative;
-    width: 40px;
-    height: 40px;
-}
-
-.image-checkbox img {
-    width: 40px;
-    height: 40px;
-    opacity: 1;
-}
-
-.image-checkbox input[type="checkbox"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 32px;
-    height: 34px;
-    opacity: 0.3;
-}
 
 
 
@@ -250,6 +230,7 @@ function showAreaB()
     wStr += "<HR>";
 
     //------------//
+    //フィルター用アイコンを描画
     wStr += addFilterAiconOnAreaB();
     //------------//
 
@@ -264,10 +245,7 @@ function addFilterAiconOnAreaB(){
   rtnStr += "<form name='areaB-FilterAicon'>";
   for (let key in key_aicon) {
       rtnStr += "<div class='div_f2'>";
-      rtnStr += "<div class='image-checkbox'>";
-      rtnStr += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' height='40'>";
-      rtnStr += "<input type='checkbox' id='FilterAicon"+ key +"' value='"+ key_aicon[key] +"' onclick='selectEventFilterAicon(\""+ key +"\")'>";      
-      rtnStr += "</div>";
+      rtnStr += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' width='60px' height='60px' onclick='selectEventFilterAicon(\""+ key +"\")'>";
       rtnStr += "</div>";
   }
   rtnStr += "</form>";
@@ -277,25 +255,18 @@ function addFilterAiconOnAreaB(){
 function selectEventFilterAicon(argKey){
   //フィルター用アイコンをクリックしたときにチェックボックスの有無を変更する
   let resultStr = "";
-  let checkbox = document.getElementById("FilterAicon"+argKey);
 
   // 検索欄の文字列を取得する
   let inputKey = document.getElementById("inputKey").value;
   inputKey = inputKey.trim();
 
-  if(checkbox.checked){
-    //チェックボックスにチェック有
-    resultStr = inputKey + " " + key_aicon[argKey];
-  }else{
-    //チェックボックスにチェック無
-    resultStr = inputKey.split(key_aicon[argKey]).join(' ');
-  }
+  let tmpArr = inputKey.split(key_aicon[argKey]);
+  tmpArr.push(key_aicon[argKey]);
+  resultStr = tmpArr.join(" ");
+
   document.getElementById("inputKey").value = resultStr;
   selectEventFlowC();
 }
-
-
-
 
 
 function editLinkInfo(){
@@ -341,7 +312,6 @@ function showAreaC(showFlg){
       cateStr += list[lp0]["category"][lpf]["key"];
     }
 
-    //sFlg = setSelectFlg( list[lp0]["aicon"]+list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
     sFlg = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(sFlg == 1)
