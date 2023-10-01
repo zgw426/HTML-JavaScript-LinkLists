@@ -10,7 +10,8 @@ key_hightlight["マイクロソフト"] = "#c0ffcb";
 let key_aicon = new Array();
 key_aicon.length = 0;
 
-key_aicon["movie.png"] = "動画 YouTube";
+key_aicon["y_movie.png"] = "動画 YouTube";
 key_aicon["google.png"] = "google.png";
 key_aicon["yahoo.png"] = "yahoo.png";
-
+key_aicon["y_money.png"] = "楽天";
+key_aicon["y_cloud.png"] = "Gyao!";
