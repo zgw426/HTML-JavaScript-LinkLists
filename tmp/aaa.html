@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div id="message"></div>
+<div id="message2"></div>
+
+<script>
+
+const targetDateList = [];
+
+targetDateList.push(["YYYY-MM-05","study.png","555ああああいいいいい"]);
+targetDateList.push(["YYYY-MM-04","study.png","444ああああいいいいい"]);
+targetDateList.push(["2023-10-04","dashborad.png","ああdddddddddddddddあああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ"]);
+targetDateList.push(["2023-10-05","","いいい"]);
+targetDateList.push(["2023-10-04","y_cloud.png","ううううううううううううううううううううううううううううううううううううううう"]);
+targetDateList.push(["2023-10-04","study.png","あいうえおかきくけこ"]);
+targetDateList.push(["YYYY-MM-04","study.png","ああああいいいいい"]);
+
+
+const targetWeekList = [];
+
+targetWeekList.push(["水","","水曜日１"]);
+targetWeekList.push(["水","","水曜日２"]);
+targetWeekList.push(["木","","木曜日A"]);
+targetWeekList.push(["金","","金曜日B"]);
+
+
+function checkEventMsg(loTargetDateList){
+    outStrA = "";  // 日付指定されたイベント
+    outStrB = "";  // 日のみ指定されたイベント
+    let regex = /^\d{4}-\d{2}-\d{2}$/;  // 正規表現を使用して日付の形式を確認
+    let currentDate = new Date();  // 現在の日付を取得
+    const curYear = currentDate.getFullYear();
+    const curMonth = currentDate.getMonth() + 1;
+    const curDay = currentDate.getDate();
+    currentDate.setHours(0, 0, 0, 0);
+
+    outStrA += "■-- " + curMonth + "月" + curDay + "日 --■<BR />";
+    outStrB += "■-- " + curDay + "日 --■<BR />";
+    for (let tgt = 0; tgt < loTargetDateList.length; tgt++) {
+        let targetStr = loTargetDateList[tgt][0];
+        if (regex.test(targetStr)) { // 日付が指定されている場合
+            const targetDate = new Date(targetStr);
+            targetDate.setHours(0, 0, 0, 0);
+            outStrA += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], targetDateList[tgt][2]);
+        }else{  // 日のみ指定されている場合
+            targetStr = targetStr.replace("YYYY", curYear);
+            targetStr = targetStr.replace("MM", curMonth);
+            outStrB += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], targetDateList[tgt][2]);
+        }
+    }
+    document.getElementById("message").innerHTML = outStrA + "<BR />" + outStrB;
+}
+
+
+function makeCheckEventStr(loCurrentDate, loTargetStr, loAicon, loEventStr){
+    const targetDate = new Date(loTargetStr);
+    let rtnStr = "";
+    targetDate.setHours(0, 0, 0, 0);  
+
+    if (targetDate.getTime() === loCurrentDate.getTime()) {
+        let aicon = "default.png";  // デフォルトのアイコン
+        if(loAicon != ""){
+            aicon = loAicon;  // 指定のアイコンにする
+        }
+        rtnStr += "<p clear='left'>";
+        rtnStr += "<img src='" + loAicon + "' align='left' width='30px'>";
+        rtnStr += loEventStr;
+        rtnStr += "</p>";
+    }
+    return(rtnStr);
+}
+
+
+checkEventMsg(targetDateList);
+
+
+
+
+
+function checkWeekEventMsg(loTargetWeekList){
+    let rtnStr = "";
+    const date = new Date();
+    const dayOfWeek = date.getDay();
+    const dayOfWeekMaps = [];
+    dayOfWeekMaps["日"] = 0;
+    dayOfWeekMaps["月"] = 1;
+    dayOfWeekMaps["火"] = 2;
+    dayOfWeekMaps["水"] = 3;
+    dayOfWeekMaps["木"] = 4;
+    dayOfWeekMaps["金"] = 5;
+
+    for (let tgt = 0; tgt < loTargetWeekList.length; tgt++) {
+        if(dayOfWeek == dayOfWeekMaps[loTargetWeekList[tgt][0]] ){
+            console.log(":0: "+loTargetWeekList[tgt][0]);
+            console.log(":1: "+loTargetWeekList[tgt][1]);
+            console.log(":2: "+loTargetWeekList[tgt][2]);
+            rtnStr += loTargetWeekList[tgt][2];
+        }
+    }
+
+   return(rtnStr);
+}
+
+
+
+let aaa = checkWeekEventMsg(targetWeekList);
+document.getElementById("message2").innerHTML = aaa;
+
+
+
+
+</script>
+
+</body>
+</html>
