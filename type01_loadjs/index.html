@@ -227,12 +227,19 @@ function showAreaB()
     wStr += "</form>";
     wStr += "<HR>";
     wStr += "<center><input type='button' value='リンク情報の更新' onclick='editLinkInfo()' /></center>";
-    wStr += "<HR>";
 
     //------------//
     //フィルター用アイコンを描画
+    wStr += "<HR>";
     wStr += addFilterAiconOnAreaB();
+
     //------------//
+    //イベント情報を表示
+    wStr += "<BR clear='all' />";
+    wStr += "<HR>";
+    wStr += checkEventMsg(targetDateList);
+
+    wStr += checkWeekEventMsg(targetWeekList);
 
     document.getElementById("areaB").innerHTML = wStr;
 }
@@ -581,6 +588,105 @@ function set_C1key_B1key(){
   }
   c1key = c1key.concat(areaC1);
 }
+
+
+function checkEventMsg(loTargetDateList){
+  //毎月&指定日付のイベントを表示する
+  outStrA = "";  // 日付指定されたイベント
+  outStrB = "";  // 日のみ指定されたイベント
+  let regex = /^\d{4}-\d{2}-\d{2}$/;  // 正規表現を使用して日付の形式を確認
+  let currentDate = new Date();  // 現在の日付を取得
+  const curYear = currentDate.getFullYear();
+  const curMonth = currentDate.getMonth() + 1;
+  const curDay = currentDate.getDate();
+  currentDate.setHours(0, 0, 0, 0);
+
+  for (let tgt = 0; tgt < loTargetDateList.length; tgt++) {
+      let targetStr = loTargetDateList[tgt][0];
+      let outStr = "";
+      if (regex.test(targetStr)) { // 日付が指定されている場合
+          const targetDate = new Date(targetStr);
+          targetDate.setHours(0, 0, 0, 0);
+          outStr += `[${curMonth}/${curDay}]  ${targetDateList[tgt][2]}`;
+          outStrA += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_month.png");
+      }else{  // 日のみ指定されている場合
+          targetStr = targetStr.replace("YYYY", curYear);
+          targetStr = targetStr.replace("MM", curMonth);
+          outStr += `[/${curDay}]  ${targetDateList[tgt][2]}`;
+          outStrB += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_day.png");
+      }
+  }
+  return( outStrA  + outStrB );
+}
+
+
+function makeCheckEventStr(loCurrentDate, loTargetStr, loAicon, loEventStr, loDefaultAicon){
+    const targetDate = new Date(loTargetStr);
+    let rtnStr = "";
+    targetDate.setHours(0, 0, 0, 0);  
+
+    if (targetDate.getTime() === loCurrentDate.getTime()) {
+        let aiconDir = "aicon/"
+        let aicon = loDefaultAicon;  // デフォルトのアイコン
+        if(loAicon != ""){
+            aicon = loAicon;  // 指定のアイコンにする
+        }
+        //console.log("aicon = "+aicon + " : " + loEventStr);
+        rtnStr += "<p clear='left'>";
+        rtnStr += "<img src='" + aiconDir + aicon + "' align='left' width='22px'>";
+        rtnStr += loEventStr;
+        rtnStr += "</p>";
+    }
+    return(rtnStr);
+}
+
+
+function checkWeekEventMsg(loTargetWeekList){
+  //毎週のイベントを表示する
+  let rtnStr = "";
+  const date = new Date();
+  const dayOfWeek = date.getDay();
+  const dayOfWeekMaps = [];
+  dayOfWeekMaps["日"] = 0;
+  dayOfWeekMaps["月"] = 1;
+  dayOfWeekMaps["火"] = 2;
+  dayOfWeekMaps["水"] = 3;
+  dayOfWeekMaps["木"] = 4;
+  dayOfWeekMaps["金"] = 5;
+  dayOfWeekMaps["土"] = 6;
+
+  for (let tgt = 0; tgt < loTargetWeekList.length; tgt++) {
+    console.log(`tgt=${tgt}, dayOfWeekMaps[loTargetWeekList[tgt][0]]=${dayOfWeekMaps[loTargetWeekList[tgt][0]]}`);
+    if(dayOfWeek == dayOfWeekMaps[loTargetWeekList[tgt][0]] ){
+        console.log(":0: "+loTargetWeekList[tgt][0]);
+        console.log(":1: "+loTargetWeekList[tgt][1]);
+        console.log(":2: "+loTargetWeekList[tgt][2]);
+
+        let dayOfW = loTargetWeekList[tgt][0];
+        let aiconTgt = loTargetWeekList[tgt][1];
+        let msg = loTargetWeekList[tgt][2];
+
+        //rtnStr += loTargetWeekList[tgt][2];
+
+        let aiconDir = "aicon/"
+        let aicon = "x_week.png";  // デフォルトのアイコン
+        if(aiconTgt != ""){
+            aicon = aiconTgt;  // 指定のアイコンにする
+        }
+        rtnStr += "<p clear='left'>";
+        rtnStr += "<img src='" + aiconDir + aicon + "' align='left' width='22px'>";
+        rtnStr += `[${dayOfW}] ${msg}`;
+        rtnStr += "</p>";
+
+    }
+  }
+
+  return(rtnStr);
+}
+
+
+
+
 
 // areaB (jsファイル一覧) チェックボックスの選択時の処理フロー
 function selectEventFlowB()
