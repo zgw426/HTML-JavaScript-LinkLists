@@ -11,6 +11,7 @@
   <script src="links_08.json.js"></script>
   <script src="links_09.json.js"></script>
   <script src="links_10.json.js"></script>
+  <script src="function_enhancement.js"></script>
 
   <style>
     html { height: 100%; }
@@ -136,13 +137,16 @@
 <input type="button" value="links_08" onclick='root_flow("list08");' />
 <input type="button" value="links_09" onclick='root_flow("list09");' />
 <input type="button" value="links_10" onclick='root_flow("list10");' />
-<HR>
-
 <BR />
+<input type="button" value="その他(予定など)" onclick='etc_flow("function_enhancement.js");' />
+
+<!--
+<HR>
 <label for="number_of_blank_cells">新規登録枠数</label>
 <input type="text" id="number_of_blank_cells" name="number_of_blank_cells" value="3">
-
+-->
 <HR>
+
 
 <div id="form_area">※既存のjson.jsファイルを読み込みフォーム形式で表示※</div>
 <div id="savebutton_area">※保存ボタンを表示※</div>
@@ -167,7 +171,7 @@ const item_jsn = [
 // json.js の info 情報
 info_out = "";
 // formタグの情報を格納
-wstr = ""
+wStr = ""
 
 // 更新対象のjson.jsファイル
 list_no = "";
@@ -185,6 +189,7 @@ js_file_name["list07"] = "links_07.json.js";
 js_file_name["list08"] = "links_08.json.js";
 js_file_name["list09"] = "links_09.json.js";
 js_file_name["list10"] = "links_10.json.js";
+js_file_name["function_enhancement.js"] = "function_enhancement.js";
 
 // 更新対象のjson.js変数
 list_target = "";
@@ -209,7 +214,7 @@ function set_form_cell(form_flg, line_flg, elemnet, item_val){
 
 function set_form_flow(item_jsn, list_elem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
-  let wstr_lo = "";
+  let wStr_lo = "";
   let item_val = "";
   let tmp_val = "";
   for (const elem in item_jsn) {
@@ -238,18 +243,17 @@ function set_form_flow(item_jsn, list_elem){
       tmp_val = tmp_val.trim();  // 最後の改行コードを削除
       item_val = tmp_val;
     }
-    //wstr_lo += "<div class='div_f2'>";
-    wstr_lo += set_form_cell(form_flg, line_flg, item_name, item_val);
-    wstr_lo += "<BR />";
-    //wstr_lo += "</div>";
+    //wStr_lo += "<div class='div_f2'>";
+    wStr_lo += set_form_cell(form_flg, line_flg, item_name, item_val);
+    wStr_lo += "<BR />";
+    //wStr_lo += "</div>";
   }
-  return(wstr_lo);
+  return(wStr_lo);
 }
 
 
 function make_data_to_jsformat(){
-  wstr_out = "";
-  //info_out = "";
+  wStr_out = "";
   list_out = "";
   current_out = "";
   write_flg = 1;
@@ -310,13 +314,35 @@ function make_data_to_jsformat(){
     }
   }
   list_out = '"list": [\n' + list_out + "\n]";
-  wstr_out += "let " + list_no + " = {\n";
-  wstr_out += info_out + ",\n";
-  wstr_out += list_out;
-  wstr_out += "};";
+  wStr_out += "let " + list_no + " = {\n";
+  wStr_out += info_out + ",\n";
+  wStr_out += list_out;
+  wStr_out += "};";
 
-  document.getElementById("json_area").innerHTML = wstr_out;
+  document.getElementById("json_area").innerHTML = wStr_out;
   document.getElementById("message_area").innerHTML = '<font color="red">' + warning_msg + "</font>";
+
+  let text = document.getElementById("json_area");
+  text.select();
+  document.execCommand("copy");
+  document.getElementById("savebutton_area").innerHTML = "<input type='button' value='ファイル出力' onclick='outputText();' />";
+}
+
+
+function make_data_to_jsformat_etc(){
+  let wOutStr = "";
+  let name_out = "";
+  let value_out = "";
+
+  // フォームの情報を取得
+  const form_elements = document.forms.linklist;
+
+  for(index = 0; index < form_elements.length; index++){
+    name_out = form_elements.elements.item(index).name;
+    value_out= form_elements.elements.item(index).value;
+  }
+
+  document.getElementById("json_area").innerHTML = value_out;
 
   let text = document.getElementById("json_area");
   text.select();
@@ -357,7 +383,7 @@ function set_init(){
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
   document.getElementById("json_area").innerHTML = "";
-  wstr = "";
+  wStr = "";
   list_str = "";
   info_str = "";
   info_out = "";
@@ -370,64 +396,62 @@ function set_links_no(arg_no){
   list_str_lo = "";
   info_str_lo = "";
   switch (arg_no){
-      case "list01": list_str_lo = 'list01["list"]'; info_str_lo = 'list01["info"]'; break;
-      case "list02": list_str_lo = 'list02["list"]'; info_str_lo = 'list02["info"]'; break;
-      case "list03": list_str_lo = 'list03["list"]'; info_str_lo = 'list03["info"]'; break;
-      case "list04": list_str_lo = 'list04["list"]'; info_str_lo = 'list04["info"]'; break;
-      case "list05": list_str_lo = 'list05["list"]'; info_str_lo = 'list05["info"]'; break;
-      case "list06": list_str_lo = 'list06["list"]'; info_str_lo = 'list06["info"]'; break;
-      case "list07": list_str_lo = 'list07["list"]'; info_str_lo = 'list07["info"]'; break;
-      case "list08": list_str_lo = 'list08["list"]'; info_str_lo = 'list08["info"]'; break;
-      case "list09": list_str_lo = 'list09["list"]'; info_str_lo = 'list09["info"]'; break;
-      case "list10": list_str_lo = 'list10["list"]'; info_str_lo = 'list10["info"]'; break;
-    }
+    case "list01": list_str_lo = 'list01["list"]'; info_str_lo = 'list01["info"]'; break;
+    case "list02": list_str_lo = 'list02["list"]'; info_str_lo = 'list02["info"]'; break;
+    case "list03": list_str_lo = 'list03["list"]'; info_str_lo = 'list03["info"]'; break;
+    case "list04": list_str_lo = 'list04["list"]'; info_str_lo = 'list04["info"]'; break;
+    case "list05": list_str_lo = 'list05["list"]'; info_str_lo = 'list05["info"]'; break;
+    case "list06": list_str_lo = 'list06["list"]'; info_str_lo = 'list06["info"]'; break;
+    case "list07": list_str_lo = 'list07["list"]'; info_str_lo = 'list07["info"]'; break;
+    case "list08": list_str_lo = 'list08["list"]'; info_str_lo = 'list08["info"]'; break;
+    case "list09": list_str_lo = 'list09["list"]'; info_str_lo = 'list09["info"]'; break;
+    case "list10": list_str_lo = 'list10["list"]'; info_str_lo = 'list10["info"]'; break;
+  }
 }
 
 function root_flow(arg_no){
   set_init();  // 初期値設定
   list_no = arg_no;
-  wstr += '<form name="linklist" action="" onsubmit="">'
+  wStr += '<form name="linklist" action="" onsubmit="">'
 
   switch (arg_no){
-      case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
-      case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
-      case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
-      case "list04": list_str = 'list04["list"]'; info_str = 'list04["info"]'; break;
-      case "list05": list_str = 'list05["list"]'; info_str = 'list05["info"]'; break;
-      case "list06": list_str = 'list06["list"]'; info_str = 'list06["info"]'; break;
-      case "list07": list_str = 'list07["list"]'; info_str = 'list07["info"]'; break;
-      case "list08": list_str = 'list08["list"]'; info_str = 'list08["info"]'; break;
-      case "list09": list_str = 'list09["list"]'; info_str = 'list09["info"]'; break;
-      case "list10": list_str = 'list10["list"]'; info_str = 'list10["info"]'; break;
-    }
+    case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
+    case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
+    case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
+    case "list04": list_str = 'list04["list"]'; info_str = 'list04["info"]'; break;
+    case "list05": list_str = 'list05["list"]'; info_str = 'list05["info"]'; break;
+    case "list06": list_str = 'list06["list"]'; info_str = 'list06["info"]'; break;
+    case "list07": list_str = 'list07["list"]'; info_str = 'list07["info"]'; break;
+    case "list08": list_str = 'list08["list"]'; info_str = 'list08["info"]'; break;
+    case "list09": list_str = 'list09["list"]'; info_str = 'list09["info"]'; break;
+    case "list10": list_str = 'list10["list"]'; info_str = 'list10["info"]'; break;
+  }
 
   list_target = eval(list_str);
-  info_target = eval(info_str)
+  info_target = eval(info_str);
 
-  //info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '"}';
   info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '","NOTE":"' + info_target["NOTE"] + '"}';
 
   for (const elem in list_target) {
     // jsonデータを設定値にしてフォームを作る
-    //wstr += "<div class='div_f2'>";
-    wstr += set_form_flow(item_jsn,list_target[elem]);
-    //wstr += "</div>";
-    wstr += "<HR />";
+    wStr += set_form_flow(item_jsn,list_target[elem]);
+    wStr += "<HR />";
   }
 
   // 新規登録用のフォーム枠を作る数を取得する
-  const LPMAX = Number(document.getElementById("number_of_blank_cells").value);
+  //const LPMAX = Number(document.getElementById("number_of_blank_cells").value);
+  const LPMAX = 3;
   
   for(let step = 0; step < LPMAX; step++) {
     // 各値が空白のフォームを作る
-    wstr += set_form_flow(item_jsn, "NONE");
-    wstr += "<HR />";
+    wStr += set_form_flow(item_jsn, "NONE");
+    wStr += "<HR />";
   }
 
-  wstr += '</form>';
-  wstr += '<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat();" />';
+  wStr += '</form>';
+  wStr += '<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat();" />';
 
-  document.getElementById("form_area").innerHTML = wstr;
+  document.getElementById("form_area").innerHTML = wStr;
 }
 
 function outputText(){
@@ -441,6 +465,58 @@ function outputText(){
   link.download = js_file_name[list_no]; // aタグのdownload属性を作成
   link.click(); // 定義したaタグをクリック（実行）
 }
+
+
+function etc_flow(argFileName){
+  // function_enhancement.js を編集する
+  list_no = argFileName;
+  wStr = "";
+  infoStr = "";
+  set_init();  // 初期値設定
+
+  infoStr += `const key_hightlight = [];\n`;
+  infoStr += `const targetDateList = [];\n`;
+  infoStr += `const targetWeekList = [];\n`;
+  infoStr += `const key_aicon = [];\n`;
+
+  infoStr += `\n// ----- カテゴリキーに背景色を設定する ----- //\n`;
+  for (let key in key_hightlight) {
+    let vInfo = key_hightlight[key];
+    infoStr += `key_hightlight["${key}"] = "${vInfo}";\n`;
+  }
+
+  infoStr += `\n// ----- アイコンボタン：検索キーの簡易登録 ----- //\n`;
+  for (let key in key_aicon) {
+    let vInfo = key_aicon[key];
+    infoStr += `key_aicon["${key}"] = "${vInfo}";\n`;
+  }
+
+  infoStr += `\n// ----- イベント：年・月・日 指定 ----- //\n`;
+  for (let key in targetDateList) {
+    let vDate = targetDateList[key][0];
+    let vAicon = targetDateList[key][1];
+    let vInfo = targetDateList[key][2];
+    infoStr += `targetDateList.push(["${vDate}","${vAicon}","${vInfo}"]);\n`;
+  }
+
+  infoStr += `\n// ----- イベント：曜日 指定 ----- //\n`;
+  for (let key in targetWeekList) {
+    let vDate = targetWeekList[key][0];
+    let vAicon = targetWeekList[key][1];
+    let vInfo = targetWeekList[key][2];
+    infoStr += `targetWeekList.push(["${vDate}","${vAicon}","${vInfo}"]);\n`;
+  }
+
+  wStr += `<form name="linklist" action="" onsubmit="">`;
+  wStr += `<textarea id="function_enhancement_id" name="function_enhancement_name" cols="250" rows="50">${infoStr}</textarea>`;
+  wStr += `</form>`;
+  wStr += `<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat_etc();" />`;
+
+  document.getElementById("form_area").innerHTML = wStr;
+}
+
+
+
 
 // ----------------------------------- //
 // ROOT FLOW
