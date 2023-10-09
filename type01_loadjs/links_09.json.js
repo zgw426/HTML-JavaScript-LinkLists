@@ -1,13 +1,13 @@
 let list09 = {
-  "info": {"Title":"links_09リスト","ID":"09","NOTE":"らりるれろ"},
+  "info": {"Title":"話題","ID":"09","NOTE":"注目されているサイト"},
   "list": [
   {
-    "kana"     : "ゼロキュー",
-    "Name"     : "09",
-    "URL"      : "",
+    "kana"     : "はてなブックマーク",
+    "Name"     : "はてなブックマーク",
+    "URL"      : "https://b.hatena.ne.jp/",
     "category" : 
       [
-        { "key": "09", "kana": "ゼロキュー"}
+        { "key": "ランキング", "kana": "ランキング"}
       ],
     "note"     : ""
   },

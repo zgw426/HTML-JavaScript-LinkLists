@@ -1,5 +1,5 @@
 let list03 = {
-"info": {"Title":"ローカルファイル","ID":"03","NOTE":"さしすせそ"},
+"info": {"Title":"ローカル","ID":"03","NOTE":"ローカルにあるファイル"},
 "list": [
 {
 	"aicon": "file.png",
@@ -12,5 +12,5 @@ let list03 = {
 			{ "key": "ローカルファイル", "kana": "ローカルファイル"}
 		],
 	"note": "Windows Cドライブの配下の hosts ファイル"
-},
+}
 ]};
