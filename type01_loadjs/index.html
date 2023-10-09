@@ -21,8 +21,8 @@
 
 //---- ↓↓ 左側に表示するリストの設定 ↓↓ ----//
 
-//let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
-let load_arr = [list01,list02,list03,list05,list06,list08,list09,list10];
+let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
+//let load_arr = [list01,list02,list03,list05];
 
 //---- ↑↑ 左側に表示するリストの設定 ↑↑ ----//
 
@@ -35,7 +35,6 @@ let iptkey = new Array();  // 検索欄の情報
 let aicons = new Array();  // 画像ファイル名
 let area100Str = "";
 let reiwa = ""; // 令和の年数
-
 
 
 // 読み込むjsonを変数 list に追加
@@ -649,7 +648,7 @@ function checkEventMsg(loTargetDateList){
   const curDay = currentDate.getDate();
 
   area100Str += `${curYear}/${curMonth}/${curDay}`;
-  reiwa = curYear - 2018 + 1; // 令和の年数
+  reiwa = curYear - 2018; // 令和の年数
 
   currentDate.setHours(0, 0, 0, 0);
 

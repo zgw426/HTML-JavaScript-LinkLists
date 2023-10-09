@@ -10,11 +10,10 @@ key_hightlight["マイクロソフト"] = "#c0ffcb";
 let key_aicon = new Array();
 key_aicon.length = 0;
 
-key_aicon["y_movie.png"] = "動画 YouTube";
+key_aicon["y_movie.png"] = "動画";
 key_aicon["google.png"] = "google.png";
 key_aicon["yahoo.png"] = "yahoo.png";
 key_aicon["y_money.png"] = "楽天";
-key_aicon["y_cloud.png"] = "Gyao!";
 
 // 月・日のイベント情報
 
@@ -61,9 +60,26 @@ targetDateList.push(["YYYY-MM-17","","毎月17日のイベント２"]);
 targetDateList.push(["YYYY-MM-18","","毎月18日のイベント２"]);
 targetDateList.push(["YYYY-MM-19","","毎月19日のイベント２"]);
 targetDateList.push(["YYYY-MM-20","","毎月20日のイベント２"]);
-
 targetDateList.push(["2023-10-07","x_month_red.png","10月7日のイベント"]);
 targetDateList.push(["2023-10-07","","10月7日のイベント"]);
+targetDateList.push(["2023-01-31","","月末"]);
+targetDateList.push(["2023-02-30","","月末"]);
+targetDateList.push(["2023-03-31","","月末"]);
+targetDateList.push(["2023-04-30","","月末"]);
+targetDateList.push(["2023-05-31","","月末"]);
+targetDateList.push(["2023-06-30","","月末"]);
+targetDateList.push(["2023-07-31","","月末"]);
+targetDateList.push(["2023-08-31","","月末"]);
+targetDateList.push(["2023-09-30","","月末"]);
+targetDateList.push(["2023-10-31","","月末"]);
+targetDateList.push(["2023-11-30","","月末"]);
+targetDateList.push(["2023-12-31","","月末"]);
+
+
+
+
+
+
 
 
 
