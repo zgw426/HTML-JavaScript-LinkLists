@@ -160,12 +160,12 @@ const storage = localStorage;
 
 // 項目-群
 const item_jsn = [
-  {"item": "aicon", "line_flg": 0},
-  {"item": "kana", "line_flg": 0},
-  {"item": "Name", "line_flg": 0},
-  {"item": "URL", "line_flg": 0},
-  {"item": "category", "line_flg": 1},
-  {"item": "note", "line_flg": 2},
+  {"item": "aicon"   , "line_flg": 0, "mustFlg": "OPTION"},
+  {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
+  {"item": "Name"    , "line_flg": 0, "mustFlg": "MUST"},
+  {"item": "URL"     , "line_flg": 0, "mustFlg": "MUST"},
+  {"item": "category", "line_flg": 1, "mustFlg": "MUST"},
+  {"item": "note"    , "line_flg": 2, "mustFlg": "OPTION"},
 ];
 
 // json.js の info 情報
@@ -196,7 +196,7 @@ list_target = "";
 info_target = "";
 
 
-function set_form_cell(form_flg, line_flg, elemnet, item_val){
+function set_form_cell(form_flg, line_flg, elemnet, item_val, mustFlg){
   // 1項目の入力フォームを作る
   lo_str = "";
   //lo_str+= "<div>";
@@ -209,6 +209,11 @@ function set_form_cell(form_flg, line_flg, elemnet, item_val){
     lo_str+= '<textarea id="'+elemnet+'" name="'+elemnet+'" cols="100%" rows="5">'+ item_val +'</textarea>';
   }
   //lo_str+= '</div>';
+
+  if(mustFlg=="MUST"){
+    lo_str = "<font color='red'>" +lo_str+ "</font>";
+  }
+
   return(lo_str);
 }
 
@@ -221,6 +226,7 @@ function set_form_flow(item_jsn, list_elem){
     form_flg = 1;
     line_flg = Number(item_jsn[elem]["line_flg"]);
     item_name = item_jsn[elem]["item"];
+    must_flg  = item_jsn[elem]["mustFlg"];
 
     item_no = Number(elem) + 1;
     if(elem == 0){
@@ -244,7 +250,8 @@ function set_form_flow(item_jsn, list_elem){
       item_val = tmp_val;
     }
     //wStr_lo += "<div class='div_f2'>";
-    wStr_lo += set_form_cell(form_flg, line_flg, item_name, item_val);
+    //console.log( "DEBUG " + item_name +", "+ must_flg);
+    wStr_lo += set_form_cell(form_flg, line_flg, item_name, item_val, must_flg);
     wStr_lo += "<BR />";
     //wStr_lo += "</div>";
   }
