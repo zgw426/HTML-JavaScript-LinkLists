@@ -1,4 +1,4 @@
-## リンク管理ツール-リンクリスト
+## リンク管理アプリ-リンクリスト
 
 - リンクリストは、複数のリンクを管理するツールです。
 - リンクリストはhtmlファイルなのでインストール不要、ブラウザで開くと使用できます。
@@ -9,6 +9,6 @@
     - リンク情報を気が向いたときに開発します。
 
 
-# 操作デモ
+# リンクリストの紹介動画
 
-[![](https://img.youtube.com/vi/gzVICp4xvZs/0.jpg)](https://www.youtube.com/watch?v=gzVICp4xvZs)
+[![](https://img.youtube.com/vi/x7VU7s56g4U/0.jpg)](https://www.youtube.com/watch?v=x7VU7s56g4U)
