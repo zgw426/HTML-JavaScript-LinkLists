@@ -11,7 +11,7 @@ let list02 = {
 			{ "key": "買い物", "kana": "かいもの"},
 			{ "key": "動画", "kana": "とうが"}
 		],
-	"note": "Amazon.com, Inc.は、ワシントン州シアトルに本拠地を置くアメリカの多国籍テクノロジー企業らしい by Wikipedia\n\nログインID：hoge\nログインパスワード：hogefuga?123"
+	"note": "Amazon.com, Inc.は、ワシントン州シアトルに本拠地を置くアメリカの多国籍テクノロジー企業らしい by Wikipedia\nポチるという言葉を生み出した偉大なECサイト"
 },{
 	"kana": "らくてんいちば",
 	"Name": "楽天市場",
