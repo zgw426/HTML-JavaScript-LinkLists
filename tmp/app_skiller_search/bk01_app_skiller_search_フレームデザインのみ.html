@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>リンクリスト</title>
+    <!--
+    <script src="links_10.json.js"></script>
+    -->
+</head>
+
+<style>
+html { height: 100%; }
+body { height: 100%; margin: 0; }
+main {
+    height: calc(50%);
+    -js-display: flex;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding: 0px;
+}
+div.areaA {
+  padding : 0px;
+  width: calc(100%);
+  height: 30px;
+  margin: 0px;
+  overflow: hidden;
+  background-color: #D3D3D3;
+}
+main div.areaB {
+    width: calc(20% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #D3D3D3;
+}
+main div.areaC {
+    width: calc(20% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #FFFFFF;
+}
+main div.areaD {
+    width: calc(60% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #D3D3D3;
+}
+
+div.area100 {
+    width:  calc(100% - 10px);
+    height: calc(50% - 40px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #e78b8b;
+}
+
+</style>
+
+
+<body>
+<div class="areaA">※AreaA※</div>
+<main>
+    <div class="areaB" id="areaB">※AreaB※</div>
+    <div class="areaC" id="areaC">※AreaC※</div>
+    <div class="areaD" id="areaD">※AreaD※</div>
+</main>
+<div class="area100">※Area100※</div>
+</body>

@@ -1,0 +1,8 @@
+mngno,shurui-dai,shurui-chu
+m001,AWS,VPC
+m002,AWS,NATGW
+m003,AWS,CDK
+m004,AWS,Lambda
+m002,AWS,TGW
+m002,AWS,Route53
+m002,AWS,VPC

@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>app_skiller_search</title>
+</head>
+
+<style>
+html { height: 100%; }
+body { height: 100%; margin: 0; }
+main {
+    height: calc(50%);
+    -js-display: flex;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding: 0px;
+}
+div.areaA {
+  padding : 0px;
+  width: calc(100%);
+  height: 30px;
+  margin: 0px;
+  overflow: hidden;
+  background-color: #D3D3D3;
+}
+main div.areaB {
+    width: calc(20% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #D3D3D3;
+}
+main div.areaC {
+    width: calc(20% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #FFFFFF;
+}
+main div.areaD {
+    width: calc(60% - 10px);
+    height: calc(100% - 10px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #D3D3D3;
+}
+
+div.area100 {
+    width:  calc(100% - 10px);
+    height: calc(50% - 40px);
+    margin: 5px;
+    overflow-x: hidden;
+    background-color: #cdefb6;
+}
+
+</style>
+<body>
+<div class="areaA">
+    <input type="file" id="csvFileInput" accept=".csv" multiple />
+    <button id="parseButton">CSV読み込む</button>
+    <button id="analyzeButton" onClick="analyzeFlow();">解析</button>
+</div>
+<main>
+    <div class="areaB" id="areaB">※AreaB※</div>
+    <div class="areaC" id="areaC">※AreaC※</div>
+    <div class="areaD" id="areaD">※AreaD※</div>
+</main>
+<div class="area100">
+    <pre id="output"></pre>
+    <!--
+    <input type="checkbox" id="checkbox1"><label for="checkbox1">hoge</label>
+    <input type="checkbox" id="checkbox2"><label for="checkbox2">fuga</label>
+    -->
+</div>
+
+<script>
+//////////////////////////
+// 複数ファイルを読み込む
+document.getElementById('parseButton').addEventListener('click', () => {
+    const fileInput = document.getElementById('csvFileInput');
+    const output = document.getElementById('output');
+
+    if (!fileInput.files.length) {
+        output.textContent = 'ファイルを選択してください。';
+        return;
+    }
+
+    const files = Array.from(fileInput.files);
+    const results = {};
+    let filesProcessed = 0;
+
+    files.forEach(file => {
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const text = event.target.result;
+            const rows = text.split('\n').map(row => row.split(','));
+            results[file.name] = rows;
+
+            // すべてのファイルが処理されたら結果を表示
+            filesProcessed++;
+            if (filesProcessed === files.length) {
+                output.textContent = JSON.stringify(results, null, 2);
+            }
+        };
+
+        reader.onerror = function() {
+            output.textContent = `ファイル ${file.name} の読み込み中にエラーが発生しました。`;
+        };
+
+        reader.readAsText(file);
+    });
+});
+// 複数ファイルを読み込む
+//////////////////////////
+
+const infos = {
+    "01.csv": [
+        ["Department", "Name", "MngId"],
+        ["DepA", "Alice", "m001"],
+        ["DepA", "June", "m002"],
+        ["DepB", "Bob", "m002"],
+        ["DepC", "Dine", "m002"],
+        ["DepB", "Gone", "m001"],
+        ["DepB", "Gone", "m002"],
+        ["DepB", "Gone", "m003"],
+        ["DepB", "Ema", "m001"],
+        ["DepB", "Ema", "m003"],
+        ["DepC", "Ellen", "m002"],
+        ["DepB", "Charlie", "m003"]
+    ],
+    "02.csv": [
+        ["MngId", "CategoryLevel01", "CategoryLevel02"],
+        ["m001", "AWS", "EC2"],
+        ["m002", "AWS", "VPC"],
+        ["m003", "AWS", "CloudFrnt"],
+        ["m001", "AWS", "TGW"],
+        ["m002", "AWS", "Lambda"],
+        ["m003", "AWS", "CDK"],
+        ["m001", "AWS", "S3"],
+        ["m002", "AWS", "RDS"],
+        ["m003", "AWS", "DynamoDB"],
+        ["m004", "Azure", "DevOps"]
+    ],
+    "03.csv": [
+        ["MngId", "ProjectName","Start","End"],
+        ["m002", "Fuga002","2023-09","2023-10"],
+        ["m001", "Hoge001","2024-11","2024-12"],
+        ["m003", "Piyo003","2020-04","2020-06"],
+        ["m004", "PjAzure004","2019-02","2019-03"]
+    ]
+};
+
+/////////////////////////////////////////////////////////
+
+const listCsv = ["01.csv","02.csv","03.csv"]
+const listArea = {};  // 表示する場所
+const sortColumns = {};  // ソートするカラム
+const searchKeys = {};  // 検索キー
+const searchModes = {};  // 検索モード(AND|OR)
+
+// ループ処理で listArea にキーと値を設定
+listCsv.forEach((table, index) => {
+    //listArea[file] = (index + 1).toString(); // インデックスを1始まりの文字列に変換して格納
+    listArea[table] = ""; // インデックスを1始まりの文字列に変換して格納
+
+    sortColumns[table] = [];
+    searchKeys[table] = [];
+    searchModes[table] = [];
+});
+
+
+
+
+
+setSearchKeys();
+
+
+console.log(listArea);
+console.log(sortColumns);
+console.log(searchKeys);
+console.log(searchModes);
+
+
+//---------//
+
+
+
+
+
+let targetTable = "01.csv";
+let targetArea = listArea[targetTable];
+let targetSortColumns = sortColumns[targetTable];
+let targetSearchKeys = searchKeys[targetTable];
+let targetSearchMode = searchModes[targetTable];
+
+listCsv.forEach((table, index) => {
+    let targetTable = listCsv[index];
+    let targetArea = listArea[targetTable];
+    let targetSortColumns = sortColumns[targetTable];
+    let targetSearchKeys = searchKeys[targetTable];
+    let targetSearchMode = searchModes[targetTable];
+
+    showInfo(targetTable, targetArea, targetSortColumns, targetSearchKeys, targetSearchMode);
+});
+
+
+//------------------------------------------------------
+// 関数群
+
+function setSearchKeys(){
+    // 検索条件を変数に格納する
+    listArea["01.csv"] = "areaB";
+    listArea["02.csv"] = "areaC";
+    listArea["03.csv"] = "areaD";
+
+    //listCsvでループ
+    listCsv.forEach((table, index) => {
+        // 検索キーを設定
+        searchKeys[table] = [];
+        //searchKeys[table].push("a");
+        //searchKeys[table].push("c");
+        //searchKeys[table].push("r");
+
+        // 検索モードを設定
+        searchModes[table] = [];
+        searchModes[table] = "AND";
+
+        // ソートカラムを設定
+        sortColumns[table] = [];
+        sortColumns[table].push(0);
+    });
+}
+
+
+
+
+
+function showInfo(targetTable, targetArea, columns, searchKeys, searchMode){
+    console.log(`columns = ${columns}`);
+    const output = document.getElementById(targetArea);
+    let outStr = "";
+
+    if (infos[targetTable]) {
+        console.log(`Displaying rows from ${targetTable}:`);
+
+        // フィルタリング
+        let filteredRows = filterRows(infos[targetTable], searchKeys, searchMode);
+
+        // 並べ替えを実行
+        let firstClmn;
+        let secondClmn;
+        switch(targetTable){
+            case listCsv[0]:
+                firstClmn = 0;
+                secondClmn = 1;
+                break;
+            case listCsv[1]:
+                firstClmn = 1;
+                secondClmn = 2;
+                break;
+            case listCsv[2]:
+                firstClmn = 0;
+                secondClmn = 1;
+                break;
+            default:
+                firstClmn = 0;
+                secondClmn = 1;
+        }
+
+        const sortedData = sortRowsByColumns(filteredRows, firstClmn, secondClmn);
+        sortedData.forEach(row => console.log(row));
+        outStr += setKeyString(targetTable, sortedData);
+        output.innerHTML = outStr;
+    } else {
+        console.error(`File ${targetTable} not found in results.`);
+    }
+}
+
+
+function setKeyString(targetTable, sortedRows){
+    // 表示する形式(HTMLタグ)を設定する
+    console.log(`${targetTable}`);
+    let retStr = "";
+    const table01 = listCsv[0];
+    const table02 = listCsv[1];
+    const table03 = listCsv[2];
+
+    let befRow = ["FIRST","FIRST"];
+    sortedRows.forEach((row, index) => {
+        if(index != 0){
+            switch(targetTable){
+                case table01:
+                    if(row[0] != befRow[0]){
+                        retStr += `<p>${row[0]}</p>`;
+                    }
+                    if(row[1] != befRow[1]){
+                        retStr += `<input type="checkbox" id="table01-${index}" value="${row.join(', ')}"><label for="table01-${index}">${row[1]}</label>`;
+                    }
+                    befRow[0] = row[0];
+                    befRow[1] = row[1];
+                    break;
+                case table02:
+                    if(row[1] != befRow[0]){
+                        retStr += `<p>${row[1]}</p>`;
+                    }
+                    if(row[2] != befRow[1]){
+                        retStr += `<input type="checkbox" id="table02-${index}" value="${row.join(', ')}"><label for="table02-${index}">${row[2]}</label>`;
+                    }
+                    befRow[0] = row[1];
+                    befRow[1] = row[2];
+                    break;
+                case table03:
+                    retStr += `<input type="checkbox" id="table03-${index}" value="${row.join(', ')}"><label for="table03-${index}">${row.join(', ')}</label><BR />`;
+                    break;
+                default:
+                    console.log("NotHIT");
+            }
+        }
+    });
+    return retStr;
+}
+
+
+// 全角を半角に変換するユーティリティ関数
+function toHalfWidth(str) {
+    return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, char => 
+        String.fromCharCode(char.charCodeAt(0) - 0xFEE0)
+    );
+}
+
+// フィルター関数（大文字小文字無視 & 全角→半角対応）
+function filterRows(rows, searchKeys, mode = "AND") {
+    if (!searchKeys || searchKeys.length === 0) return rows; // 検索条件がなければ全ての行を返す
+
+    const header = rows[0]; // ヘッダー行
+    const dataRows = rows.slice(1); // データ行のみ抽出
+
+    // 検索キーをすべて小文字化し、全角を半角に変換
+    const normalizedSearchKeys = searchKeys.map(key => toHalfWidth(key).toLowerCase());
+
+    const filteredRows = dataRows.filter(row => {
+        const matches = normalizedSearchKeys.map(key =>
+            row.some(cell => {
+                // セルの値を小文字化し、全角を半角に変換して比較
+                const normalizedCell = toHalfWidth(cell).toLowerCase();
+                return normalizedCell.includes(key);
+            })
+        );
+        return mode === "AND" ? matches.every(Boolean) : matches.some(Boolean);
+    });
+
+    return [header, ...filteredRows]; // ヘッダー行を戻して返す
+}
+
+
+
+// Function to sort rows by firstClmn and secondClmn
+function sortRowsByColumns(data, firstClmn, secondClmn) {
+    const [header, ...rows] = data;
+    const sortedRows = rows.sort((a, b) => {
+        if (a[firstClmn] < b[firstClmn]) return -1;
+        if (a[firstClmn] > b[firstClmn]) return 1;
+        if (a[secondClmn] < b[secondClmn]) return -1;
+        if (a[secondClmn] > b[secondClmn]) return 1;
+        return 0;
+    });
+    return [header, ...sortedRows];
+}
+
+
+function getCheckboxStates(tableIdPrefix) {
+    const keyids = [];
+    const checkboxes = document.querySelectorAll(`input[type='checkbox'][id^='${tableIdPrefix}-']`);
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) {
+            //const numberPart = checkbox.id.split('-')[1];
+            const numberPart = [checkbox.value];
+            if (numberPart) {
+                keyids.push(numberPart);
+            }
+        }
+    });
+    return keyids;
+}
+
+
+// ↓ 動かない
+document.addEventListener("DOMContentLoaded", () => {
+    const button = document.createElement("button");
+    button.textContent = "Check States";
+    document.body.appendChild(button);
+
+    button.addEventListener("click", () => {
+        const table01States = getCheckboxStates("table01", 10); // Adjust totalCount as needed
+        const table02States = getCheckboxStates("table02", 10);
+        const table03States = getCheckboxStates("table03", 10);
+
+        console.log("Table01 States:", table01States);
+        console.log("Table02 States:", table02States);
+        console.log("Table03 States:", table03States);
+    });
+});
+
+
+function analyzeFlow(){
+    // 各テーブルのチェックがついているIDを取得
+    const table01Keys = getCheckboxStates("table01", 10);
+    const table02Keys = getCheckboxStates("table02", 10);
+    const table03Keys = getCheckboxStates("table03", 10);
+
+    console.log("Table01 States:", table01Keys);
+    console.log("Table02 States:", table02Keys);
+    console.log("Table03 States:", table03Keys);
+
+    // table01Idsでループ
+    table01Keys.forEach((row, id) => {
+        console.log(`Debug 01 ${row}`);
+    });
+}
+
+
+
+
+
+
+
+</script>
+
+</body>
