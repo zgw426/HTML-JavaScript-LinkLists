@@ -360,22 +360,20 @@ function make_data_to_jsformat_etc(){
 
 function set_category_out(categoryInput){
   let categoryLinesOutput = "";
-  tmp_key = "";
-  tmp_kana= "";
   tmp_head_1 = "";
   tmp_head_2 = "";
   const categoryLines = categoryInput.split("\n")
 
   for(const line in categoryLines){
     const categoryParts = categoryLines[line].split('"');
-    tmp_key = categoryParts[1];
-    tmp_kana= categoryParts[3];
-    if (typeof tmp_kana !== "undefined"){
-      tmp_head_1 = tmp_kana[0];  // 1文字目を取得
+    const categoryKey = categoryParts[1];
+    let categoryKana = categoryParts[3];
+    if (typeof categoryKana !== "undefined"){
+      tmp_head_1 = categoryKana[0];  // 1文字目を取得
       tmp_head_2 = tmp_head_1.normalize('NFD')[0];  // 濁音→静音に変換
-      tmp_kana = tmp_kana.replace(tmp_head_1, tmp_head_2);
+      categoryKana = categoryKana.replace(tmp_head_1, tmp_head_2);
     }
-    categoryLinesOutput += '\t\t\t{ "key": "' + tmp_key + '", "kana": "' + tmp_kana +'"},\n';
+    categoryLinesOutput += '\t\t\t{ "key": "' + categoryKey + '", "kana": "' + categoryKana +'"},\n';
   }
   categoryLinesOutput = categoryLinesOutput.trim();  // 最後の改行コードを削除
   categoryLinesOutput = categoryLinesOutput.slice(0, -1);  // 最後の文字 ,(コロン)を削除
