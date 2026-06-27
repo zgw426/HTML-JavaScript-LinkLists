@@ -125,6 +125,7 @@
 <input type="button" value="links_08" onclick='root_flow("list08");' />
 <input type="button" value="links_09" onclick='root_flow("list09");' />
 <input type="button" value="links_10" onclick='root_flow("list10");' />
+<div id="link_storage_area">※Web StorageのJSON情報を表示※</div>
 <!--
 <HR>
 <label for="number_of_blank_cells">新規登録枠数</label>
@@ -143,6 +144,8 @@
 // ストレージの定義
 const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
+const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
+const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 
 function getLinkStorageKey(listKey){
   return LINK_STORAGE_PREFIX + listKey;
@@ -170,6 +173,115 @@ function getLinkDataFromStorage(listKey){
 
 function setLinkDataToStorage(listKey, linkData){
   storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
+}
+
+function deleteLinkDataFromStorage(listKey){
+  storage.removeItem(getLinkStorageKey(listKey));
+}
+
+function getAllLinkInfoIds(){
+  const linkInfoIds = [];
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const linkData = getLinkDataFromStorage(linkListKeys[keyIndex]);
+    if(linkData != null){
+      linkInfoIds.push(linkData["info"]["ID"]);
+    }
+  }
+  return linkInfoIds;
+}
+
+function getVisibleLinkIds(){
+  const allLinkInfoIds = getAllLinkInfoIds();
+  const storedValue = storage.getItem(LINK_VISIBILITY_STORAGE_KEY);
+  if(storedValue == null){
+    return allLinkInfoIds;
+  }
+
+  try {
+    const storedIds = JSON.parse(storedValue);
+    return Array.isArray(storedIds)
+      ? storedIds.filter(infoId => allLinkInfoIds.includes(infoId))
+      : allLinkInfoIds;
+  } catch (error) {
+    console.warn("Invalid visible link ids in Web Storage:", error);
+    return allLinkInfoIds;
+  }
+}
+
+function saveVisibleLinkIds(linkInfoIds){
+  storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds));
+}
+
+function refreshParentAreas(){
+  if(parent && typeof parent.refreshAllAreas === "function"){
+    parent.refreshAllAreas();
+  }
+}
+
+function renderLinkStorageControls(){
+  let controlsHtml = "";
+  const visibleLinkIds = getVisibleLinkIds();
+
+  controlsHtml += "<HR>";
+  controlsHtml += "<form name='linkStorageControls'>";
+
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const listKey = linkListKeys[keyIndex];
+    const linkData = getLinkDataFromStorage(listKey);
+    if(linkData == null){
+      continue;
+    }
+
+    const linkInfo = linkData["info"];
+    const checkedAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
+    controlsHtml += "<div class='div_f1'>";
+    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm()' " + checkedAttr + ">";
+    controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
+    controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
+    controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
+    controlsHtml += "</div>";
+  }
+
+  controlsHtml += "</form>";
+  document.getElementById("link_storage_area").innerHTML = controlsHtml;
+}
+
+function updateVisibleLinksFromForm(){
+  const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
+  const visibleCheckboxes = toElementArray(document.linkStorageControls.visibleLinkInfoId);
+  const visibleLinkInfoIds = [];
+
+  for(let index = 0; index < visibleCheckboxes.length; index++){
+    if(visibleCheckboxes[index].checked){
+      visibleLinkInfoIds.push(visibleCheckboxes[index].value);
+    }
+  }
+
+  saveVisibleLinkIds(visibleLinkInfoIds);
+  refreshParentAreas();
+}
+
+function deleteStoredLinkData(listKey){
+  const linkData = getLinkDataFromStorage(listKey);
+  if(linkData == null){
+    return;
+  }
+
+  const linkInfo = linkData["info"];
+  if(!confirm(linkInfo["ID"] + "-" + linkInfo["Title"] + " をWeb Storageから削除しますか？")){
+    return;
+  }
+
+  deleteLinkDataFromStorage(listKey);
+  saveVisibleLinkIds(getVisibleLinkIds().filter(infoId => infoId != linkInfo["ID"]));
+
+  if(currentListKey == listKey){
+    currentListKey = "";
+    set_init();
+  }
+
+  renderLinkStorageControls();
+  refreshParentAreas();
 }
 
 // 項目-群
@@ -317,10 +429,9 @@ function updateLinkStorageFromForm(){
   const generatedJson = JSON.stringify(linkData, null, 2);
   document.getElementById("json_area").value = generatedJson;
   setLinkDataToStorage(currentListKey, linkData);
+  renderLinkStorageControls();
   warningMessage += "Web Storageを更新しました。<BR />";
-  if(parent && typeof parent.refreshAllAreas === "function"){
-    parent.refreshAllAreas();
-  }
+  refreshParentAreas();
   document.getElementById("message_area").innerHTML = '<font color="red">' + warningMessage + "</font>";
 }
 
@@ -404,6 +515,7 @@ function root_flow(selectedListKey){
 // ROOT FLOW
 
 set_init();  // 初期値設定
+renderLinkStorageControls();
 
 </script>
 </body>

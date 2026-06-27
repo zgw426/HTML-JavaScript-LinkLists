@@ -356,12 +356,14 @@ function showAreaB()
     let linksno = 0;
     wStr += "<form name='areaB'>";
     for(lp0=0; lp0< load_arr.length; lp0++){
+        if (!isLinkInfoVisible(load_arr[lp0]["info"]["ID"])) {
+          continue;
+        }
         linksno = lp0 + 1;
         const linkInfo = load_arr[lp0]["info"];
-        const checkedAttr = isLinkInfoVisible(linkInfo["ID"]) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
+        wStr += linkInfo["ID"] + "-" + linkInfo["Title"];
         wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -748,7 +750,6 @@ function set_C1key_B1key(){
       areaB1.push(areaB[i].value);
     }
   }
-  saveVisibleLinkIds(areaB1);
   b1key = b1key.concat(areaB1);
 
   // 検索欄の文字列をc1keyに格納する
