@@ -275,21 +275,21 @@ function selectEventFilterAicon(argKey){
 
 
 function editLinkInfo(){
-  aicon_wstr = "";
-  aicon_wstr += "<center>";
+  let iconListHtml = "";
+  iconListHtml += "<center>";
   // アイコン情報を表示
   for (let aicon_name in aicons) {
-    aicon_wstr += "<div class='div_f2'>";
-    aicon_wstr += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' height='40'>";
-    aicon_wstr += "<BR/>";
-    aicon_wstr += aicon_name;
-    aicon_wstr += "</div>";
+    iconListHtml += "<div class='div_f2'>";
+    iconListHtml += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' height='40'>";
+    iconListHtml += "<BR/>";
+    iconListHtml += aicon_name;
+    iconListHtml += "</div>";
   }
-  aicon_wstr += "</center>";
-  document.getElementById("areaC").innerHTML = aicon_wstr;
+  iconListHtml += "</center>";
+  document.getElementById("areaC").innerHTML = iconListHtml;
 
-  eStr = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
-  document.getElementById("areaD").innerHTML = eStr;
+  let editorHtml = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
+  document.getElementById("areaD").innerHTML = editorHtml;
 }
 
 function showAreaC(showFlg){
