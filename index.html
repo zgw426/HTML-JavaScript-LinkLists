@@ -365,26 +365,26 @@ function showAreaC(showFlg){
   wStr += "<form name='areaC'>";
 
   for(let o in arr){
-    tgtName     = arr[o]["key"];
+    let targetName = arr[o]["key"];
 
     // チェックボックスを "選択" にするか判定
-    sFlg = setSelectFlg2(tgtName);
-    checkedStr = "";
-    if(sFlg == 1 && showFlg == 1)
+    let isSelected = setSelectFlg2(targetName);
+    let checkedAttr = "";
+    if(isSelected == 1 && showFlg == 1)
     {
-      checkedStr = "checked='checked'"; // チェックを付ける
+      checkedAttr = "checked='checked'"; // チェックを付ける
     }
 
     if ( hiraToKana(headStr.toUpperCase()) != hiraToKana(arr[o]["value"][0].toUpperCase()) ){
       headStr = arr[o]["value"][0];
-      tmpStr = hiraToKana(headStr.toUpperCase());
-      tmpStr = tmpStr.normalize('NFD')[0];  // 濁音→静音
+      let headingText = hiraToKana(headStr.toUpperCase());
+      headingText = headingText.normalize('NFD')[0];  // 濁音→静音
 
       wStr += "<div class='div_f0'>";
       
 
 
-      wStr += "<B>" + tmpStr + "</B>";
+      wStr += "<B>" + headingText + "</B>";
       wStr += "</div>";
     }
     wStr += "<label>";
@@ -396,7 +396,7 @@ function showAreaC(showFlg){
       wStr += "<div class='div_f2'>";
     }
 
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedStr +" >" ;
+    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedAttr +" >" ;
 
     lo_aicon_name = arr[o]["key"].toLowerCase(); // 小文字変換
 
