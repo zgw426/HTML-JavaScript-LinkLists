@@ -272,9 +272,9 @@ function make_data_to_jsformat(){
   // フォームの情報を取得
   const form_elements = document.forms.linklist;
 
-  for(index = 0; index < form_elements.length; index++){
-    name_out = form_elements.elements.item(index).name;
-    value_out= form_elements.elements.item(index).value;
+  for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
+    name_out = form_elements.elements.item(formIndex).name;
+    value_out= form_elements.elements.item(formIndex).value;
 
     switch (name_out){
       case "aicon":
@@ -344,9 +344,9 @@ function make_data_to_jsformat_etc(){
   // フォームの情報を取得
   const form_elements = document.forms.linklist;
 
-  for(index = 0; index < form_elements.length; index++){
-    name_out = form_elements.elements.item(index).name;
-    value_out= form_elements.elements.item(index).value;
+  for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
+    name_out = form_elements.elements.item(formIndex).name;
+    value_out= form_elements.elements.item(formIndex).value;
   }
 
   document.getElementById("json_area").innerHTML = value_out;
