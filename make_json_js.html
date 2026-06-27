@@ -225,17 +225,17 @@ function set_form_flow(item_jsn, list_elem){
   for (const elem in item_jsn) {
     let formFlg = 1;
     let lineFlg = Number(item_jsn[elem]["line_flg"]);
-    item_name = item_jsn[elem]["item"];
+    let itemName = item_jsn[elem]["item"];
     let mustFlag  = item_jsn[elem]["mustFlg"];
 
-    item_no = Number(elem) + 1;
+    let itemNo = Number(elem) + 1;
     if(elem == 0){
       formFlg = 0;
-    }else if(item_no == item_jsn.length){
+    }else if(itemNo == item_jsn.length){
       formFlg = -1;
     }
 
-    itemValue = list_elem[item_name];
+    itemValue = list_elem[itemName];
 
     if (typeof itemValue === "undefined"){
       itemValue = "";
@@ -250,8 +250,8 @@ function set_form_flow(item_jsn, list_elem){
       itemValue = categoryText;
     }
     //formHtml += "<div class='div_f2'>";
-    //console.log( "DEBUG " + item_name +", "+ mustFlag);
-    formHtml += set_form_cell(formFlg, lineFlg, item_name, itemValue, mustFlag);
+    //console.log( "DEBUG " + itemName +", "+ mustFlag);
+    formHtml += set_form_cell(formFlg, lineFlg, itemName, itemValue, mustFlag);
     formHtml += "<BR />";
     //formHtml += "</div>";
   }
