@@ -13,17 +13,17 @@
 |index.html|アプリ本体|
 |area_c_icon_mapinfo.js|カテゴリキーアイコンのマップ情報|
 |area_c_key_highlight.js|強調表示するカテゴリキーの設定|
-|links_01.json.js|リンク情報を含むjsファイル|
-|links_02.json.js|リンク情報を含むjsファイル|
-|links_03.json.js|リンク情報を含むjsファイル|
-|links_04.json.js|リンク情報を含むjsファイル|
-|links_05.json.js|リンク情報を含むjsファイル|
-|links_06.json.js|リンク情報を含むjsファイル|
-|links_07.json.js|リンク情報を含むjsファイル|
-|links_08.json.js|リンク情報を含むjsファイル|
-|links_09.json.js|リンク情報を含むjsファイル|
-|links_10.json.js|リンク情報を含むjsファイル|
-|make_json_js.html|json.jsファイルの更新補助ツール|
+|links_01.json|リンク情報を含むjsファイル|
+|links_02.json|リンク情報を含むjsファイル|
+|links_03.json|リンク情報を含むjsファイル|
+|links_04.json|リンク情報を含むjsファイル|
+|links_05.json|リンク情報を含むjsファイル|
+|links_06.json|リンク情報を含むjsファイル|
+|links_07.json|リンク情報を含むjsファイル|
+|links_08.json|リンク情報を含むjsファイル|
+|links_09.json|リンク情報を含むjsファイル|
+|links_10.json|リンク情報を含むjsファイル|
+|make_json_js.html|jsonファイルの更新補助ツール|
 
 ## アプリ起動方法
 
@@ -48,13 +48,13 @@
 
 ※ 確認日 2022/12/04
 
-## リンクファイル(links_xx.json.js)の登録情報
+## リンクファイル(links_xx.json)の登録情報
 
-リンク情報はリンクファイル(links_xx.json.js)に格納されています。
-リンクファイルは`links_01.json.js`～`links_10.json.js`の10ある
+リンク情報はリンクファイル(links_xx.json)に格納されています。
+リンクファイルは`links_01.json`～`links_10.json`の10ある
 
 リンク情報の追加/編集方法を紹介します。
-`links_xx.json.js`にはJSON形式で情報が登録されています。JSON形式を崩さないよう情報を編集、追加することでリンク情報を編集できます。
+`links_xx.json`にはJSON形式で情報が登録されています。JSON形式を崩さないよう情報を編集、追加することでリンク情報を編集できます。
 JSONファイルを直接編集したくない場合は、index.htmlをブラウザで開き `リンク情報の更新` ボタンからJSONファイルを編集することもできます。（ `リンク情報の更新` ボタンではファイルを上書き保存するため、誤って他のファイルを上書きしないよう注意くだささい）
 
 以下は1つのリンクに必要な情報です。
@@ -99,30 +99,14 @@ JSONファイルを直接編集したくない場合は、index.htmlをブラウ
   - youtube.png
 
 
-## リンクファイル(links_xx.json.js)追加方法
+## リンクファイル(links_xx.json)の取り込みと出力
 
-リンクファイル(links_xx.json.js)は最大10読み込みできます。読み込み数を変更するには`index.html`ファイルをテキストエディタで開き、変数`load_arr`の値を更新します。
+リンク情報は links_01.json から links_10.json の JSON ファイルとして管理します。
+index.html は JSON ファイルを直接読み込まず、ブラウザの Web Storage に保存されたリンク情報を表示します。
 
-```javascript:index.htmlより抜粋
-let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
-```
+1. index.html をブラウザで開きます。
+2. JSON取込 ボタンから links_XX.json ファイルを選択します。複数ファイルをまとめて選択できます。
+3. 取り込んだリンク情報は Web Storage に保存され、次回以降は Web Storage の情報から表示されます。
+4. Web Storage のリンク情報をファイル化する場合は JSON出力 ボタンを押します。links_XX.json としてダウンロードされます。
 
-たとえば、`links_03.json.js`, `links_05.json.js` のみ読み込むようにしたい場合
-
-```javascript
-let load_arr = [list03,list05];
-```
-
-load_arr に登録する値は、`xxxx.json.js`ファイルの1行目に記載されている変数名です。
-`links_01.json.js`では1行目が以下のようになっているため `list01` となります
-
-```javascript:links_01.json.js
-let list01 = {
-"info": {"Title":"開発","ID":"01"},
-"list": [
-{
-	"icon": "google.png",
-    :
-    :
-```
-
+JSON ファイルは info と list を持つオブジェクトです。info.ID の値により list01 から list10 の保存先が決まります。

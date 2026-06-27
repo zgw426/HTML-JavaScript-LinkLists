@@ -7,22 +7,15 @@
   <title>リンクリスト</title>
   <script src="area_c_icon_mapinfo.js"></script>
   <script src="function_enhancement.js"></script>
-  <script src="links_01.json.js"></script>
-  <script src="links_02.json.js"></script>
-  <script src="links_03.json.js"></script>
-  <script src="links_04.json.js"></script>
-  <script src="links_05.json.js"></script>
-  <script src="links_06.json.js"></script>
-  <script src="links_07.json.js"></script>
-  <script src="links_08.json.js"></script>
-  <script src="links_09.json.js"></script>
-  <script src="links_10.json.js"></script>
 <script>
 
 //---- ↓↓ 左側に表示するリストの設定 ↓↓ ----//
 
-let load_arr = [list01,list02,list03,list04,list05,list06,list07,list08,list09,list10];
-//let load_arr = [list01,list02,list03,list05];
+const storage = localStorage;
+const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
+const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
+let load_arr = [];
+//let linkListKeys = ["list01","list02","list03","list05"];
 
 //---- ↑↑ 左側に表示するリストの設定 ↑↑ ----//
 
@@ -38,6 +31,113 @@ let reiwa = ""; // 令和の年数
 
 
 // 読み込むjsonを変数 list に追加
+function getLinkStorageKey(listKey){
+  return LINK_STORAGE_PREFIX + listKey;
+}
+
+function makeListKeyFromInfoId(infoId){
+  return "list" + String(infoId).padStart(2, "0");
+}
+
+function makeJsonFileName(listData){
+  return "links_" + String(listData["info"]["ID"]).padStart(2, "0") + ".json";
+}
+
+function isValidLinkData(linkData){
+  return linkData
+    && typeof linkData === "object"
+    && linkData["info"]
+    && typeof linkData["info"]["ID"] !== "undefined"
+    && Array.isArray(linkData["list"]);
+}
+
+function getLinkDataFromStorage(listKey){
+  const storedValue = storage.getItem(getLinkStorageKey(listKey));
+  if(storedValue == null) return null;
+  try {
+    const linkData = JSON.parse(storedValue);
+    return isValidLinkData(linkData) ? linkData : null;
+  } catch (error) {
+    console.warn("Invalid link data in Web Storage:", listKey, error);
+    return null;
+  }
+}
+
+function setLinkDataToStorage(listKey, linkData){
+  storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
+}
+
+function refreshLoadArrFromStorage(){
+  load_arr.length = 0;
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const linkData = getLinkDataFromStorage(linkListKeys[keyIndex]);
+    if(linkData != null){
+      load_arr.push(linkData);
+    }
+  }
+}
+
+function refreshAllAreas(){
+  set_Initial();
+  refreshLoadArrFromStorage();
+  set_List();
+  showAreaB();
+  showAreaC(0);
+  showAreaD();
+}
+
+function importLinkJsonFiles(files){
+  const fileList = Array.from(files);
+  const readers = fileList.map(file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const linkData = JSON.parse(reader.result);
+        if(!isValidLinkData(linkData)){
+          throw new Error("invalid link json");
+        }
+        const listKey = makeListKeyFromInfoId(linkData["info"]["ID"]);
+        setLinkDataToStorage(listKey, linkData);
+        resolve(file.name);
+      } catch (error) {
+        reject(new Error(file.name + ": " + error.message));
+      }
+    };
+    reader.onerror = () => reject(new Error(file.name + ": file read error"));
+    reader.readAsText(file);
+  }));
+
+  Promise.all(readers)
+    .then(importedFileNames => {
+      refreshAllAreas();
+      alert(importedFileNames.length + " file(s) imported.");
+    })
+    .catch(error => {
+      alert("Import failed. " + error.message);
+    });
+}
+
+function downloadTextFile(fileName, fileContent, contentType){
+  const blob = new Blob([fileContent], {type: contentType});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function exportAllLinkJsonFiles(){
+  refreshLoadArrFromStorage();
+  if(load_arr.length == 0){
+    alert("No link data in Web Storage.");
+    return;
+  }
+  for(let linkIndex = 0; linkIndex < load_arr.length; linkIndex++){
+    const linkData = load_arr[linkIndex];
+    downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+  }
+}
+
 function set_List(){
   list.length = 0;
   if( b1key.length == 0 ){ // index.htmlを開いたときに実施する処理
@@ -45,7 +145,7 @@ function set_List(){
       list = list.concat(load_arr[lp]["list"]);
       listinfo = listinfo.concat(load_arr[lp]["info"]);
     }
-  }else{ // ShowAreaB(json.jsファイル一覧)のチェックボックスをクリックしたときの処理
+  }else{ // ShowAreaB(Web Storageのリンク一覧)のチェックボックスをクリックしたときの処理
     for(let lp=0; lp < load_arr.length; lp++){
       if (b1key.includes(load_arr[lp]["info"]["ID"])) {
         list = list.concat(load_arr[lp]["list"]);
@@ -185,6 +285,9 @@ textarea{
     <input type="text" id="inputKey" size="50">
     <input type="button" value="検索" onclick="selectEventFlowC();" />
     <input type="button" value="リセット" onclick="pageReload();" />
+    <input type="file" id="linkJsonImportFiles" accept=".json,application/json" multiple style="display:none" onchange="importLinkJsonFiles(this.files); this.value='';" />
+    <input type="button" value="JSON取込" onclick="document.getElementById('linkJsonImportFiles').click();" />
+    <input type="button" value="JSON出力" onclick="exportAllLinkJsonFiles();" />
   </form>
 </div>
 <main>
@@ -781,6 +884,7 @@ function selectEventFlowC()
 
 //-----------------------------------
 // ROOTフロー：起動時の処理
+refreshLoadArrFromStorage();
 set_List();
 showAreaB();
 showAreaC(0);

@@ -1,16 +1,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <script src="links_01.json.js"></script>
-  <script src="links_02.json.js"></script>
-  <script src="links_03.json.js"></script>
-  <script src="links_04.json.js"></script>
-  <script src="links_05.json.js"></script>
-  <script src="links_06.json.js"></script>
-  <script src="links_07.json.js"></script>
-  <script src="links_08.json.js"></script>
-  <script src="links_09.json.js"></script>
-  <script src="links_10.json.js"></script>
   <script src="function_enhancement.js"></script>
 
   <style>
@@ -148,15 +138,44 @@
 <HR>
 
 
-<div id="form_area">※既存のjson.jsファイルを読み込みフォーム形式で表示※</div>
+<div id="form_area">※既存のjsonファイルを読み込みフォーム形式で表示※</div>
 <div id="savebutton_area">※保存ボタンを表示※</div>
 <div id="message_area">※警告メッセージなどを表示※</div>
-<textarea id="json_area" cols="80" rows="10">※新規のjson.js情報※</textarea>
+<textarea id="json_area" cols="80" rows="10">※新規のjson情報※</textarea>
 
 <script>
 
 // ストレージの定義
 const storage = localStorage;
+const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
+
+function getLinkStorageKey(listKey){
+  return LINK_STORAGE_PREFIX + listKey;
+}
+
+function isValidLinkData(linkData){
+  return linkData
+    && typeof linkData === "object"
+    && linkData["info"]
+    && typeof linkData["info"]["ID"] !== "undefined"
+    && Array.isArray(linkData["list"]);
+}
+
+function getLinkDataFromStorage(listKey){
+  const storedValue = storage.getItem(getLinkStorageKey(listKey));
+  if(storedValue == null) return null;
+  try {
+    const linkData = JSON.parse(storedValue);
+    return isValidLinkData(linkData) ? linkData : null;
+  } catch (error) {
+    console.warn("Invalid link data in Web Storage:", listKey, error);
+    return null;
+  }
+}
+
+function setLinkDataToStorage(listKey, linkData){
+  storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
+}
 
 // 項目-群
 const itemDefinitions = [
@@ -168,30 +187,30 @@ const itemDefinitions = [
   {"item": "note"    , "line_flg": 2, "mustFlg": "OPTION"},
 ];
 
-// json.js の info 情報
+// json の info 情報
 let infoSection = "";
 // formタグの情報を格納
 wStr = ""
 
-// 更新対象のjson.jsファイル
+// 更新対象のjsonファイル
 let currentListKey = "";
 let listExpression = "";  // list 情報
 let infoExpression = "";  // info 情報
 
 const jsFileNames = new Array();
-jsFileNames["list01"] = "links_01.json.js";
-jsFileNames["list02"] = "links_02.json.js";
-jsFileNames["list03"] = "links_03.json.js";
-jsFileNames["list04"] = "links_04.json.js";
-jsFileNames["list05"] = "links_05.json.js";
-jsFileNames["list06"] = "links_06.json.js";
-jsFileNames["list07"] = "links_07.json.js";
-jsFileNames["list08"] = "links_08.json.js";
-jsFileNames["list09"] = "links_09.json.js";
-jsFileNames["list10"] = "links_10.json.js";
+jsFileNames["list01"] = "links_01.json";
+jsFileNames["list02"] = "links_02.json";
+jsFileNames["list03"] = "links_03.json";
+jsFileNames["list04"] = "links_04.json";
+jsFileNames["list05"] = "links_05.json";
+jsFileNames["list06"] = "links_06.json";
+jsFileNames["list07"] = "links_07.json";
+jsFileNames["list08"] = "links_08.json";
+jsFileNames["list09"] = "links_09.json";
+jsFileNames["list10"] = "links_10.json";
 jsFileNames["function_enhancement.js"] = "function_enhancement.js";
 
-// 更新対象のjson.js変数
+// 更新対象のjson変数
 let targetList = "";
 let targetInfo = "";
 
@@ -310,7 +329,7 @@ function make_data_to_jsformat(){
         currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
         currentItemOutput += "},";
         if(shouldWrite){
-          // 新json.jsファイルに追記する情報
+          // 新jsonファイルに追記する情報
           listSection += currentItemOutput;
           warningMessage += warningMessageCell;
         }
@@ -321,12 +340,17 @@ function make_data_to_jsformat(){
     }
   }
   listSection = '"list": [\n' + listSection + "\n]";
-  generatedJs += "let " + currentListKey + " = {\n";
+  generatedJs += "{\n";
   generatedJs += infoSection + ",\n";
   generatedJs += listSection;
-  generatedJs += "};";
+  generatedJs += "}";
 
   document.getElementById("json_area").innerHTML = generatedJs;
+  try {
+    setLinkDataToStorage(currentListKey, JSON.parse(generatedJs));
+  } catch (error) {
+    warningMessage += "JSON parse error: " + error.message + "<BR />";
+  }
   document.getElementById("message_area").innerHTML = '<font color="red">' + warningMessage + "</font>";
 
   let text = document.getElementById("json_area");
@@ -393,23 +417,17 @@ function set_init(){
 function root_flow(selectedListKey){
   set_init();  // 初期値設定
   currentListKey = selectedListKey;
+  currentListKey = selectedListKey;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
-  switch (selectedListKey){
-    case "list01": listExpression = 'list01["list"]'; infoExpression = 'list01["info"]'; break;
-    case "list02": listExpression = 'list02["list"]'; infoExpression = 'list02["info"]'; break;
-    case "list03": listExpression = 'list03["list"]'; infoExpression = 'list03["info"]'; break;
-    case "list04": listExpression = 'list04["list"]'; infoExpression = 'list04["info"]'; break;
-    case "list05": listExpression = 'list05["list"]'; infoExpression = 'list05["info"]'; break;
-    case "list06": listExpression = 'list06["list"]'; infoExpression = 'list06["info"]'; break;
-    case "list07": listExpression = 'list07["list"]'; infoExpression = 'list07["info"]'; break;
-    case "list08": listExpression = 'list08["list"]'; infoExpression = 'list08["info"]'; break;
-    case "list09": listExpression = 'list09["list"]'; infoExpression = 'list09["info"]'; break;
-    case "list10": listExpression = 'list10["list"]'; infoExpression = 'list10["info"]'; break;
+  const targetData = getLinkDataFromStorage(selectedListKey);
+  if(targetData == null){
+    document.getElementById("message_area").innerHTML = "Web Storage に " + selectedListKey + " のリンク情報がありません。";
+    return;
   }
 
-  targetList = eval(listExpression);
-  targetInfo = eval(infoExpression);
+  targetList = targetData["list"];
+  targetInfo = targetData["info"];
 
   infoSection += '"info": {"Title":"' + targetInfo["Title"] + '","ID":"' + targetInfo["ID"] + '","NOTE":"' + targetInfo["NOTE"] + '"}';
 
