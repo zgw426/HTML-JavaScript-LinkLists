@@ -300,7 +300,7 @@ function showAreaC(showFlg){
   let tmp_aicons = new Array();
   words.length = kanas.length = aicons.length = tmp_aicons.length = 0;
   let wdcount = {};
-  let sFlg = 1;
+  let isSelected = 1;
 
   tmp_aicons = set_tmp_aicons_default(tmp_aicons);
 
@@ -317,9 +317,9 @@ function showAreaC(showFlg){
       cateStr += list[lp0]["category"][lpf]["key"];
     }
 
-    sFlg = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    isSelected = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
-    if(sFlg == 1)
+    if(isSelected == 1)
     {
       for(lpf=0; lpf<list[lpa]["category"].length; lpf++){
         words.push( list[lpa]["category"][lpf]["key"] );
