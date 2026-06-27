@@ -437,10 +437,10 @@ function root_flow(arg_no){
 
 function outputText(){
   // 作成したリンク集をファイル出力する
-  let str = "";
-  str += document.getElementById("json_area").value;
-  let ary = str.split(''); // 配列形式に変換（後述のBlobで全要素出力）
-  let blob = new Blob(ary,{type:"text/plain"}); // テキスト形式でBlob定義
+  let fileContent = "";
+  fileContent += document.getElementById("json_area").value;
+  let fileContentChars = fileContent.split(''); // 配列形式に変換（後述のBlobで全要素出力）
+  let blob = new Blob(fileContentChars,{type:"text/plain"}); // テキスト形式でBlob定義
   let link = document.createElement('a'); // HTMLのaタグを作成
   link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
   link.download = jsFileNames[currentListKey]; // aタグのdownload属性を作成
