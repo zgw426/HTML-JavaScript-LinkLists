@@ -270,11 +270,11 @@ function make_data_to_jsformat(){
   let warningMessageCell = "";
 
   // フォームの情報を取得
-  const form_elements = document.forms.linklist;
+  const formElements = document.forms.linklist;
 
-  for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
-    fieldName = form_elements.elements.item(formIndex).name;
-    fieldValue= form_elements.elements.item(formIndex).value;
+  for(let formIndex = 0; formIndex < formElements.length; formIndex++){
+    fieldName = formElements.elements.item(formIndex).name;
+    fieldValue= formElements.elements.item(formIndex).value;
 
     switch (fieldName){
       case "aicon":
@@ -341,11 +341,11 @@ function make_data_to_jsformat_etc(){
   let fieldValue = "";
 
   // フォームの情報を取得
-  const form_elements = document.forms.linklist;
+  const formElements = document.forms.linklist;
 
-  for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
-    fieldName = form_elements.elements.item(formIndex).name;
-    fieldValue= form_elements.elements.item(formIndex).value;
+  for(let formIndex = 0; formIndex < formElements.length; formIndex++){
+    fieldName = formElements.elements.item(formIndex).name;
+    fieldValue= formElements.elements.item(formIndex).value;
   }
 
   document.getElementById("json_area").innerHTML = fieldValue;
