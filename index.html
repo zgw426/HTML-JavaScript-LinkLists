@@ -218,7 +218,8 @@ function showAreaB()
         linksno = lp0 + 1;
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
+        //wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
+        wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)'>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
         wStr += "<BR />　<small>"+ listinfo[lp0]["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -596,10 +597,11 @@ function showAreaD()
 }
 
 function set_C1key_B1key(){
+  const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
   const areaB1 = [];
-  const areaB  = document.areaB.areaB1;
+  const areaB  = toElementArray(document.areaB.areaB1);
   const areaC1 = [];
-  const areaC  = document.areaC.areaC1;
+  const areaC  = toElementArray(document.areaC.areaC1);
 
   for (let i = 0; i < areaB.length; i++) {
     if (areaB[i].checked) {
