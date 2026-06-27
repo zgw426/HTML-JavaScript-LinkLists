@@ -24,6 +24,7 @@ let load_arr = [];
 let list = [];
 let listinfo = [];
 let visibleLinkIds = [];
+let isAreaBFilterActive = false;
 let b1key  = new Array();  // list02_infoの情報
 let c1key  = new Array();  // categoryの情報
 let iptkey = new Array();  // 検索欄の情報
@@ -187,7 +188,8 @@ function set_List(){
   list.length = 0;
   listinfo.length = 0;
   for(let lp=0; lp < load_arr.length; lp++){
-    if (visibleLinkIds.includes(load_arr[lp]["info"]["ID"])) {
+    const linkInfoId = load_arr[lp]["info"]["ID"];
+    if (visibleLinkIds.includes(linkInfoId) && (!isAreaBFilterActive || b1key.includes(linkInfoId))) {
       list = list.concat(load_arr[lp]["list"]);
       listinfo = listinfo.concat(load_arr[lp]["info"]);
     }
@@ -337,6 +339,7 @@ textarea{
 <script>
 function set_Initial(){
   list.length = listinfo.length = b1key.length = c1key.length = iptkey.length = 0;
+  isAreaBFilterActive = false;
 }
 
 function hiraToKana(str) {
@@ -361,9 +364,10 @@ function showAreaB()
         }
         linksno = lp0 + 1;
         const linkInfo = load_arr[lp0]["info"];
+        const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfo["ID"])) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += linkInfo["ID"] + "-" + linkInfo["Title"];
+        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
         wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -745,6 +749,7 @@ function set_C1key_B1key(){
   const areaC1 = [];
   const areaC  = toElementArray(document.areaC.areaC1);
 
+  isAreaBFilterActive = areaB.length > 0;
   for (let i = 0; i < areaB.length; i++) {
     if (areaB[i].checked) {
       areaB1.push(areaB[i].value);
