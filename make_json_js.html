@@ -174,7 +174,7 @@ info_out = "";
 wStr = ""
 
 // 更新対象のjson.jsファイル
-list_no = "";
+let currentListKey = "";
 list_str = "";  // list 情報
 info_str = "";  // info 情報
 
@@ -321,7 +321,7 @@ function make_data_to_jsformat(){
     }
   }
   listSection = '"list": [\n' + listSection + "\n]";
-  generatedJs += "let " + list_no + " = {\n";
+  generatedJs += "let " + currentListKey + " = {\n";
   generatedJs += info_out + ",\n";
   generatedJs += listSection;
   generatedJs += "};";
@@ -410,7 +410,7 @@ function set_links_no(arg_no){
 
 function root_flow(arg_no){
   set_init();  // 初期値設定
-  list_no = arg_no;
+  currentListKey = arg_no;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
   switch (arg_no){
@@ -461,14 +461,14 @@ function outputText(){
   let blob = new Blob(ary,{type:"text/plain"}); // テキスト形式でBlob定義
   let link = document.createElement('a'); // HTMLのaタグを作成
   link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
-  link.download = jsFileNames[list_no]; // aタグのdownload属性を作成
+  link.download = jsFileNames[currentListKey]; // aタグのdownload属性を作成
   link.click(); // 定義したaタグをクリック（実行）
 }
 
 
 function etc_flow(argFileName){
   // function_enhancement.js を編集する
-  list_no = argFileName;
+  currentListKey = argFileName;
   wStr = "";
   let enhancementSource = "";
   set_init();  // 初期値設定
