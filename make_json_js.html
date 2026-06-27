@@ -261,7 +261,7 @@ function set_form_flow(item_jsn, list_elem){
 
 function make_data_to_jsformat(){
   let generatedJs = "";
-  list_out = "";
+  let listSection = "";
   current_out = "";
   let shouldWrite = true;
   let fieldName = "";
@@ -311,7 +311,7 @@ function make_data_to_jsformat(){
         current_out += "},";
         if(shouldWrite){
           // 新json.jsファイルに追記する情報
-          list_out += current_out;
+          listSection += current_out;
           warning_msg += warning_msg_cell;
         }
         current_out = "";
@@ -320,10 +320,10 @@ function make_data_to_jsformat(){
         break;
     }
   }
-  list_out = '"list": [\n' + list_out + "\n]";
+  listSection = '"list": [\n' + listSection + "\n]";
   generatedJs += "let " + list_no + " = {\n";
   generatedJs += info_out + ",\n";
-  generatedJs += list_out;
+  generatedJs += listSection;
   generatedJs += "};";
 
   document.getElementById("json_area").innerHTML = generatedJs;
