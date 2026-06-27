@@ -246,16 +246,15 @@ function showAreaB()
 
 function addFilterAiconOnAreaB(){
   //アイコンを使ったフィルタ用のキーのアイコンを表示する
-  rtnStr = "";
-  checkedStr = "";
-  rtnStr += "<form name='areaB-FilterAicon'>";
+  let filterHtml = "";
+  filterHtml += "<form name='areaB-FilterAicon'>";
   for (let key in key_aicon) {
-      rtnStr += "<div class='div_f2'>";
-      rtnStr += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' width='60px' height='60px' onclick='selectEventFilterAicon(\""+ key +"\")'>";
-      rtnStr += "</div>";
+      filterHtml += "<div class='div_f2'>";
+      filterHtml += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' width='60px' height='60px' onclick='selectEventFilterAicon(\""+ key +"\")'>";
+      filterHtml += "</div>";
   }
-  rtnStr += "</form>";
-  return rtnStr;
+  filterHtml += "</form>";
+  return filterHtml;
 }
 
 function selectEventFilterAicon(argKey){
