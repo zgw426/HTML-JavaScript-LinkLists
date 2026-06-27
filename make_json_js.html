@@ -169,7 +169,7 @@ const item_jsn = [
 ];
 
 // json.js の info 情報
-info_out = "";
+let infoSection = "";
 // formタグの情報を格納
 wStr = ""
 
@@ -322,7 +322,7 @@ function make_data_to_jsformat(){
   }
   listSection = '"list": [\n' + listSection + "\n]";
   generatedJs += "let " + currentListKey + " = {\n";
-  generatedJs += info_out + ",\n";
+  generatedJs += infoSection + ",\n";
   generatedJs += listSection;
   generatedJs += "};";
 
@@ -385,7 +385,7 @@ function set_init(){
   wStr = "";
   list_str = "";
   info_str = "";
-  info_out = "";
+  infoSection = "";
   document.getElementById("savebutton_area").innerHTML = "";  // ファイル出力ボタンを消す
 }
 
@@ -411,7 +411,7 @@ function root_flow(arg_no){
   list_target = eval(list_str);
   info_target = eval(info_str);
 
-  info_out += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '","NOTE":"' + info_target["NOTE"] + '"}';
+  infoSection += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '","NOTE":"' + info_target["NOTE"] + '"}';
 
   for (const elem in list_target) {
     // jsonデータを設定値にしてフォームを作る
