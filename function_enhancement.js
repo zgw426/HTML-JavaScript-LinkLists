@@ -1,11 +1,11 @@
-const key_hightlight = [];
+const key_highlight = [];
 const targetDateList = [];
 const targetWeekList = [];
 const key_aicon = [];
 
 // ----- カテゴリキーに背景色を設定する ----- //
-key_hightlight["資産"] = "#ffc0cb";
-key_hightlight["動画"] = "#c0ffcb";
+key_highlight["資産"] = "#ffc0cb";
+key_highlight["動画"] = "#c0ffcb";
 
 // ----- アイコンボタン：検索キーの簡易登録 ----- //
 key_aicon["y_movie.png"] = "動画";

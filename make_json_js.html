@@ -481,15 +481,15 @@ function etc_flow(argFileName){
   infoStr = "";
   set_init();  // 初期値設定
 
-  infoStr += `const key_hightlight = [];\n`;
+  infoStr += `const key_highlight = [];\n`;
   infoStr += `const targetDateList = [];\n`;
   infoStr += `const targetWeekList = [];\n`;
   infoStr += `const key_aicon = [];\n`;
 
   infoStr += `\n// ----- カテゴリキーに背景色を設定する ----- //\n`;
-  for (let key in key_hightlight) {
-    let vInfo = key_hightlight[key];
-    infoStr += `key_hightlight["${key}"] = "${vInfo}";\n`;
+  for (let key in key_highlight) {
+    let vInfo = key_highlight[key];
+    infoStr += `key_highlight["${key}"] = "${vInfo}";\n`;
   }
 
   infoStr += `\n// ----- アイコンボタン：検索キーの簡易登録 ----- //\n`;
