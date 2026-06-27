@@ -360,8 +360,6 @@ function make_data_to_jsformat_etc(){
 
 function set_category_out(categoryInput){
   let categoryLinesOutput = "";
-  tmp_head_1 = "";
-  tmp_head_2 = "";
   const categoryLines = categoryInput.split("\n")
 
   for(const line in categoryLines){
@@ -369,9 +367,9 @@ function set_category_out(categoryInput){
     const categoryKey = categoryParts[1];
     let categoryKana = categoryParts[3];
     if (typeof categoryKana !== "undefined"){
-      tmp_head_1 = categoryKana[0];  // 1文字目を取得
-      tmp_head_2 = tmp_head_1.normalize('NFD')[0];  // 濁音→静音に変換
-      categoryKana = categoryKana.replace(tmp_head_1, tmp_head_2);
+      const firstKanaChar = categoryKana[0];  // 1文字目を取得
+      const normalizedFirstKanaChar = firstKanaChar.normalize('NFD')[0];  // 濁音→静音に変換
+      categoryKana = categoryKana.replace(firstKanaChar, normalizedFirstKanaChar);
     }
     categoryLinesOutput += '\t\t\t{ "key": "' + categoryKey + '", "kana": "' + categoryKana +'"},\n';
   }
