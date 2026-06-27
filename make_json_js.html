@@ -159,7 +159,7 @@
 const storage = localStorage;
 
 // 項目-群
-const item_jsn = [
+const itemDefinitions = [
   {"item": "aicon"   , "line_flg": 0, "mustFlg": "OPTION"},
   {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "Name"    , "line_flg": 0, "mustFlg": "MUST"},
@@ -217,21 +217,21 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
   return(fieldHtml);
 }
 
-function set_form_flow(item_jsn, list_elem){
+function set_form_flow(itemDefinitions, list_elem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
   let itemValue = "";
   let categoryText = "";
-  for (const elem in item_jsn) {
+  for (const elem in itemDefinitions) {
     let formFlg = 1;
-    let lineFlg = Number(item_jsn[elem]["line_flg"]);
-    let itemName = item_jsn[elem]["item"];
-    let mustFlag  = item_jsn[elem]["mustFlg"];
+    let lineFlg = Number(itemDefinitions[elem]["line_flg"]);
+    let itemName = itemDefinitions[elem]["item"];
+    let mustFlag  = itemDefinitions[elem]["mustFlg"];
 
     let itemNo = Number(elem) + 1;
     if(elem == 0){
       formFlg = 0;
-    }else if(itemNo == item_jsn.length){
+    }else if(itemNo == itemDefinitions.length){
       formFlg = -1;
     }
 
@@ -415,7 +415,7 @@ function root_flow(arg_no){
 
   for (const elem in targetList) {
     // jsonデータを設定値にしてフォームを作る
-    wStr += set_form_flow(item_jsn,targetList[elem]);
+    wStr += set_form_flow(itemDefinitions,targetList[elem]);
     wStr += "<HR />";
   }
 
@@ -425,7 +425,7 @@ function root_flow(arg_no){
   
   for(let step = 0; step < LPMAX; step++) {
     // 各値が空白のフォームを作る
-    wStr += set_form_flow(item_jsn, "NONE");
+    wStr += set_form_flow(itemDefinitions, "NONE");
     wStr += "<HR />";
   }
 
