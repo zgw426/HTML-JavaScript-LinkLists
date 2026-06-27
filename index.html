@@ -32,7 +32,7 @@ let listinfo = [];
 let b1key  = new Array();  // list02_infoの情報
 let c1key  = new Array();  // categoryの情報
 let iptkey = new Array();  // 検索欄の情報
-let aicons = new Array();  // 画像ファイル名
+let icons = new Array();  // 画像ファイル名
 let area100Str = "";
 let reiwa = ""; // 令和の年数
 
@@ -278,11 +278,11 @@ function editLinkInfo(){
   let iconListHtml = "";
   iconListHtml += "<center>";
   // アイコン情報を表示
-  for (let aicon_name in aicons) {
+  for (let iconName in icons) {
     iconListHtml += "<div class='div_f2'>";
-    iconListHtml += "<img src='aicon/"+ aicon_name +"' alt='" + aicon_name + "' height='40'>";
+    iconListHtml += "<img src='aicon/"+ iconName +"' alt='" + iconName + "' height='40'>";
     iconListHtml += "<BR/>";
-    iconListHtml += aicon_name;
+    iconListHtml += iconName;
     iconListHtml += "</div>";
   }
   iconListHtml += "</center>";
@@ -297,12 +297,12 @@ function showAreaC(showFlg){
   let wStr = "";
   let words = new Array();
   let kanas = new Array();
-  let tmp_aicons = new Array();
-  words.length = kanas.length = aicons.length = tmp_aicons.length = 0;
+  let tmpIcons = new Array();
+  words.length = kanas.length = icons.length = tmpIcons.length = 0;
   let wdcount = {};
   let isSelected = 1;
 
-  tmp_aicons = set_tmp_aicons_default(tmp_aicons);
+  tmpIcons = setDefaultIcons(tmpIcons);
 
   for(lpa=0; lpa<list.length; lpa++){
     lp0 = lpa;
@@ -330,7 +330,7 @@ function showAreaC(showFlg){
 
         // ------------------- アイコン -------------------
         if(typeof list[lpa]["aicon"] !== 'undefined'){
-          tmp_aicons.push(list[lpa]["aicon"]);
+          tmpIcons.push(list[lpa]["aicon"]);
         }
         // ------------------- アイコン -------------------
       }
@@ -355,13 +355,13 @@ function showAreaC(showFlg){
   });
 
   //昇順ソート(アイコン)
-  tmp_aicons.sort();
-  for(let aicon_i=0; aicon_i < tmp_aicons.length; aicon_i++){
-    aicons[ tmp_aicons[aicon_i] ] = tmp_aicons[aicon_i];
+  tmpIcons.sort();
+  for(let iconIndex=0; iconIndex < tmpIcons.length; iconIndex++){
+    icons[ tmpIcons[iconIndex] ] = tmpIcons[iconIndex];
   }
 
   let headStr = "";
-  let lo_aicon_name = "";
+  let iconMapKey = "";
   wStr += "<form name='areaC'>";
 
   for(let o in arr){
@@ -398,17 +398,17 @@ function showAreaC(showFlg){
 
     wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedAttr +" >" ;
 
-    lo_aicon_name = arr[o]["key"].toLowerCase(); // 小文字変換
+    iconMapKey = arr[o]["key"].toLowerCase(); // 小文字変換
 
-    if(typeof aicon_mapinfo[ lo_aicon_name ] !== 'undefined'){
+    if(typeof aicon_mapinfo[ iconMapKey ] !== 'undefined'){
       //------カテゴリキーに画像貼り付け------//
-      wStr += "<img src='aicon/"+ aicon_mapinfo[ lo_aicon_name ] +"' height='16'> ";
+      wStr += "<img src='aicon/"+ aicon_mapinfo[ iconMapKey ] +"' height='16'> ";
     }
 
     wStr += arr[o]["key"];
     wStr += "</div>";
     wStr += "</label>";
-    lo_aicon_name = "";
+    iconMapKey = "";
   }
   wStr += "</form>";
   document.getElementById("areaC").innerHTML = wStr;
@@ -443,68 +443,68 @@ function setSelectFlg(tgtAicon, tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUr
   return(ctn);
 }
 
-function set_tmp_aicons_default(lo_aicons){
+function setDefaultIcons(iconNames){
   //登録情報の更新のときに表示するアイコン用の画像を設定
-  lo_aicons.push("analytics.png");
-  lo_aicons.push("cloud.png");
-  lo_aicons.push("console.png");
-  lo_aicons.push("dashboard.png");
-  lo_aicons.push("mng.png");
-  lo_aicons.push("program.png");
-  lo_aicons.push("schedule.png");
-  lo_aicons.push("search.png");
-  lo_aicons.push("study.png");
-  lo_aicons.push("user.png");
-  lo_aicons.push("x_board.png");
-  lo_aicons.push("x_checkbox-false.png");
-  lo_aicons.push("x_checkbox-true.png");
-  lo_aicons.push("x_day.png");
-  lo_aicons.push("x_day_red.png");
-  lo_aicons.push("x_mmdd.png");
-  lo_aicons.push("x_mmdd_red.png");
-  lo_aicons.push("x_month.png");
-  lo_aicons.push("x_month_red.png");
-  lo_aicons.push("x_question.png");
-  lo_aicons.push("x_trash.png");
-  lo_aicons.push("x_week.png");
-  lo_aicons.push("x_week_red.png");
-  lo_aicons.push("yahoo.png");
-  lo_aicons.push("youtube.png");
-  lo_aicons.push("y_cloud.png");
-  lo_aicons.push("y_cloud_aws.png");
-  lo_aicons.push("y_money.png");
-  lo_aicons.push("y_movie.png");
-  lo_aicons.push("z_3d.png");
-  lo_aicons.push("z_ai.png");
-  lo_aicons.push("z_analytics.png");
-  lo_aicons.push("z_ar.png");
-  lo_aicons.push("z_cloud.png");
-  lo_aicons.push("z_console.png");
-  lo_aicons.push("z_dashboard.png");
-  lo_aicons.push("z_docker.png");
-  lo_aicons.push("z_file.png");
-  lo_aicons.push("z_folder.png");
-  lo_aicons.push("z_garbage_can.png");
-  lo_aicons.push("z_mng.png");
-  lo_aicons.push("z_money.png");
-  lo_aicons.push("z_movie.png");
-  lo_aicons.push("z_news.png");
-  lo_aicons.push("z_office.png");
-  lo_aicons.push("z_program.png");
-  lo_aicons.push("z_schedule.png");
-  lo_aicons.push("z_search.png");
-  lo_aicons.push("z_study.png");
-  lo_aicons.push("z_user.png");
-  lo_aicons.push("z_windows.png");
+  iconNames.push("analytics.png");
+  iconNames.push("cloud.png");
+  iconNames.push("console.png");
+  iconNames.push("dashboard.png");
+  iconNames.push("mng.png");
+  iconNames.push("program.png");
+  iconNames.push("schedule.png");
+  iconNames.push("search.png");
+  iconNames.push("study.png");
+  iconNames.push("user.png");
+  iconNames.push("x_board.png");
+  iconNames.push("x_checkbox-false.png");
+  iconNames.push("x_checkbox-true.png");
+  iconNames.push("x_day.png");
+  iconNames.push("x_day_red.png");
+  iconNames.push("x_mmdd.png");
+  iconNames.push("x_mmdd_red.png");
+  iconNames.push("x_month.png");
+  iconNames.push("x_month_red.png");
+  iconNames.push("x_question.png");
+  iconNames.push("x_trash.png");
+  iconNames.push("x_week.png");
+  iconNames.push("x_week_red.png");
+  iconNames.push("yahoo.png");
+  iconNames.push("youtube.png");
+  iconNames.push("y_cloud.png");
+  iconNames.push("y_cloud_aws.png");
+  iconNames.push("y_money.png");
+  iconNames.push("y_movie.png");
+  iconNames.push("z_3d.png");
+  iconNames.push("z_ai.png");
+  iconNames.push("z_analytics.png");
+  iconNames.push("z_ar.png");
+  iconNames.push("z_cloud.png");
+  iconNames.push("z_console.png");
+  iconNames.push("z_dashboard.png");
+  iconNames.push("z_docker.png");
+  iconNames.push("z_file.png");
+  iconNames.push("z_folder.png");
+  iconNames.push("z_garbage_can.png");
+  iconNames.push("z_mng.png");
+  iconNames.push("z_money.png");
+  iconNames.push("z_movie.png");
+  iconNames.push("z_news.png");
+  iconNames.push("z_office.png");
+  iconNames.push("z_program.png");
+  iconNames.push("z_schedule.png");
+  iconNames.push("z_search.png");
+  iconNames.push("z_study.png");
+  iconNames.push("z_user.png");
+  iconNames.push("z_windows.png");
 
 
 
 
-  for(let lo_aicon_i=0; lo_aicon_i< aicon_default.length; lo_aicon_i++){
-    lo_aicons.push(aicon_default[lo_aicon_i]);
+  for(let iconIndex=0; iconIndex< aicon_default.length; iconIndex++){
+    iconNames.push(aicon_default[iconIndex]);
   }
 
-  return lo_aicons;
+  return iconNames;
 }
 
 // カテゴリ一覧に表示するカテゴリにチェックボックスを "選択" にするか判定
