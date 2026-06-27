@@ -390,24 +390,6 @@ function set_init(){
 }
 
 
-function set_links_no(arg_no){
-  // 使ってない
-  list_str_lo = "";
-  info_str_lo = "";
-  switch (arg_no){
-    case "list01": list_str_lo = 'list01["list"]'; info_str_lo = 'list01["info"]'; break;
-    case "list02": list_str_lo = 'list02["list"]'; info_str_lo = 'list02["info"]'; break;
-    case "list03": list_str_lo = 'list03["list"]'; info_str_lo = 'list03["info"]'; break;
-    case "list04": list_str_lo = 'list04["list"]'; info_str_lo = 'list04["info"]'; break;
-    case "list05": list_str_lo = 'list05["list"]'; info_str_lo = 'list05["info"]'; break;
-    case "list06": list_str_lo = 'list06["list"]'; info_str_lo = 'list06["info"]'; break;
-    case "list07": list_str_lo = 'list07["list"]'; info_str_lo = 'list07["info"]'; break;
-    case "list08": list_str_lo = 'list08["list"]'; info_str_lo = 'list08["info"]'; break;
-    case "list09": list_str_lo = 'list09["list"]'; info_str_lo = 'list09["info"]'; break;
-    case "list10": list_str_lo = 'list10["list"]'; info_str_lo = 'list10["info"]'; break;
-  }
-}
-
 function root_flow(arg_no){
   set_init();  // 初期値設定
   currentListKey = arg_no;
