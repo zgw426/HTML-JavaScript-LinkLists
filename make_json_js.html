@@ -464,9 +464,9 @@ function root_flow(arg_no){
 function outputText(){
   // 作成したリンク集をファイル出力する
   let str = "";
-  str += document.getElementById("json_area").innerHTML;
+  str += document.getElementById("json_area").value;
   let ary = str.split(''); // 配列形式に変換（後述のBlobで全要素出力）
-  let blob = new Blob(ary,{type:"text/plan"}); // テキスト形式でBlob定義
+  let blob = new Blob(ary,{type:"text/plain"}); // テキスト形式でBlob定義
   let link = document.createElement('a'); // HTMLのaタグを作成
   link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
   link.download = js_file_name[list_no]; // aタグのdownload属性を作成
