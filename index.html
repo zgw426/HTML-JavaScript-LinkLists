@@ -13,6 +13,7 @@
 
 const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
+const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 let load_arr = [];
 //let linkListKeys = ["list01","list02","list03","list05"];
@@ -22,6 +23,7 @@ let load_arr = [];
 
 let list = [];
 let listinfo = [];
+let visibleLinkIds = [];
 let b1key  = new Array();  // list02_infoの情報
 let c1key  = new Array();  // categoryの情報
 let iptkey = new Array();  // 検索欄の情報
@@ -67,6 +69,45 @@ function setLinkDataToStorage(listKey, linkData){
   storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
 }
 
+function getAllLinkInfoIds(){
+  const linkInfoIds = [];
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const linkData = getLinkDataFromStorage(linkListKeys[keyIndex]);
+    if(linkData != null){
+      linkInfoIds.push(linkData["info"]["ID"]);
+    }
+  }
+  return linkInfoIds;
+}
+
+function loadVisibleLinkIds(){
+  const allLinkInfoIds = getAllLinkInfoIds();
+  const storedValue = storage.getItem(LINK_VISIBILITY_STORAGE_KEY);
+  if(storedValue == null){
+    visibleLinkIds = allLinkInfoIds;
+    return;
+  }
+
+  try {
+    const storedIds = JSON.parse(storedValue);
+    visibleLinkIds = Array.isArray(storedIds)
+      ? storedIds.filter(infoId => allLinkInfoIds.includes(infoId))
+      : allLinkInfoIds;
+  } catch (error) {
+    console.warn("Invalid visible link ids in Web Storage:", error);
+    visibleLinkIds = allLinkInfoIds;
+  }
+}
+
+function saveVisibleLinkIds(linkInfoIds){
+  visibleLinkIds = linkInfoIds;
+  storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(visibleLinkIds));
+}
+
+function isLinkInfoVisible(linkInfoId){
+  return visibleLinkIds.includes(linkInfoId);
+}
+
 function refreshLoadArrFromStorage(){
   load_arr.length = 0;
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
@@ -80,6 +121,7 @@ function refreshLoadArrFromStorage(){
 function refreshAllAreas(){
   set_Initial();
   refreshLoadArrFromStorage();
+  loadVisibleLinkIds();
   set_List();
   showAreaB();
   showAreaC(0);
@@ -98,7 +140,7 @@ function importLinkJsonFiles(files){
         }
         const listKey = makeListKeyFromInfoId(linkData["info"]["ID"]);
         setLinkDataToStorage(listKey, linkData);
-        resolve(file.name);
+        resolve({"fileName": file.name, "infoId": linkData["info"]["ID"]});
       } catch (error) {
         reject(new Error(file.name + ": " + error.message));
       }
@@ -108,9 +150,12 @@ function importLinkJsonFiles(files){
   }));
 
   Promise.all(readers)
-    .then(importedFileNames => {
+    .then(importedFiles => {
+      loadVisibleLinkIds();
+      const importedInfoIds = importedFiles.map(importedFile => importedFile["infoId"]);
+      saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat(importedInfoIds))));
       refreshAllAreas();
-      alert(importedFileNames.length + " file(s) imported.");
+      alert(importedFiles.length + " file(s) imported.");
     })
     .catch(error => {
       alert("Import failed. " + error.message);
@@ -140,21 +185,14 @@ function exportAllLinkJsonFiles(){
 
 function set_List(){
   list.length = 0;
-  if( b1key.length == 0 ){ // index.htmlを開いたときに実施する処理
-    for(let lp=0; lp < load_arr.length; lp++){
+  listinfo.length = 0;
+  for(let lp=0; lp < load_arr.length; lp++){
+    if (visibleLinkIds.includes(load_arr[lp]["info"]["ID"])) {
       list = list.concat(load_arr[lp]["list"]);
       listinfo = listinfo.concat(load_arr[lp]["info"]);
     }
-  }else{ // ShowAreaB(Web Storageのリンク一覧)のチェックボックスをクリックしたときの処理
-    for(let lp=0; lp < load_arr.length; lp++){
-      if (b1key.includes(load_arr[lp]["info"]["ID"])) {
-        list = list.concat(load_arr[lp]["list"]);
-        listinfo = listinfo.concat(load_arr[lp]["info"]);
-      }
-    }
   }
 }
-
 </script>
 <style>
 html { height: 100%; }
@@ -319,11 +357,12 @@ function showAreaB()
     wStr += "<form name='areaB'>";
     for(lp0=0; lp0< load_arr.length; lp0++){
         linksno = lp0 + 1;
+        const linkInfo = load_arr[lp0]["info"];
+        const checkedAttr = isLinkInfoVisible(linkInfo["ID"]) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        //wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' checked>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
-        wStr += "<input type='checkbox' name='areaB1' value='" + listinfo[lp0]["ID"] + "' onclick='selectEventFlowB(this.name, this.value)'>" + listinfo[lp0]["ID"] + "-" + listinfo[lp0]["Title"];
-        wStr += "<BR />　<small>"+ listinfo[lp0]["NOTE"] +"</small>";
+        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
+        wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
     }
@@ -709,6 +748,7 @@ function set_C1key_B1key(){
       areaB1.push(areaB[i].value);
     }
   }
+  saveVisibleLinkIds(areaB1);
   b1key = b1key.concat(areaB1);
 
   // 検索欄の文字列をc1keyに格納する
@@ -885,6 +925,7 @@ function selectEventFlowC()
 //-----------------------------------
 // ROOTフロー：起動時の処理
 refreshLoadArrFromStorage();
+loadVisibleLinkIds();
 set_List();
 showAreaB();
 showAreaC(0);
