@@ -192,8 +192,8 @@ jsFileNames["list10"] = "links_10.json.js";
 jsFileNames["function_enhancement.js"] = "function_enhancement.js";
 
 // 更新対象のjson.js変数
-list_target = "";
-info_target = "";
+let targetList = "";
+let targetInfo = "";
 
 
 function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
@@ -408,14 +408,14 @@ function root_flow(arg_no){
     case "list10": list_str = 'list10["list"]'; info_str = 'list10["info"]'; break;
   }
 
-  list_target = eval(list_str);
-  info_target = eval(info_str);
+  targetList = eval(list_str);
+  targetInfo = eval(info_str);
 
-  infoSection += '"info": {"Title":"' + info_target["Title"] + '","ID":"' + info_target["ID"] + '","NOTE":"' + info_target["NOTE"] + '"}';
+  infoSection += '"info": {"Title":"' + targetInfo["Title"] + '","ID":"' + targetInfo["ID"] + '","NOTE":"' + targetInfo["NOTE"] + '"}';
 
-  for (const elem in list_target) {
+  for (const elem in targetList) {
     // jsonデータを設定値にしてフォームを作る
-    wStr += set_form_flow(item_jsn,list_target[elem]);
+    wStr += set_form_flow(item_jsn,targetList[elem]);
     wStr += "<HR />";
   }
 
