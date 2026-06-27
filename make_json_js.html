@@ -219,7 +219,7 @@ function set_form_cell(form_flg, line_flg, element, item_val, mustFlg){
 
 function set_form_flow(item_jsn, list_elem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
-  let wStr_lo = "";
+  let formHtml = "";
   let item_val = "";
   let tmp_val = "";
   for (const elem in item_jsn) {
@@ -249,13 +249,13 @@ function set_form_flow(item_jsn, list_elem){
       tmp_val = tmp_val.trim();  // 最後の改行コードを削除
       item_val = tmp_val;
     }
-    //wStr_lo += "<div class='div_f2'>";
+    //formHtml += "<div class='div_f2'>";
     //console.log( "DEBUG " + item_name +", "+ must_flg);
-    wStr_lo += set_form_cell(form_flg, line_flg, item_name, item_val, must_flg);
-    wStr_lo += "<BR />";
-    //wStr_lo += "</div>";
+    formHtml += set_form_cell(form_flg, line_flg, item_name, item_val, must_flg);
+    formHtml += "<BR />";
+    //formHtml += "</div>";
   }
-  return(wStr_lo);
+  return(formHtml);
 }
 
 
