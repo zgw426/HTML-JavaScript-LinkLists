@@ -1,8 +1,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <script src="function_enhancement.js"></script>
-
   <style>
     html { height: 100%; }
     body { height: 100%; margin: 0; }
@@ -127,9 +125,6 @@
 <input type="button" value="links_08" onclick='root_flow("list08");' />
 <input type="button" value="links_09" onclick='root_flow("list09");' />
 <input type="button" value="links_10" onclick='root_flow("list10");' />
-<BR />
-<input type="button" value="その他(予定など)" onclick='etc_flow("function_enhancement.js");' />
-
 <!--
 <HR>
 <label for="number_of_blank_cells">新規登録枠数</label>
@@ -138,10 +133,10 @@
 <HR>
 
 
-<div id="form_area">※既存のjsonファイルを読み込みフォーム形式で表示※</div>
-<div id="savebutton_area">※保存ボタンを表示※</div>
+<div id="form_area">※Web Storageのリンク情報をフォーム形式で表示※</div>
+<div id="savebutton_area">※更新ボタンを表示※</div>
 <div id="message_area">※警告メッセージなどを表示※</div>
-<textarea id="json_area" cols="80" rows="10">※新規のjson情報※</textarea>
+<textarea id="json_area" cols="80" rows="10">※更新後のjson情報※</textarea>
 
 <script>
 
@@ -187,28 +182,11 @@ const itemDefinitions = [
   {"item": "note"    , "line_flg": 2, "mustFlg": "OPTION"},
 ];
 
-// json の info 情報
-let infoSection = "";
 // formタグの情報を格納
 wStr = ""
 
-// 更新対象のjsonファイル
+// 更新対象のWeb Storage情報
 let currentListKey = "";
-let listExpression = "";  // list 情報
-let infoExpression = "";  // info 情報
-
-const jsFileNames = new Array();
-jsFileNames["list01"] = "links_01.json";
-jsFileNames["list02"] = "links_02.json";
-jsFileNames["list03"] = "links_03.json";
-jsFileNames["list04"] = "links_04.json";
-jsFileNames["list05"] = "links_05.json";
-jsFileNames["list06"] = "links_06.json";
-jsFileNames["list07"] = "links_07.json";
-jsFileNames["list08"] = "links_08.json";
-jsFileNames["list09"] = "links_09.json";
-jsFileNames["list10"] = "links_10.json";
-jsFileNames["function_enhancement.js"] = "function_enhancement.js";
 
 // 更新対象のjson変数
 let targetList = "";
@@ -278,17 +256,22 @@ function set_form_flow(itemDefinitions, listItem){
 }
 
 
-function make_data_to_jsformat(){
-  let generatedJs = "";
-  let listSection = "";
-  let currentItemOutput = "";
+function updateLinkStorageFromForm(){
+  const linkData = {
+    "info": {
+      "Title": targetInfo["Title"],
+      "ID": targetInfo["ID"],
+      "NOTE": targetInfo["NOTE"]
+    },
+    "list": []
+  };
+  let currentItem = {};
   let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
-  let warningMessage = "";  // category欄に undefined があった場合に警告を出す
+  let warningMessage = "";
   let warningMessageCell = "";
 
-  // フォームの情報を取得
   const formElements = document.forms.linklist;
 
   for(let formIndex = 0; formIndex < formElements.length; formIndex++){
@@ -297,126 +280,89 @@ function make_data_to_jsformat(){
 
     switch (fieldName){
       case "icon":
-        currentItemOutput += "{\n";
+        currentItem = {};
         if(fieldValue != ""){
-          currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+          currentItem[fieldName] = fieldValue;
         }
         break;
       case "kana":
-        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItem[fieldName] = fieldValue;
         break;
       case "Name":
-        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItem[fieldName] = fieldValue;
         if(fieldValue == "") shouldWrite = false;
         break;
       case "URL":
-        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItem[fieldName] = fieldValue;
         break;
       case "category":
-        let categoryOutput = set_category_out(fieldValue);
-
-        if(categoryOutput.indexOf('undefined') > 0){
-          warningMessageCell += "category欄に undefined が含まれています [" + categoryOutput + "]<BR />";
+        currentItem[fieldName] = parseCategoryInput(fieldValue);
+        if(currentItem[fieldName].length == 0){
+          warningMessageCell += "categoryが空です。<BR />";
         }
-
-        currentItemOutput += '\t"'+ fieldName +'":\n';
-        currentItemOutput += '\t\t[\n';
-        currentItemOutput += '\t\t\t' + categoryOutput + '\n';
-        currentItemOutput += '\t\t],\n';
         break;
       case "note":
-        fieldValue = fieldValue.replace(/\n/g, '\\n')
-        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
-        currentItemOutput += "},";
+        currentItem[fieldName] = fieldValue;
         if(shouldWrite){
-          // 新jsonファイルに追記する情報
-          listSection += currentItemOutput;
+          linkData["list"].push(currentItem);
           warningMessage += warningMessageCell;
         }
-        currentItemOutput = "";
+        currentItem = {};
         shouldWrite = true;
         warningMessageCell = "";
         break;
     }
   }
-  listSection = '"list": [\n' + listSection + "\n]";
-  generatedJs += "{\n";
-  generatedJs += infoSection + ",\n";
-  generatedJs += listSection;
-  generatedJs += "}";
 
-  document.getElementById("json_area").innerHTML = generatedJs;
-  try {
-    setLinkDataToStorage(currentListKey, JSON.parse(generatedJs));
-  } catch (error) {
-    warningMessage += "JSON parse error: " + error.message + "<BR />";
+  const generatedJson = JSON.stringify(linkData, null, 2);
+  document.getElementById("json_area").value = generatedJson;
+  setLinkDataToStorage(currentListKey, linkData);
+  warningMessage += "Web Storageを更新しました。<BR />";
+  if(parent && typeof parent.refreshAllAreas === "function"){
+    parent.refreshAllAreas();
   }
   document.getElementById("message_area").innerHTML = '<font color="red">' + warningMessage + "</font>";
-
-  let text = document.getElementById("json_area");
-  text.select();
-  document.execCommand("copy");
-  document.getElementById("savebutton_area").innerHTML = "<input type='button' value='ファイル出力' onclick='outputText();' />";
 }
 
+function parseCategoryInput(categoryInput){
+  const categoryList = [];
+  const categoryLines = categoryInput.split("\n");
 
-function make_data_to_jsformat_etc(){
-  let fieldName = "";
-  let fieldValue = "";
-
-  // フォームの情報を取得
-  const formElements = document.forms.linklist;
-
-  for(let formIndex = 0; formIndex < formElements.length; formIndex++){
-    fieldName = formElements.elements.item(formIndex).name;
-    fieldValue= formElements.elements.item(formIndex).value;
-  }
-
-  document.getElementById("json_area").innerHTML = fieldValue;
-
-  let text = document.getElementById("json_area");
-  text.select();
-  document.execCommand("copy");
-  document.getElementById("savebutton_area").innerHTML = "<input type='button' value='ファイル出力' onclick='outputText();' />";
-}
-
-
-function set_category_out(categoryInput){
-  let categoryLinesOutput = "";
-  const categoryLines = categoryInput.split("\n")
-
-  for(const line in categoryLines){
-    const categoryParts = categoryLines[line].split('"');
+  for(const lineIndex in categoryLines){
+    const categoryParts = categoryLines[lineIndex].split('"');
     const categoryKey = categoryParts[1];
     let categoryKana = categoryParts[3];
-    if (typeof categoryKana !== "undefined"){
-      const firstKanaChar = categoryKana[0];  // 1文字目を取得
-      const normalizedFirstKanaChar = firstKanaChar.normalize('NFD')[0];  // 濁音→静音に変換
+
+    if(typeof categoryKey === "undefined" || categoryKey == ""){
+      continue;
+    }
+
+    if(typeof categoryKana === "undefined"){
+      categoryKana = "";
+    }else if(categoryKana != ""){
+      const firstKanaChar = categoryKana[0];
+      const normalizedFirstKanaChar = firstKanaChar.normalize('NFD')[0];
       categoryKana = categoryKana.replace(firstKanaChar, normalizedFirstKanaChar);
     }
-    categoryLinesOutput += '\t\t\t{ "key": "' + categoryKey + '", "kana": "' + categoryKana +'"},\n';
+
+    categoryList.push({"key": categoryKey, "kana": categoryKana});
   }
-  categoryLinesOutput = categoryLinesOutput.trim();  // 最後の改行コードを削除
-  categoryLinesOutput = categoryLinesOutput.slice(0, -1);  // 最後の文字 ,(コロン)を削除
-  return(categoryLinesOutput);
+
+  return categoryList;
 }
 
 
 function set_init(){
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
-  document.getElementById("json_area").innerHTML = "";
+  document.getElementById("json_area").value = "";
   wStr = "";
-  listExpression = "";
-  infoExpression = "";
-  infoSection = "";
-  document.getElementById("savebutton_area").innerHTML = "";  // ファイル出力ボタンを消す
+  document.getElementById("savebutton_area").innerHTML = "";  // 更新ボタンを消す
 }
 
 
 function root_flow(selectedListKey){
   set_init();  // 初期値設定
-  currentListKey = selectedListKey;
   currentListKey = selectedListKey;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
@@ -428,8 +374,6 @@ function root_flow(selectedListKey){
 
   targetList = targetData["list"];
   targetInfo = targetData["info"];
-
-  infoSection += '"info": {"Title":"' + targetInfo["Title"] + '","ID":"' + targetInfo["ID"] + '","NOTE":"' + targetInfo["NOTE"] + '"}';
 
   for (const listIndex in targetList) {
     // jsonデータを設定値にしてフォームを作る
@@ -448,68 +392,7 @@ function root_flow(selectedListKey){
   }
 
   wStr += '</form>';
-  wStr += '<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat();" />';
-
-  document.getElementById("form_area").innerHTML = wStr;
-}
-
-function outputText(){
-  // 作成したリンク集をファイル出力する
-  let fileContent = "";
-  fileContent += document.getElementById("json_area").value;
-  let fileContentChars = fileContent.split(''); // 配列形式に変換（後述のBlobで全要素出力）
-  let blob = new Blob(fileContentChars,{type:"text/plain"}); // テキスト形式でBlob定義
-  let link = document.createElement('a'); // HTMLのaタグを作成
-  link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
-  link.download = jsFileNames[currentListKey]; // aタグのdownload属性を作成
-  link.click(); // 定義したaタグをクリック（実行）
-}
-
-
-function etc_flow(selectedFileKey){
-  // function_enhancement.js を編集する
-  currentListKey = selectedFileKey;
-  wStr = "";
-  let enhancementSource = "";
-  set_init();  // 初期値設定
-
-  enhancementSource += `const key_highlight = [];\n`;
-  enhancementSource += `const targetDateList = [];\n`;
-  enhancementSource += `const targetWeekList = [];\n`;
-  enhancementSource += `const key_icon = [];\n`;
-
-  enhancementSource += `\n// ----- カテゴリキーに背景色を設定する ----- //\n`;
-  for (let key in key_highlight) {
-    let highlightColor = key_highlight[key];
-    enhancementSource += `key_highlight["${key}"] = "${highlightColor}";\n`;
-  }
-
-  enhancementSource += `\n// ----- アイコンボタン：検索キーの簡易登録 ----- //\n`;
-  for (let key in key_icon) {
-    let iconSearchKey = key_icon[key];
-    enhancementSource += `key_icon["${key}"] = "${iconSearchKey}";\n`;
-  }
-
-  enhancementSource += `\n// ----- イベント：年・月・日 指定 ----- //\n`;
-  for (let key in targetDateList) {
-    let eventDate = targetDateList[key][0];
-    let eventIcon = targetDateList[key][1];
-    let eventInfo = targetDateList[key][2];
-    enhancementSource += `targetDateList.push(["${eventDate}","${eventIcon}","${eventInfo}"]);\n`;
-  }
-
-  enhancementSource += `\n// ----- イベント：曜日 指定 ----- //\n`;
-  for (let key in targetWeekList) {
-    let eventDate = targetWeekList[key][0];
-    let eventIcon = targetWeekList[key][1];
-    let eventInfo = targetWeekList[key][2];
-    enhancementSource += `targetWeekList.push(["${eventDate}","${eventIcon}","${eventInfo}"]);\n`;
-  }
-
-  wStr += `<form name="linklist" action="" onsubmit="">`;
-  wStr += `<textarea id="function_enhancement_id" name="function_enhancement_name" cols="250" rows="50">${enhancementSource}</textarea>`;
-  wStr += `</form>`;
-  wStr += `<input type="button" value="jsファイル作成" onclick="make_data_to_jsformat_etc();" />`;
+  wStr += '<input type="button" value="Web Storage更新" onclick="updateLinkStorageFromForm();" />';
 
   document.getElementById("form_area").innerHTML = wStr;
 }
