@@ -682,19 +682,19 @@ function checkEventMsg(loTargetDateList){
 }
 
 
-function makeCheckEventStr(loCurrentDate, loTargetStr, loAicon, loEventStr, loDefaultAicon){
+function makeCheckEventStr(loCurrentDate, loTargetStr, loIcon, loEventStr, loDefaultIcon){
     const targetDate = new Date(loTargetStr);
     let rtnStr = "";
     targetDate.setHours(0, 0, 0, 0);  
 
     if (targetDate.getTime() === loCurrentDate.getTime()) {
-      let aiconDir = "aicon/"
-      let aicon = loDefaultAicon;  // デフォルトのアイコン
-      if(loAicon != ""){
-          aicon = loAicon;  // 指定のアイコンにする
+      let iconDir = "aicon/"
+      let icon = loDefaultIcon;  // デフォルトのアイコン
+      if(loIcon != ""){
+          icon = loIcon;  // 指定のアイコンにする
       }
       rtnStr += "<p clear='left'>";
-      rtnStr += "<img src='" + aiconDir + aicon + "' align='left' height='22px'>";
+      rtnStr += "<img src='" + iconDir + icon + "' align='left' height='22px'>";
       rtnStr += loEventStr;
       rtnStr += "</p>";
     }
@@ -724,18 +724,18 @@ function checkWeekEventMsg(loTargetWeekList){
     let pattern = new RegExp(loTargetWeekList[tgt][0]);
     let result = pattern.test(weekStr);
     let dayOfW = loTargetWeekList[tgt][0];
-    let aiconTgt = loTargetWeekList[tgt][1];
+    let iconTarget = loTargetWeekList[tgt][1];
     let msg = loTargetWeekList[tgt][2];
-    let aiconDir = "aicon/"
-    let aicon = "x_week.png";  // デフォルトのアイコン
+    let iconDir = "aicon/"
+    let icon = "x_week.png";  // デフォルトのアイコン
 
     if(result){
       if(dayOfWeek == dayOfWeekMaps[loTargetWeekList[tgt][0]] ){
-        if(aiconTgt != ""){
-            aicon = aiconTgt;  // 指定のアイコンにする
+        if(iconTarget != ""){
+            icon = iconTarget;  // 指定のアイコンにする
         }
         rtnStr += "<p clear='left'>";
-        rtnStr += "<img src='" + aiconDir + aicon + "' align='left' height='22px'>";
+        rtnStr += "<img src='" + iconDir + icon + "' align='left' height='22px'>";
         //rtnStr += `[${dayOfW}] ${msg}`;
         rtnStr += `[${dayOfW}] ${msg}`;
         rtnStr += "</p>";
@@ -743,7 +743,7 @@ function checkWeekEventMsg(loTargetWeekList){
     }else{
       //入力規則に誤りがある週のイベント情報
       rtnStr += "<p clear='left'>";
-      rtnStr += `<img src='${aiconDir}x_question.png' align='left' height='22px'>`;
+      rtnStr += `<img src='${iconDir}x_question.png' align='left' height='22px'>`;
       rtnStr += `<B><font color="red">[${dayOfW}] ${msg}</font></B>`;
       rtnStr += "</p>";
     }
