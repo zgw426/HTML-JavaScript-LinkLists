@@ -524,7 +524,7 @@ function setSelectFlg2(tgtStr){
 function showAreaD()
 {
   let wStr = "";
-  let sFlg = 1;
+  let isSelected = 1;
   let headStr = "";
   document.getElementById("areaD").innerHTML = "";
 
@@ -550,16 +550,16 @@ function showAreaD()
       decoUrl = decodeURI( list[lp0]["URL"] );
     } 
     
-    sFlg = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    isSelected = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
-    if(sFlg == 1)
+    if(isSelected == 1)
     {
       if( hiraToKana(list[lp0]["kana"][0].toUpperCase()).normalize('NFD')[0] != hiraToKana(headStr.toUpperCase()).normalize('NFD')[0]){
         headStr = list[lp0]["kana"][0];
-        tmpStr = hiraToKana( headStr.toUpperCase() );
-        tmpStr = tmpStr.normalize('NFD')[0];  // 濁音→静音
+        let headingText = hiraToKana( headStr.toUpperCase() );
+        headingText = headingText.normalize('NFD')[0];  // 濁音→静音
         wStr += "<div class='div_f0'>";
-        wStr += "<B>" + tmpStr + "</B>";
+        wStr += "<B>" + headingText + "</B>";
         wStr += "</div>"
       }
 
@@ -579,9 +579,9 @@ function showAreaD()
       wStr += "<hr width='100%'>";
 
       // note の改行(\n)を数えて textarea タグの高さを設定する
-      let CRcount = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
-      // console.log("CRcount = " + CRcount + ", note = " + list[lp0]["note"]);
-      wStr += "<textarea rows='"+ CRcount +"'>";
+      let noteRows = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
+      // console.log("noteRows = " + noteRows + ", note = " + list[lp0]["note"]);
+      wStr += "<textarea rows='"+ noteRows +"'>";
       wStr += list[lp0]["note"];
       wStr += "</textarea><BR />";
 
