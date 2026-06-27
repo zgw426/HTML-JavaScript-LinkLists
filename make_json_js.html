@@ -175,8 +175,8 @@ wStr = ""
 
 // 更新対象のjson.jsファイル
 let currentListKey = "";
-list_str = "";  // list 情報
-info_str = "";  // info 情報
+let listExpression = "";  // list 情報
+let infoExpression = "";  // info 情報
 
 const jsFileNames = new Array();
 jsFileNames["list01"] = "links_01.json.js";
@@ -383,8 +383,8 @@ function set_init(){
   document.getElementById("message_area").innerHTML = "";
   document.getElementById("json_area").innerHTML = "";
   wStr = "";
-  list_str = "";
-  info_str = "";
+  listExpression = "";
+  infoExpression = "";
   infoSection = "";
   document.getElementById("savebutton_area").innerHTML = "";  // ファイル出力ボタンを消す
 }
@@ -396,20 +396,20 @@ function root_flow(arg_no){
   wStr += '<form name="linklist" action="" onsubmit="">'
 
   switch (arg_no){
-    case "list01": list_str = 'list01["list"]'; info_str = 'list01["info"]'; break;
-    case "list02": list_str = 'list02["list"]'; info_str = 'list02["info"]'; break;
-    case "list03": list_str = 'list03["list"]'; info_str = 'list03["info"]'; break;
-    case "list04": list_str = 'list04["list"]'; info_str = 'list04["info"]'; break;
-    case "list05": list_str = 'list05["list"]'; info_str = 'list05["info"]'; break;
-    case "list06": list_str = 'list06["list"]'; info_str = 'list06["info"]'; break;
-    case "list07": list_str = 'list07["list"]'; info_str = 'list07["info"]'; break;
-    case "list08": list_str = 'list08["list"]'; info_str = 'list08["info"]'; break;
-    case "list09": list_str = 'list09["list"]'; info_str = 'list09["info"]'; break;
-    case "list10": list_str = 'list10["list"]'; info_str = 'list10["info"]'; break;
+    case "list01": listExpression = 'list01["list"]'; infoExpression = 'list01["info"]'; break;
+    case "list02": listExpression = 'list02["list"]'; infoExpression = 'list02["info"]'; break;
+    case "list03": listExpression = 'list03["list"]'; infoExpression = 'list03["info"]'; break;
+    case "list04": listExpression = 'list04["list"]'; infoExpression = 'list04["info"]'; break;
+    case "list05": listExpression = 'list05["list"]'; infoExpression = 'list05["info"]'; break;
+    case "list06": listExpression = 'list06["list"]'; infoExpression = 'list06["info"]'; break;
+    case "list07": listExpression = 'list07["list"]'; infoExpression = 'list07["info"]'; break;
+    case "list08": listExpression = 'list08["list"]'; infoExpression = 'list08["info"]'; break;
+    case "list09": listExpression = 'list09["list"]'; infoExpression = 'list09["info"]'; break;
+    case "list10": listExpression = 'list10["list"]'; infoExpression = 'list10["info"]'; break;
   }
 
-  targetList = eval(list_str);
-  targetInfo = eval(info_str);
+  targetList = eval(listExpression);
+  targetInfo = eval(infoExpression);
 
   infoSection += '"info": {"Title":"' + targetInfo["Title"] + '","ID":"' + targetInfo["ID"] + '","NOTE":"' + targetInfo["NOTE"] + '"}';
 
