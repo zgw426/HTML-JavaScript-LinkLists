@@ -54,18 +54,18 @@ function checkEventMsg(loTargetDateList){
 }
 
 
-function makeCheckEventStr(loCurrentDate, loTargetStr, loAicon, loEventStr){
+function makeCheckEventStr(loCurrentDate, loTargetStr, loIcon, loEventStr){
     const targetDate = new Date(loTargetStr);
     let rtnStr = "";
     targetDate.setHours(0, 0, 0, 0);  
 
     if (targetDate.getTime() === loCurrentDate.getTime()) {
-        let aicon = "default.png";  // デフォルトのアイコン
-        if(loAicon != ""){
-            aicon = loAicon;  // 指定のアイコンにする
+        let icon = "default.png";  // デフォルトのアイコン
+        if(loIcon != ""){
+            icon = loIcon;  // 指定のアイコンにする
         }
         rtnStr += "<p clear='left'>";
-        rtnStr += "<img src='" + loAicon + "' align='left' width='30px'>";
+        rtnStr += "<img src='" + loIcon + "' align='left' width='30px'>";
         rtnStr += loEventStr;
         rtnStr += "</p>";
     }

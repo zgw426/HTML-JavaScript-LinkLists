@@ -1,17 +1,17 @@
 const key_highlight = [];
 const targetDateList = [];
 const targetWeekList = [];
-const key_aicon = [];
+const key_icon = [];
 
 // ----- カテゴリキーに背景色を設定する ----- //
 key_highlight["資産"] = "#ffc0cb";
 key_highlight["動画"] = "#c0ffcb";
 
 // ----- アイコンボタン：検索キーの簡易登録 ----- //
-key_aicon["y_movie.png"] = "動画";
-key_aicon["y_money.png"] = "資産";
-key_aicon["y_cloud_aws.png"] = "クラウド aws";
-key_aicon["y_cloud.png"] = "クラウド";
+key_icon["y_movie.png"] = "動画";
+key_icon["y_money.png"] = "資産";
+key_icon["y_cloud_aws.png"] = "クラウド aws";
+key_icon["y_cloud.png"] = "クラウド";
 
 // ----- イベント：年・月・日 指定 ----- //
 targetDateList.push(["2023-10-20","x_mmdd_red.png","13:00～□□点検"]);

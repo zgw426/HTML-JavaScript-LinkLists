@@ -160,7 +160,7 @@ const storage = localStorage;
 
 // 項目-群
 const itemDefinitions = [
-  {"item": "aicon"   , "line_flg": 0, "mustFlg": "OPTION"},
+  {"item": "icon"   , "line_flg": 0, "mustFlg": "OPTION"},
   {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "Name"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "URL"     , "line_flg": 0, "mustFlg": "MUST"},
@@ -277,7 +277,7 @@ function make_data_to_jsformat(){
     fieldValue= formElements.elements.item(formIndex).value;
 
     switch (fieldName){
-      case "aicon":
+      case "icon":
         currentItemOutput += "{\n";
         if(fieldValue != ""){
           currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
@@ -458,7 +458,7 @@ function etc_flow(selectedFileKey){
   enhancementSource += `const key_highlight = [];\n`;
   enhancementSource += `const targetDateList = [];\n`;
   enhancementSource += `const targetWeekList = [];\n`;
-  enhancementSource += `const key_aicon = [];\n`;
+  enhancementSource += `const key_icon = [];\n`;
 
   enhancementSource += `\n// ----- カテゴリキーに背景色を設定する ----- //\n`;
   for (let key in key_highlight) {
@@ -467,9 +467,9 @@ function etc_flow(selectedFileKey){
   }
 
   enhancementSource += `\n// ----- アイコンボタン：検索キーの簡易登録 ----- //\n`;
-  for (let key in key_aicon) {
-    let iconSearchKey = key_aicon[key];
-    enhancementSource += `key_aicon["${key}"] = "${iconSearchKey}";\n`;
+  for (let key in key_icon) {
+    let iconSearchKey = key_icon[key];
+    enhancementSource += `key_icon["${key}"] = "${iconSearchKey}";\n`;
   }
 
   enhancementSource += `\n// ----- イベント：年・月・日 指定 ----- //\n`;

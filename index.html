@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
-  <script src="areac_aicon_mapinfo.js"></script>
+  <script src="areac_icon_mapinfo.js"></script>
   <script src="function_enhancement.js"></script>
   <script src="links_01.json.js"></script>
   <script src="links_02.json.js"></script>
@@ -231,7 +231,7 @@ function showAreaB()
     //------------//
     //フィルター用アイコンを描画
     wStr += "<HR>";
-    wStr += addFilterAiconOnAreaB();
+    wStr += addFilterIconOnAreaB();
 
     //------------//
     //イベント情報を表示
@@ -244,20 +244,20 @@ function showAreaB()
 }
 
 
-function addFilterAiconOnAreaB(){
+function addFilterIconOnAreaB(){
   //アイコンを使ったフィルタ用のキーのアイコンを表示する
   let filterHtml = "";
-  filterHtml += "<form name='areaB-FilterAicon'>";
-  for (let key in key_aicon) {
+  filterHtml += "<form name='areaB-FilterIcon'>";
+  for (let key in key_icon) {
       filterHtml += "<div class='div_f2'>";
-      filterHtml += "<img src='aicon/"+ key +"' alt='"+key_aicon[key]+"' width='60px' height='60px' onclick='selectEventFilterAicon(\""+ key +"\")'>";
+      filterHtml += "<img src='icon/"+ key +"' alt='"+key_icon[key]+"' width='60px' height='60px' onclick='selectEventFilterIcon(\""+ key +"\")'>";
       filterHtml += "</div>";
   }
   filterHtml += "</form>";
   return filterHtml;
 }
 
-function selectEventFilterAicon(argKey){
+function selectEventFilterIcon(argKey){
   //フィルター用アイコンをクリックしたときにチェックボックスの有無を変更する
   let resultStr = "";
 
@@ -265,8 +265,8 @@ function selectEventFilterAicon(argKey){
   let inputKey = document.getElementById("inputKey").value;
   inputKey = inputKey.trim();
 
-  let tmpArr = inputKey.split(key_aicon[argKey]);
-  tmpArr.push(key_aicon[argKey]);
+  let tmpArr = inputKey.split(key_icon[argKey]);
+  tmpArr.push(key_icon[argKey]);
   resultStr = tmpArr.join(" ");
 
   document.getElementById("inputKey").value = resultStr;
@@ -280,7 +280,7 @@ function editLinkInfo(){
   // アイコン情報を表示
   for (let iconName in icons) {
     iconListHtml += "<div class='div_f2'>";
-    iconListHtml += "<img src='aicon/"+ iconName +"' alt='" + iconName + "' height='40'>";
+    iconListHtml += "<img src='icon/"+ iconName +"' alt='" + iconName + "' height='40'>";
     iconListHtml += "<BR/>";
     iconListHtml += iconName;
     iconListHtml += "</div>";
@@ -317,7 +317,7 @@ function showAreaC(showFlg){
       cateStr += list[lp0]["category"][lpf]["key"];
     }
 
-    isSelected = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    isSelected = setSelectFlg( list[lp0]["icon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(isSelected == 1)
     {
@@ -329,8 +329,8 @@ function showAreaC(showFlg){
         kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
 
         // ------------------- アイコン -------------------
-        if(typeof list[lpa]["aicon"] !== 'undefined'){
-          tmpIcons.push(list[lpa]["aicon"]);
+        if(typeof list[lpa]["icon"] !== 'undefined'){
+          tmpIcons.push(list[lpa]["icon"]);
         }
         // ------------------- アイコン -------------------
       }
@@ -400,9 +400,9 @@ function showAreaC(showFlg){
 
     iconMapKey = arr[o]["key"].toLowerCase(); // 小文字変換
 
-    if(typeof aicon_mapinfo[ iconMapKey ] !== 'undefined'){
+    if(typeof iconMapInfo[ iconMapKey ] !== 'undefined'){
       //------カテゴリキーに画像貼り付け------//
-      wStr += "<img src='aicon/"+ aicon_mapinfo[ iconMapKey ] +"' height='16'> ";
+      wStr += "<img src='icon/"+ iconMapInfo[ iconMapKey ] +"' height='16'> ";
     }
 
     wStr += arr[o]["key"];
@@ -414,9 +414,9 @@ function showAreaC(showFlg){
   document.getElementById("areaC").innerHTML = wStr;
 }
 
-function setSelectFlg(tgtAicon, tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
+function setSelectFlg(tgtIcon, tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl){
   let rtn = ctn = 0;
-  let tgtStr = tgtAicon + "," + tgtName + "," + tgtCategory + "," + tgtNote + "," + tgtDecoUrl;
+  let tgtStr = tgtIcon + "," + tgtName + "," + tgtCategory + "," + tgtNote + "," + tgtDecoUrl;
   let rFlg = new Array();
 
   tgtStr = tgtStr.toLowerCase(); // 小文字変換
@@ -500,8 +500,8 @@ function setDefaultIcons(iconNames){
 
 
 
-  for(let iconIndex=0; iconIndex< aicon_default.length; iconIndex++){
-    iconNames.push(aicon_default[iconIndex]);
+  for(let iconIndex=0; iconIndex< defaultIcons.length; iconIndex++){
+    iconNames.push(defaultIcons[iconIndex]);
   }
 
   return iconNames;
@@ -550,7 +550,7 @@ function showAreaD()
       decoUrl = decodeURI( list[lp0]["URL"] );
     } 
     
-    isSelected = setSelectFlg( list[lp0]["aicon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
+    isSelected = setSelectFlg( list[lp0]["icon"], list[lp0]["Name"], list[lp0]["URL"], cateStr, list[lp0]["note"], decoUrl );
 
     if(isSelected == 1)
     {
@@ -567,8 +567,8 @@ function showAreaD()
       wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
 
       // アイコン情報あれば表示
-      if(typeof list[lp0]["aicon"] !== 'undefined'){
-        wStr += "<img src='aicon/"+ list[lp0]["aicon"] +"' height='70' align='middle' hspace='3px' vspace='3px'>";
+      if(typeof list[lp0]["icon"] !== 'undefined'){
+        wStr += "<img src='icon/"+ list[lp0]["icon"] +"' height='70' align='middle' hspace='3px' vspace='3px'>";
       }
       wStr += list[lp0]["Name"];
       wStr += "</a>";
@@ -688,7 +688,7 @@ function makeCheckEventStr(loCurrentDate, loTargetStr, loIcon, loEventStr, loDef
     targetDate.setHours(0, 0, 0, 0);  
 
     if (targetDate.getTime() === loCurrentDate.getTime()) {
-      let iconDir = "aicon/"
+      let iconDir = "icon/"
       let icon = loDefaultIcon;  // デフォルトのアイコン
       if(loIcon != ""){
           icon = loIcon;  // 指定のアイコンにする
@@ -726,7 +726,7 @@ function checkWeekEventMsg(loTargetWeekList){
     let dayOfW = loTargetWeekList[tgt][0];
     let iconTarget = loTargetWeekList[tgt][1];
     let msg = loTargetWeekList[tgt][2];
-    let iconDir = "aicon/"
+    let iconDir = "icon/"
     let icon = "x_week.png";  // デフォルトのアイコン
 
     if(result){

@@ -2,7 +2,7 @@ let list02 = {
 "info": {"Title":"買い物","ID":"02","NOTE":"ECサイト"},
 "list": [
 {
-	"aicon": "amazon.png",
+	"icon": "amazon.png",
 	"kana": "アマゾン",
 	"Name": "Amazon",
 	"URL": "https://www.amazon.co.jp/",

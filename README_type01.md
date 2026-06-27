@@ -11,7 +11,7 @@
 |ファイル|説明|
 |---|---|
 |index.html|アプリ本体|
-|aicon_mapinfo.js|カテゴリキーアイコンのマップ情報|
+|areac_icon_mapinfo.js|カテゴリキーアイコンのマップ情報|
 |areac_key_highlight.js|強調表示するカテゴリキーの設定|
 |links_01.json.js|リンク情報を含むjsファイル|
 |links_02.json.js|リンク情報を含むjsファイル|
@@ -61,7 +61,7 @@ JSONファイルを直接編集したくない場合は、index.htmlをブラウ
 
 ```
   {
-    "aicon"    : "google.png",
+    "icon"    : "google.png",
     "kana"     : "google",
     "Name"     : "Google",
     "URL"      : "https://www.google.com/",
@@ -74,7 +74,7 @@ JSONファイルを直接編集したくない場合は、index.htmlをブラウ
 
 |パラメータ|説明|
 |--------|--------|
-|aicon|(オプション)表示する画像ファイル名。|
+|icon|(オプション)表示する画像ファイル名。|
 |kana|Nameの読み仮名。情報の表示順序に影響|
 |Name|リンクを表示する際のタイトル|
 |URL|リンクのURL|
@@ -83,13 +83,13 @@ JSONファイルを直接編集したくない場合は、index.htmlをブラウ
 |category-kana|カテゴリ欄に表示する単語の読み仮名|
 |note|備考欄|
 
-※ パラメータ aicon について
+※ パラメータ icon について
 
-パラメータ `aicon` には表示する画像ファイル名を記載します。
-画像ファイルは、`aicon`フォルダ配下に格納しておきます。
+パラメータ `icon` には表示する画像ファイル名を記載します。
+画像ファイルは、`icon`フォルダ配下に格納しておきます。
 サンプルとして以下の画像ファイルを格納しています。
 
-- ./HTML-JavaScript-LinkLists/aicon
+- ./HTML-JavaScript-LinkLists/icon
   - amazon.png
   - bing.png
   - file.png
@@ -121,7 +121,7 @@ let list01 = {
 "info": {"Title":"開発","ID":"01"},
 "list": [
 {
-	"aicon": "google.png",
+	"icon": "google.png",
     :
     :
 ```

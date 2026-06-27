@@ -2,7 +2,7 @@ let list05 = {
 "info": {"Title":"動画サイト","ID":"05","NOTE":"動画視聴"},
 "list": [
 {
-	"aicon": "youtube.png",
+	"icon": "youtube.png",
 	"kana": "ユーチューブ",
 	"Name": "YouTube",
 	"URL": "https://www.youtube.com/",
