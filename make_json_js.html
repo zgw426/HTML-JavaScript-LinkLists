@@ -264,8 +264,8 @@ function make_data_to_jsformat(){
   list_out = "";
   current_out = "";
   write_flg = 1;
-  name_out = "";
-  value_out= "";
+  let fieldName = "";
+  let fieldValue= "";
   warning_msg = "";  // category欄に undefined があった場合に警告を出す
   warning_msg_cell = "";
 
@@ -273,41 +273,41 @@ function make_data_to_jsformat(){
   const form_elements = document.forms.linklist;
 
   for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
-    name_out = form_elements.elements.item(formIndex).name;
-    value_out= form_elements.elements.item(formIndex).value;
+    fieldName = form_elements.elements.item(formIndex).name;
+    fieldValue= form_elements.elements.item(formIndex).value;
 
-    switch (name_out){
+    switch (fieldName){
       case "aicon":
         current_out += "{\n";
-        if(value_out != ""){
-          current_out +=  '\t"'+ name_out +'": "'+ value_out +'",\n';
+        if(fieldValue != ""){
+          current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         }
         break;
       case "kana":
-        current_out +=  '\t"'+ name_out +'": "'+ value_out +'",\n';
+        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         break;
       case "Name":
-        current_out +=  '\t"'+ name_out +'": "'+ value_out +'",\n';
-        if(value_out == "") write_flg = 0;
+        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        if(fieldValue == "") write_flg = 0;
         break;
       case "URL":
-        current_out +=  '\t"'+ name_out +'": "'+ value_out +'",\n';
+        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         break;
       case "category":
-        tmp_out = set_category_out(value_out);
+        tmp_out = set_category_out(fieldValue);
 
         if(tmp_out.indexOf('undefined') > 0){
           warning_msg_cell += "category欄に undefined が含まれています [" + tmp_out + "]<BR />";
         }
 
-        current_out += '\t"'+ name_out +'":\n';
+        current_out += '\t"'+ fieldName +'":\n';
         current_out += '\t\t[\n';
         current_out += '\t\t\t' + tmp_out + '\n';
         current_out += '\t\t],\n';
         break;
       case "note":
-        value_out = value_out.replace(/\n/g, '\\n')
-        current_out +=  '\t"'+ name_out +'": "'+ value_out +'"\n';
+        fieldValue = fieldValue.replace(/\n/g, '\\n')
+        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
         current_out += "},";
         if(write_flg == 1){
           // 新json.jsファイルに追記する情報
@@ -338,18 +338,18 @@ function make_data_to_jsformat(){
 
 function make_data_to_jsformat_etc(){
   let wOutStr = "";
-  let name_out = "";
-  let value_out = "";
+  let fieldName = "";
+  let fieldValue = "";
 
   // フォームの情報を取得
   const form_elements = document.forms.linklist;
 
   for(let formIndex = 0; formIndex < form_elements.length; formIndex++){
-    name_out = form_elements.elements.item(formIndex).name;
-    value_out= form_elements.elements.item(formIndex).value;
+    fieldName = form_elements.elements.item(formIndex).name;
+    fieldValue= form_elements.elements.item(formIndex).value;
   }
 
-  document.getElementById("json_area").innerHTML = value_out;
+  document.getElementById("json_area").innerHTML = fieldValue;
 
   let text = document.getElementById("json_area");
   text.select();
