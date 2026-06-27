@@ -222,14 +222,14 @@ function set_form_flow(itemDefinitions, listItem){
   let formHtml = "";
   let itemValue = "";
   let categoryText = "";
-  for (const elem in itemDefinitions) {
+  for (const definitionIndex in itemDefinitions) {
     let formFlg = 1;
-    let lineFlg = Number(itemDefinitions[elem]["line_flg"]);
-    let itemName = itemDefinitions[elem]["item"];
-    let mustFlag  = itemDefinitions[elem]["mustFlg"];
+    let lineFlg = Number(itemDefinitions[definitionIndex]["line_flg"]);
+    let itemName = itemDefinitions[definitionIndex]["item"];
+    let mustFlag  = itemDefinitions[definitionIndex]["mustFlg"];
 
-    let itemNo = Number(elem) + 1;
-    if(elem == 0){
+    let itemNo = Number(definitionIndex) + 1;
+    if(definitionIndex == 0){
       formFlg = 0;
     }else if(itemNo == itemDefinitions.length){
       formFlg = -1;
