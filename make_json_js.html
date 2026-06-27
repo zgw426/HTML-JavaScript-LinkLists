@@ -262,7 +262,7 @@ function set_form_flow(item_jsn, list_elem){
 function make_data_to_jsformat(){
   let generatedJs = "";
   let listSection = "";
-  current_out = "";
+  let currentItemOutput = "";
   let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
@@ -278,20 +278,20 @@ function make_data_to_jsformat(){
 
     switch (fieldName){
       case "aicon":
-        current_out += "{\n";
+        currentItemOutput += "{\n";
         if(fieldValue != ""){
-          current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+          currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         }
         break;
       case "kana":
-        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         break;
       case "Name":
-        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         if(fieldValue == "") shouldWrite = false;
         break;
       case "URL":
-        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
+        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         break;
       case "category":
         let categoryOutput = set_category_out(fieldValue);
@@ -300,21 +300,21 @@ function make_data_to_jsformat(){
           warning_msg_cell += "category欄に undefined が含まれています [" + categoryOutput + "]<BR />";
         }
 
-        current_out += '\t"'+ fieldName +'":\n';
-        current_out += '\t\t[\n';
-        current_out += '\t\t\t' + categoryOutput + '\n';
-        current_out += '\t\t],\n';
+        currentItemOutput += '\t"'+ fieldName +'":\n';
+        currentItemOutput += '\t\t[\n';
+        currentItemOutput += '\t\t\t' + categoryOutput + '\n';
+        currentItemOutput += '\t\t],\n';
         break;
       case "note":
         fieldValue = fieldValue.replace(/\n/g, '\\n')
-        current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
-        current_out += "},";
+        currentItemOutput +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
+        currentItemOutput += "},";
         if(shouldWrite){
           // 新json.jsファイルに追記する情報
-          listSection += current_out;
+          listSection += currentItemOutput;
           warning_msg += warning_msg_cell;
         }
-        current_out = "";
+        currentItemOutput = "";
         shouldWrite = true;
         warning_msg_cell = "";
         break;
