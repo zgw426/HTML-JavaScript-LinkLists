@@ -145,6 +145,7 @@
 const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
+const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 
 function getLinkStorageKey(listKey){
@@ -212,6 +213,29 @@ function saveVisibleLinkIds(linkInfoIds){
   storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds));
 }
 
+function getAreaBVisibleLinkIds(){
+  const visibleLinkIds = getVisibleLinkIds();
+  const storedValue = storage.getItem(AREA_B_VISIBILITY_STORAGE_KEY);
+  if(storedValue == null){
+    return visibleLinkIds;
+  }
+
+  try {
+    const storedIds = JSON.parse(storedValue);
+    return Array.isArray(storedIds)
+      ? storedIds.filter(infoId => visibleLinkIds.includes(infoId))
+      : visibleLinkIds;
+  } catch (error) {
+    console.warn("Invalid AreaB visible link ids in Web Storage:", error);
+    return visibleLinkIds;
+  }
+}
+
+function saveAreaBVisibleLinkIds(linkInfoIds){
+  const visibleLinkIds = getVisibleLinkIds();
+  storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds.filter(infoId => visibleLinkIds.includes(infoId))));
+}
+
 function refreshParentAreas(){
   if(parent && typeof parent.refreshAllAreas === "function"){
     parent.refreshAllAreas();
@@ -221,6 +245,7 @@ function refreshParentAreas(){
 function renderLinkStorageControls(){
   let controlsHtml = "";
   const visibleLinkIds = getVisibleLinkIds();
+  const areaBVisibleLinkIds = getAreaBVisibleLinkIds();
 
   controlsHtml += "<HR>";
   controlsHtml += "<form name='linkStorageControls'>";
@@ -234,8 +259,13 @@ function renderLinkStorageControls(){
 
     const linkInfo = linkData["info"];
     const checkedAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
+    const areaBCheckedAttr = areaBVisibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
+    const areaBDisabledAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "" : "disabled='disabled'";
     controlsHtml += "<div class='div_f1'>";
+    controlsHtml += "表示 ";
     controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm()' " + checkedAttr + ">";
+    controlsHtml += " AreaB初期表示 ";
+    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateAreaBVisibleLinksFromForm()' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
     controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
@@ -258,6 +288,23 @@ function updateVisibleLinksFromForm(){
   }
 
   saveVisibleLinkIds(visibleLinkInfoIds);
+  saveAreaBVisibleLinkIds(getAreaBVisibleLinkIds());
+  renderLinkStorageControls();
+  refreshParentAreas();
+}
+
+function updateAreaBVisibleLinksFromForm(){
+  const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
+  const areaBVisibleCheckboxes = toElementArray(document.linkStorageControls.areaBVisibleLinkInfoId);
+  const areaBVisibleLinkInfoIds = [];
+
+  for(let index = 0; index < areaBVisibleCheckboxes.length; index++){
+    if(areaBVisibleCheckboxes[index].checked){
+      areaBVisibleLinkInfoIds.push(areaBVisibleCheckboxes[index].value);
+    }
+  }
+
+  saveAreaBVisibleLinkIds(areaBVisibleLinkInfoIds);
   refreshParentAreas();
 }
 
@@ -274,6 +321,7 @@ function deleteStoredLinkData(listKey){
 
   deleteLinkDataFromStorage(listKey);
   saveVisibleLinkIds(getVisibleLinkIds().filter(infoId => infoId != linkInfo["ID"]));
+  saveAreaBVisibleLinkIds(getAreaBVisibleLinkIds().filter(infoId => infoId != linkInfo["ID"]));
 
   if(currentListKey == listKey){
     currentListKey = "";

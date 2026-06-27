@@ -14,6 +14,7 @@
 const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
+const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 let load_arr = [];
 //let linkListKeys = ["list01","list02","list03","list05"];
@@ -109,6 +110,26 @@ function isLinkInfoVisible(linkInfoId){
   return visibleLinkIds.includes(linkInfoId);
 }
 
+function loadAreaBVisibleLinkIds(){
+  const storedValue = storage.getItem(AREA_B_VISIBILITY_STORAGE_KEY);
+  if(storedValue == null){
+    b1key = b1key.concat(visibleLinkIds);
+    isAreaBFilterActive = true;
+    return;
+  }
+
+  try {
+    const storedIds = JSON.parse(storedValue);
+    b1key = Array.isArray(storedIds)
+      ? b1key.concat(storedIds.filter(infoId => visibleLinkIds.includes(infoId)))
+      : b1key.concat(visibleLinkIds);
+  } catch (error) {
+    console.warn("Invalid AreaB visible link ids in Web Storage:", error);
+    b1key = b1key.concat(visibleLinkIds);
+  }
+  isAreaBFilterActive = true;
+}
+
 function refreshLoadArrFromStorage(){
   load_arr.length = 0;
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
@@ -123,6 +144,7 @@ function refreshAllAreas(){
   set_Initial();
   refreshLoadArrFromStorage();
   loadVisibleLinkIds();
+  loadAreaBVisibleLinkIds();
   set_List();
   showAreaB();
   showAreaC(0);
@@ -155,6 +177,9 @@ function importLinkJsonFiles(files){
       loadVisibleLinkIds();
       const importedInfoIds = importedFiles.map(importedFile => importedFile["infoId"]);
       saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat(importedInfoIds))));
+      b1key.length = 0;
+      loadAreaBVisibleLinkIds();
+      storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(Array.from(new Set(b1key.concat(importedInfoIds)))));
       refreshAllAreas();
       alert(importedFiles.length + " file(s) imported.");
     })
@@ -932,6 +957,7 @@ function selectEventFlowC()
 // ROOTフロー：起動時の処理
 refreshLoadArrFromStorage();
 loadVisibleLinkIds();
+loadAreaBVisibleLinkIds();
 set_List();
 showAreaB();
 showAreaC(0);
