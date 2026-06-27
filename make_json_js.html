@@ -294,15 +294,15 @@ function make_data_to_jsformat(){
         current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
         break;
       case "category":
-        tmp_out = set_category_out(fieldValue);
+        let categoryOutput = set_category_out(fieldValue);
 
-        if(tmp_out.indexOf('undefined') > 0){
-          warning_msg_cell += "category欄に undefined が含まれています [" + tmp_out + "]<BR />";
+        if(categoryOutput.indexOf('undefined') > 0){
+          warning_msg_cell += "category欄に undefined が含まれています [" + categoryOutput + "]<BR />";
         }
 
         current_out += '\t"'+ fieldName +'":\n';
         current_out += '\t\t[\n';
-        current_out += '\t\t\t' + tmp_out + '\n';
+        current_out += '\t\t\t' + categoryOutput + '\n';
         current_out += '\t\t],\n';
         break;
       case "note":
