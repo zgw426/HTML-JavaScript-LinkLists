@@ -217,7 +217,7 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
   return(fieldHtml);
 }
 
-function set_form_flow(itemDefinitions, list_elem){
+function set_form_flow(itemDefinitions, listItem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
   let itemValue = "";
@@ -235,7 +235,7 @@ function set_form_flow(itemDefinitions, list_elem){
       formFlg = -1;
     }
 
-    itemValue = list_elem[itemName];
+    itemValue = listItem[itemName];
 
     if (typeof itemValue === "undefined"){
       itemValue = "";
