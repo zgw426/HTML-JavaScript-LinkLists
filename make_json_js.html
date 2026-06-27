@@ -221,7 +221,7 @@ function set_form_flow(item_jsn, list_elem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
   let item_val = "";
-  let tmp_val = "";
+  let categoryText = "";
   for (const elem in item_jsn) {
     form_flg = 1;
     line_flg = Number(item_jsn[elem]["line_flg"]);
@@ -240,14 +240,14 @@ function set_form_flow(item_jsn, list_elem){
     if (typeof item_val === "undefined"){
       item_val = "";
     }else  if (typeof item_val === "object"){
-      tmp_val = "";
+      categoryText = "";
       for(const cell in item_val){
         if (item_val[cell]["key"] != ""){
-          tmp_val += '"'+item_val[cell]["key"]+'": "'+item_val[cell]["kana"] + '"\n';
+          categoryText += '"'+item_val[cell]["key"]+'": "'+item_val[cell]["kana"] + '"\n';
         }
       }
-      tmp_val = tmp_val.trim();  // 最後の改行コードを削除
-      item_val = tmp_val;
+      categoryText = categoryText.trim();  // 最後の改行コードを削除
+      item_val = categoryText;
     }
     //formHtml += "<div class='div_f2'>";
     //console.log( "DEBUG " + item_name +", "+ must_flg);
