@@ -263,7 +263,7 @@ function make_data_to_jsformat(){
   wStr_out = "";
   list_out = "";
   current_out = "";
-  write_flg = 1;
+  let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
   warning_msg = "";  // category欄に undefined があった場合に警告を出す
@@ -288,7 +288,7 @@ function make_data_to_jsformat(){
         break;
       case "Name":
         current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
-        if(fieldValue == "") write_flg = 0;
+        if(fieldValue == "") shouldWrite = false;
         break;
       case "URL":
         current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'",\n';
@@ -309,13 +309,13 @@ function make_data_to_jsformat(){
         fieldValue = fieldValue.replace(/\n/g, '\\n')
         current_out +=  '\t"'+ fieldName +'": "'+ fieldValue +'"\n';
         current_out += "},";
-        if(write_flg == 1){
+        if(shouldWrite){
           // 新json.jsファイルに追記する情報
           list_out += current_out;
           warning_msg += warning_msg_cell;
         }
         current_out = "";
-        write_flg = 1;
+        shouldWrite = true;
         warning_msg_cell = "";
         break;
     }
