@@ -11,8 +11,8 @@
 |ファイル|説明|
 |---|---|
 |index.html|アプリ本体|
-|areac_icon_mapinfo.js|カテゴリキーアイコンのマップ情報|
-|areac_key_highlight.js|強調表示するカテゴリキーの設定|
+|area_c_icon_mapinfo.js|カテゴリキーアイコンのマップ情報|
+|area_c_key_highlight.js|強調表示するカテゴリキーの設定|
 |links_01.json.js|リンク情報を含むjsファイル|
 |links_02.json.js|リンク情報を含むjsファイル|
 |links_03.json.js|リンク情報を含むjsファイル|

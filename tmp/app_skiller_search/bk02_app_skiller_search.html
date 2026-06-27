@@ -255,27 +255,27 @@ function showInfo(targetTable, targetArea, columns, searchKeys, searchMode){
         let filteredRows = filterRows(infos[targetTable], searchKeys, searchMode);
 
         // 並べ替えを実行
-        let firstClmn;
-        let secondClmn;
+        let firstColumn;
+        let secondColumn;
         switch(targetTable){
             case listCsv[0]:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
                 break;
             case listCsv[1]:
-                firstClmn = 1;
-                secondClmn = 2;
+                firstColumn = 1;
+                secondColumn = 2;
                 break;
             case listCsv[2]:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
                 break;
             default:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
         }
 
-        const sortedData = sortRowsByColumns(filteredRows, firstClmn, secondClmn);
+        const sortedData = sortRowsByColumns(filteredRows, firstColumn, secondColumn);
         sortedData.forEach(row => console.log(row));
         outStr += setKeyString(targetTable, sortedData);
         output.innerHTML = outStr;
@@ -362,14 +362,14 @@ function filterRows(rows, searchKeys, mode = "AND") {
 
 
 
-// Function to sort rows by firstClmn and secondClmn
-function sortRowsByColumns(data, firstClmn, secondClmn) {
+// Function to sort rows by firstColumn and secondColumn
+function sortRowsByColumns(data, firstColumn, secondColumn) {
     const [header, ...rows] = data;
     const sortedRows = rows.sort((a, b) => {
-        if (a[firstClmn] < b[firstClmn]) return -1;
-        if (a[firstClmn] > b[firstClmn]) return 1;
-        if (a[secondClmn] < b[secondClmn]) return -1;
-        if (a[secondClmn] > b[secondClmn]) return 1;
+        if (a[firstColumn] < b[firstColumn]) return -1;
+        if (a[firstColumn] > b[firstColumn]) return 1;
+        if (a[secondColumn] < b[secondColumn]) return -1;
+        if (a[secondColumn] > b[secondColumn]) return 1;
         return 0;
     });
     return [header, ...sortedRows];

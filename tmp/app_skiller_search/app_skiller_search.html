@@ -282,27 +282,27 @@ function showInfo(targetTable, targetArea, columns, searchKeys, searchMode){
         let filteredRows = filterRows(infos[targetTable], searchKeys, searchMode);
 
         // 並べ替えを実行
-        let firstClmn;
-        let secondClmn;
+        let firstColumn;
+        let secondColumn;
         switch(targetTable){
             case listCsv[0]:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
                 break;
             case listCsv[1]:
-                firstClmn = 1;
-                secondClmn = 2;
+                firstColumn = 1;
+                secondColumn = 2;
                 break;
             case listCsv[2]:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
                 break;
             default:
-                firstClmn = 0;
-                secondClmn = 1;
+                firstColumn = 0;
+                secondColumn = 1;
         }
 
-        const sortedData = sortRowsByColumns(filteredRows, firstClmn, secondClmn);
+        const sortedData = sortRowsByColumns(filteredRows, firstColumn, secondColumn);
         sortedData.forEach(row => console.log(row));
         outStr += setKeyString(targetTable, sortedData);
         output.innerHTML = outStr;
@@ -348,7 +348,7 @@ function setKeyString(targetTable, sortedRows){
                     }
                     if(row[1] != befRow[1]){
                         checkedStr = isValueInArray(row[1], selected01Keys);
-                        retStr += `<input type="checkbox" id="table01-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SLECTED');"><label for="table01-${index}">${row[1]}</label>`;
+                        retStr += `<input type="checkbox" id="table01-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SELECTED');"><label for="table01-${index}">${row[1]}</label>`;
                     }
                     befRow[0] = row[0];
                     befRow[1] = row[1];
@@ -359,14 +359,14 @@ function setKeyString(targetTable, sortedRows){
                     }
                     if(row[2] != befRow[1]){
                         checkedStr = isValueInArray(row[2], selected02Keys);
-                        retStr += `<input type="checkbox" id="table02-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SLECTED');"><label for="table02-${index}">${row[2]}</label>`;
+                        retStr += `<input type="checkbox" id="table02-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SELECTED');"><label for="table02-${index}">${row[2]}</label>`;
                     }
                     befRow[0] = row[1];
                     befRow[1] = row[2];
                     break;
                 case table03:
                     checkedStr = isValueInArray(row[0], selected03Keys);
-                    retStr += `<input type="checkbox" id="table03-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SLECTED');"><label for="table03-${index}">${row.join(', ')}</label><BR />`;
+                    retStr += `<input type="checkbox" id="table03-${index}" value="${row.join(', ')}" ${checkedStr} onClick="rootFlow('SELECTED');"><label for="table03-${index}">${row.join(', ')}</label><BR />`;
                     break;
                 default:
                     console.log("NotHIT");
@@ -410,14 +410,14 @@ function filterRows(rows, searchKeys, mode = "AND") {
 
 
 
-// Function to sort rows by firstClmn and secondClmn
-function sortRowsByColumns(data, firstClmn, secondClmn) {
+// Function to sort rows by firstColumn and secondColumn
+function sortRowsByColumns(data, firstColumn, secondColumn) {
     const [header, ...rows] = data;
     const sortedRows = rows.sort((a, b) => {
-        if (a[firstClmn] < b[firstClmn]) return -1;
-        if (a[firstClmn] > b[firstClmn]) return 1;
-        if (a[secondClmn] < b[secondClmn]) return -1;
-        if (a[secondClmn] > b[secondClmn]) return 1;
+        if (a[firstColumn] < b[firstColumn]) return -1;
+        if (a[firstColumn] > b[firstColumn]) return 1;
+        if (a[secondColumn] < b[secondColumn]) return -1;
+        if (a[secondColumn] > b[secondColumn]) return 1;
         return 0;
     });
     return [header, ...sortedRows];
@@ -450,7 +450,7 @@ function analyzeFlow(){
     selected02Keys = [];
     selected03Keys = [];
     selectedMngIds = [];  // フィルタするMngId群
-    let tmpselectedMngIds = [];  // フィルタするMngId群(重複削除前)
+    let tmpSelectedMngIds = [];  // フィルタするMngId群(重複削除前)
 
     let tmpMngIdsByKeyword01 = [];
     let tmpMngIdsByKeyword02 = [];
@@ -464,7 +464,7 @@ function analyzeFlow(){
 
         selected01Keys.push(t01Name);
         tmpMngIdsByKeyword01 = getMngIdsByName(infos, listCsv[0], t01Name);
-        //tmpselectedMngIds.push(...tmpMngIdsByKeyword);
+        //tmpSelectedMngIds.push(...tmpMngIdsByKeyword);
     });
 
     table02Keys.forEach((key, index) => {
@@ -475,7 +475,7 @@ function analyzeFlow(){
 
         selected02Keys.push([t02CategoryLevel01,t02CategoryLevel02]);
         tmpMngIdsByKeyword02 = getMngIdsByCategory(infos, listCsv[1], t02CategoryLevel01, t02CategoryLevel02);
-        //tmpselectedMngIds.push(...tmpMngIdsByKeyword);
+        //tmpSelectedMngIds.push(...tmpMngIdsByKeyword);
     });
     
     table03Keys.forEach((key, index) => {
@@ -488,25 +488,25 @@ function analyzeFlow(){
         selected03Keys.push(t03MngId);
 
         tmpMngIdsByKeyword03.push(t03MngId);
-        //tmpselectedMngIds.push(t03MngId);
+        //tmpSelectedMngIds.push(t03MngId);
     });
 
 
-    tmpselectedMngIds = getCommonValues(tmpMngIdsByKeyword01, tmpMngIdsByKeyword02, tmpMngIdsByKeyword03);  // 全てに含まれるMngIdのみ残す
+    tmpSelectedMngIds = getCommonValues(tmpMngIdsByKeyword01, tmpMngIdsByKeyword02, tmpMngIdsByKeyword03);  // 全てに含まれるMngIdのみ残す
     console.log("00-0-0-0-0-0-0");
     console.log(tmpMngIdsByKeyword01);
     console.log(tmpMngIdsByKeyword02);
     console.log(tmpMngIdsByKeyword03);
-    console.log(tmpselectedMngIds);
+    console.log(tmpSelectedMngIds);
     console.log("11-0-0-0-0-0-0");
-    selectedMngIds = removeDuplicates(tmpselectedMngIds); // 重複削除
+    selectedMngIds = removeDuplicates(tmpSelectedMngIds); // 重複削除
 
     /*
     console.log("-------");
     console.log(selected01Keys);  // チェックボックスにチェックが入ったキー 01
     console.log(selected02Keys);  // チェックボックスにチェックが入ったキー 02
     console.log(selected03Keys);  // チェックボックスにチェックが入ったキー 03
-    console.log(tmpselectedMngIds);  // フィルタするMngId群
+    console.log(tmpSelectedMngIds);  // フィルタするMngId群
     console.log(selectedMngIds);  // フィルタするMngId群(重複削除)
     console.log("=====-------");
     */
