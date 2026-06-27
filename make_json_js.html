@@ -260,7 +260,7 @@ function set_form_flow(item_jsn, list_elem){
 
 
 function make_data_to_jsformat(){
-  wStr_out = "";
+  let generatedJs = "";
   list_out = "";
   current_out = "";
   let shouldWrite = true;
@@ -321,12 +321,12 @@ function make_data_to_jsformat(){
     }
   }
   list_out = '"list": [\n' + list_out + "\n]";
-  wStr_out += "let " + list_no + " = {\n";
-  wStr_out += info_out + ",\n";
-  wStr_out += list_out;
-  wStr_out += "};";
+  generatedJs += "let " + list_no + " = {\n";
+  generatedJs += info_out + ",\n";
+  generatedJs += list_out;
+  generatedJs += "};";
 
-  document.getElementById("json_area").innerHTML = wStr_out;
+  document.getElementById("json_area").innerHTML = generatedJs;
   document.getElementById("message_area").innerHTML = '<font color="red">' + warning_msg + "</font>";
 
   let text = document.getElementById("json_area");
