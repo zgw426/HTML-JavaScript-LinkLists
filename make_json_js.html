@@ -390,12 +390,12 @@ function set_init(){
 }
 
 
-function root_flow(arg_no){
+function root_flow(selectedListKey){
   set_init();  // 初期値設定
-  currentListKey = arg_no;
+  currentListKey = selectedListKey;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
-  switch (arg_no){
+  switch (selectedListKey){
     case "list01": listExpression = 'list01["list"]'; infoExpression = 'list01["info"]'; break;
     case "list02": listExpression = 'list02["list"]'; infoExpression = 'list02["info"]'; break;
     case "list03": listExpression = 'list03["list"]'; infoExpression = 'list03["info"]'; break;
