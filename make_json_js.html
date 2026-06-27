@@ -358,7 +358,7 @@ function make_data_to_jsformat_etc(){
 }
 
 
-function set_category_out(value_out){
+function set_category_out(categoryInput){
   out_lo = "";
   out_arr = new Array();
   tmp_arr = new Array();
@@ -366,7 +366,7 @@ function set_category_out(value_out){
   tmp_kana= "";
   tmp_head_1 = "";
   tmp_head_2 = "";
-  out_arr = value_out.split("\n")
+  out_arr = categoryInput.split("\n")
 
   for(const line in out_arr){
     tmp_arr.length = 0;
