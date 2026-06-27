@@ -474,18 +474,18 @@ function etc_flow(selectedFileKey){
 
   enhancementSource += `\n// ----- イベント：年・月・日 指定 ----- //\n`;
   for (let key in targetDateList) {
-    let vDate = targetDateList[key][0];
-    let vAicon = targetDateList[key][1];
-    let vInfo = targetDateList[key][2];
-    enhancementSource += `targetDateList.push(["${vDate}","${vAicon}","${vInfo}"]);\n`;
+    let eventDate = targetDateList[key][0];
+    let eventIcon = targetDateList[key][1];
+    let eventInfo = targetDateList[key][2];
+    enhancementSource += `targetDateList.push(["${eventDate}","${eventIcon}","${eventInfo}"]);\n`;
   }
 
   enhancementSource += `\n// ----- イベント：曜日 指定 ----- //\n`;
   for (let key in targetWeekList) {
-    let vDate = targetWeekList[key][0];
-    let vAicon = targetWeekList[key][1];
-    let vInfo = targetWeekList[key][2];
-    enhancementSource += `targetWeekList.push(["${vDate}","${vAicon}","${vInfo}"]);\n`;
+    let eventDate = targetWeekList[key][0];
+    let eventIcon = targetWeekList[key][1];
+    let eventInfo = targetWeekList[key][2];
+    enhancementSource += `targetWeekList.push(["${eventDate}","${eventIcon}","${eventInfo}"]);\n`;
   }
 
   wStr += `<form name="linklist" action="" onsubmit="">`;
