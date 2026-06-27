@@ -196,17 +196,17 @@ list_target = "";
 info_target = "";
 
 
-function set_form_cell(form_flg, line_flg, element, item_val, mustFlg){
+function set_form_cell(form_flg, line_flg, element, itemValue, mustFlg){
   // 1項目の入力フォームを作る
   let fieldHtml = "";
   //fieldHtml+= "<div>";
   fieldHtml+= '<label for="'+element+'">'+element+'</label>';
   if(line_flg == 0){
-    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ item_val +'" size="100%" >';
+    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ itemValue +'" size="100%" >';
   }else if(line_flg == 1){
-    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ item_val +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ itemValue +'</textarea>';
   }else{
-    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ item_val +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ itemValue +'</textarea>';
   }
   //fieldHtml+= '</div>';
 
@@ -220,7 +220,7 @@ function set_form_cell(form_flg, line_flg, element, item_val, mustFlg){
 function set_form_flow(item_jsn, list_elem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
-  let item_val = "";
+  let itemValue = "";
   let categoryText = "";
   for (const elem in item_jsn) {
     form_flg = 1;
@@ -235,23 +235,23 @@ function set_form_flow(item_jsn, list_elem){
       form_flg = -1;
     }
 
-    item_val = list_elem[item_name];
+    itemValue = list_elem[item_name];
 
-    if (typeof item_val === "undefined"){
-      item_val = "";
-    }else  if (typeof item_val === "object"){
+    if (typeof itemValue === "undefined"){
+      itemValue = "";
+    }else  if (typeof itemValue === "object"){
       categoryText = "";
-      for(const cell in item_val){
-        if (item_val[cell]["key"] != ""){
-          categoryText += '"'+item_val[cell]["key"]+'": "'+item_val[cell]["kana"] + '"\n';
+      for(const cell in itemValue){
+        if (itemValue[cell]["key"] != ""){
+          categoryText += '"'+itemValue[cell]["key"]+'": "'+itemValue[cell]["kana"] + '"\n';
         }
       }
       categoryText = categoryText.trim();  // 最後の改行コードを削除
-      item_val = categoryText;
+      itemValue = categoryText;
     }
     //formHtml += "<div class='div_f2'>";
     //console.log( "DEBUG " + item_name +", "+ must_flg);
-    formHtml += set_form_cell(form_flg, line_flg, item_name, item_val, must_flg);
+    formHtml += set_form_cell(form_flg, line_flg, item_name, itemValue, must_flg);
     formHtml += "<BR />";
     //formHtml += "</div>";
   }
