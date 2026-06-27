@@ -178,18 +178,18 @@ list_no = "";
 list_str = "";  // list 情報
 info_str = "";  // info 情報
 
-js_file_name = new Array();
-js_file_name["list01"] = "links_01.json.js";
-js_file_name["list02"] = "links_02.json.js";
-js_file_name["list03"] = "links_03.json.js";
-js_file_name["list04"] = "links_04.json.js";
-js_file_name["list05"] = "links_05.json.js";
-js_file_name["list06"] = "links_06.json.js";
-js_file_name["list07"] = "links_07.json.js";
-js_file_name["list08"] = "links_08.json.js";
-js_file_name["list09"] = "links_09.json.js";
-js_file_name["list10"] = "links_10.json.js";
-js_file_name["function_enhancement.js"] = "function_enhancement.js";
+const jsFileNames = new Array();
+jsFileNames["list01"] = "links_01.json.js";
+jsFileNames["list02"] = "links_02.json.js";
+jsFileNames["list03"] = "links_03.json.js";
+jsFileNames["list04"] = "links_04.json.js";
+jsFileNames["list05"] = "links_05.json.js";
+jsFileNames["list06"] = "links_06.json.js";
+jsFileNames["list07"] = "links_07.json.js";
+jsFileNames["list08"] = "links_08.json.js";
+jsFileNames["list09"] = "links_09.json.js";
+jsFileNames["list10"] = "links_10.json.js";
+jsFileNames["function_enhancement.js"] = "function_enhancement.js";
 
 // 更新対象のjson.js変数
 list_target = "";
@@ -462,7 +462,7 @@ function outputText(){
   let blob = new Blob(ary,{type:"text/plain"}); // テキスト形式でBlob定義
   let link = document.createElement('a'); // HTMLのaタグを作成
   link.href = URL.createObjectURL(blob); // aタグのhref属性を作成
-  link.download = js_file_name[list_no]; // aタグのdownload属性を作成
+  link.download = jsFileNames[list_no]; // aタグのdownload属性を作成
   link.click(); // 定義したaタグをクリック（実行）
 }
 
