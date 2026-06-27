@@ -198,23 +198,23 @@ info_target = "";
 
 function set_form_cell(form_flg, line_flg, element, item_val, mustFlg){
   // 1項目の入力フォームを作る
-  lo_str = "";
-  //lo_str+= "<div>";
-  lo_str+= '<label for="'+element+'">'+element+'</label>';
+  let fieldHtml = "";
+  //fieldHtml+= "<div>";
+  fieldHtml+= '<label for="'+element+'">'+element+'</label>';
   if(line_flg == 0){
-    lo_str+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ item_val +'" size="100%" >';
+    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ item_val +'" size="100%" >';
   }else if(line_flg == 1){
-    lo_str+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ item_val +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ item_val +'</textarea>';
   }else{
-    lo_str+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ item_val +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ item_val +'</textarea>';
   }
-  //lo_str+= '</div>';
+  //fieldHtml+= '</div>';
 
   if(mustFlg=="MUST"){
-    lo_str = "<font color='red'>" +lo_str+ "</font>";
+    fieldHtml = "<font color='red'>" +fieldHtml+ "</font>";
   }
 
-  return(lo_str);
+  return(fieldHtml);
 }
 
 function set_form_flow(item_jsn, list_elem){
