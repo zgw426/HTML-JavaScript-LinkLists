@@ -360,17 +360,16 @@ function make_data_to_jsformat_etc(){
 
 function set_category_out(categoryInput){
   let categoryLinesOutput = "";
-  out_arr = new Array();
   tmp_arr = new Array();
   tmp_key = "";
   tmp_kana= "";
   tmp_head_1 = "";
   tmp_head_2 = "";
-  out_arr = categoryInput.split("\n")
+  const categoryLines = categoryInput.split("\n")
 
-  for(const line in out_arr){
+  for(const line in categoryLines){
     tmp_arr.length = 0;
-    tmp_arr = out_arr[line].split('"');
+    tmp_arr = categoryLines[line].split('"');
     tmp_key = tmp_arr[1];
     tmp_kana= tmp_arr[3];
     if (typeof tmp_kana !== "undefined"){
