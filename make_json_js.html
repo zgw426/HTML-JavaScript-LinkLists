@@ -359,7 +359,7 @@ function make_data_to_jsformat_etc(){
 
 
 function set_category_out(categoryInput){
-  out_lo = "";
+  let categoryLinesOutput = "";
   out_arr = new Array();
   tmp_arr = new Array();
   tmp_key = "";
@@ -378,11 +378,11 @@ function set_category_out(categoryInput){
       tmp_head_2 = tmp_head_1.normalize('NFD')[0];  // 濁音→静音に変換
       tmp_kana = tmp_kana.replace(tmp_head_1, tmp_head_2);
     }
-    out_lo += '\t\t\t{ "key": "' + tmp_key + '", "kana": "' + tmp_kana +'"},\n';
+    categoryLinesOutput += '\t\t\t{ "key": "' + tmp_key + '", "kana": "' + tmp_kana +'"},\n';
   }
-  out_lo = out_lo.trim();  // 最後の改行コードを削除
-  out_lo = out_lo.slice(0, -1);  // 最後の文字 ,(コロン)を削除
-  return(out_lo);
+  categoryLinesOutput = categoryLinesOutput.trim();  // 最後の改行コードを削除
+  categoryLinesOutput = categoryLinesOutput.slice(0, -1);  // 最後の文字 ,(コロン)を削除
+  return(categoryLinesOutput);
 }
 
 
