@@ -23,7 +23,7 @@ aicon_mapinfo["azure"] = "z_cloud.png";
 aicon_mapinfo["aws"] = "z_cloud.png";
 aicon_mapinfo["管理"] = "z_mng.png";
 aicon_mapinfo["コンソール"] = "z_console.png";
-aicon_mapinfo["ダッシュボード"] = "z_dashborad.png";
+aicon_mapinfo["ダッシュボード"] = "z_dashboard.png";
 
 aicon_mapinfo["ファイル"] = "z_file.png";
 aicon_mapinfo["ローカルファイル"] = "z_file.png";
@@ -75,7 +75,7 @@ aicon_mapinfo["powerpoint"] = "z_office.png";
 aicon_default.push("analytics.png");
 aicon_default.push("cloud.png");
 aicon_default.push("console.png");
-aicon_default.push("dashborad.png");
+aicon_default.push("dashboard.png");
 aicon_default.push("mng.png");
 aicon_default.push("program.png");
 aicon_default.push("schedule.png");
