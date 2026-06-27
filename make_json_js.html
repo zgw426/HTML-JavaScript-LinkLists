@@ -266,8 +266,8 @@ function make_data_to_jsformat(){
   let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
-  warning_msg = "";  // category欄に undefined があった場合に警告を出す
-  warning_msg_cell = "";
+  let warningMessage = "";  // category欄に undefined があった場合に警告を出す
+  let warningMessageCell = "";
 
   // フォームの情報を取得
   const form_elements = document.forms.linklist;
@@ -297,7 +297,7 @@ function make_data_to_jsformat(){
         let categoryOutput = set_category_out(fieldValue);
 
         if(categoryOutput.indexOf('undefined') > 0){
-          warning_msg_cell += "category欄に undefined が含まれています [" + categoryOutput + "]<BR />";
+          warningMessageCell += "category欄に undefined が含まれています [" + categoryOutput + "]<BR />";
         }
 
         currentItemOutput += '\t"'+ fieldName +'":\n';
@@ -312,11 +312,11 @@ function make_data_to_jsformat(){
         if(shouldWrite){
           // 新json.jsファイルに追記する情報
           listSection += currentItemOutput;
-          warning_msg += warning_msg_cell;
+          warningMessage += warningMessageCell;
         }
         currentItemOutput = "";
         shouldWrite = true;
-        warning_msg_cell = "";
+        warningMessageCell = "";
         break;
     }
   }
@@ -327,7 +327,7 @@ function make_data_to_jsformat(){
   generatedJs += "};";
 
   document.getElementById("json_area").innerHTML = generatedJs;
-  document.getElementById("message_area").innerHTML = '<font color="red">' + warning_msg + "</font>";
+  document.getElementById("message_area").innerHTML = '<font color="red">' + warningMessage + "</font>";
 
   let text = document.getElementById("json_area");
   text.select();
