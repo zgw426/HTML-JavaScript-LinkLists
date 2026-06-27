@@ -462,14 +462,14 @@ function etc_flow(selectedFileKey){
 
   enhancementSource += `\n// ----- カテゴリキーに背景色を設定する ----- //\n`;
   for (let key in key_highlight) {
-    let vInfo = key_highlight[key];
-    enhancementSource += `key_highlight["${key}"] = "${vInfo}";\n`;
+    let highlightColor = key_highlight[key];
+    enhancementSource += `key_highlight["${key}"] = "${highlightColor}";\n`;
   }
 
   enhancementSource += `\n// ----- アイコンボタン：検索キーの簡易登録 ----- //\n`;
   for (let key in key_aicon) {
-    let vInfo = key_aicon[key];
-    enhancementSource += `key_aicon["${key}"] = "${vInfo}";\n`;
+    let iconSearchKey = key_aicon[key];
+    enhancementSource += `key_aicon["${key}"] = "${iconSearchKey}";\n`;
   }
 
   enhancementSource += `\n// ----- イベント：年・月・日 指定 ----- //\n`;
