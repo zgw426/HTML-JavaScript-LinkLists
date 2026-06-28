@@ -244,6 +244,24 @@ div.areaA {
   overflow: hidden;
   background-color: #D3D3D3;
 }
+div.areaA form {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.areaA_main_controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.areaA_json_controls {
+  margin-left: auto;
+  padding-right: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 main div.areaB {
     width: calc(20% - 10px);
     height: calc(100% - 10px);
@@ -347,12 +365,16 @@ textarea{
 <body>
 <div class="areaA">
   <form action="" onsubmit="selectEventFlowC();return false;">
+    <span class="areaA_main_controls">
     <input type="text" id="inputKey" size="50">
     <input type="button" value="検索" onclick="selectEventFlowC();" />
     <input type="button" value="リセット" onclick="pageReload();" />
+    </span>
+    <span class="areaA_json_controls">
     <input type="file" id="linkJsonImportFiles" accept=".json,application/json" multiple style="display:none" onchange="importLinkJsonFiles(this.files); this.value='';" />
     <input type="button" value="JSON取込" onclick="document.getElementById('linkJsonImportFiles').click();" />
     <input type="button" value="JSON出力" onclick="exportAllLinkJsonFiles();" />
+    </span>
   </form>
 </div>
 <main>
