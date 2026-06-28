@@ -1370,6 +1370,7 @@ function selectEventFlowC(actionSource, changedValue, checked)
 //-----------------------------------
 // ROOTフロー：起動時の処理
 loadEnhancementDataFromStorage();
+recordOperationLog("起動", "リンクリスト");
 refreshLoadArrFromStorage();
 loadVisibleLinkIds();
 loadAreaBVisibleLinkIds();
