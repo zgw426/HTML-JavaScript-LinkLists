@@ -265,13 +265,15 @@ function renderLinkStorageControls(){
     const areaBCheckedAttr = areaBVisibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
     const areaBDisabledAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "" : "disabled='disabled'";
     controlsHtml += "<div class='div_f1'>";
-    controlsHtml += "表示 ";
     controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm()' " + checkedAttr + ">";
-    controlsHtml += " AreaB初期表示 ";
+    controlsHtml += " 常時表示";
     controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateAreaBVisibleLinksFromForm()' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
+    controlsHtml += " AreaB初期表示";
+    controlsHtml += "<HR>";    
     controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
+
     controlsHtml += "</div>";
   }
 
