@@ -17,6 +17,7 @@ const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
+const DEFAULT_ORIGINAL_ID = "HTML-JavaScript-LinkLists";
 const DEFAULT_OPERATION_LOG_MAX = 100;
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 let load_arr = [];
@@ -105,6 +106,7 @@ function makeEnhancementDataFromGlobals(){
     "key_icon": getObjectFromKeyedArray(key_icon),
     "targetDateList": targetDateList,
     "targetWeekList": targetWeekList,
+    "originalId": typeof originalId === "undefined" ? DEFAULT_ORIGINAL_ID : originalId,
     "operationLogMax": typeof operationLogMax === "undefined" ? DEFAULT_OPERATION_LOG_MAX : operationLogMax
   };
 }
@@ -131,6 +133,7 @@ function getEnhancementDataFromStorage(){
 }
 
 function setEnhancementDataToStorage(enhancementData){
+  enhancementData["originalId"] = getValidatedOriginalId(enhancementData["originalId"]);
   enhancementData["operationLogMax"] = getValidatedOperationLogMax(enhancementData["operationLogMax"]);
   storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
   saveOperationLogs(getOperationLogs());
@@ -154,6 +157,20 @@ function loadEnhancementDataFromStorage(){
 
 function makeEnhancementJsonFileName(){
   return "function_enhancement.json";
+}
+
+function getValidatedOriginalId(value){
+  const originalIdValue = String(value == null ? "" : value).trim();
+  return originalIdValue == "" ? DEFAULT_ORIGINAL_ID : originalIdValue;
+}
+
+function getOriginalId(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return DEFAULT_ORIGINAL_ID;
+  }
+
+  return getValidatedOriginalId(enhancementData["originalId"]);
 }
 
 function getValidatedOperationLogMax(value){
@@ -251,7 +268,36 @@ function exportOperationLogCsv(){
     ].map(escapeCsvValue).join(",") + "\r\n";
   }
 
-  downloadTextFile("operation_log.csv", csvText, "text/csv");
+  downloadTextFile(makeOperationLogCsvFileName(operationLogs), csvText, "text/csv");
+}
+
+function padNumber(value, length){
+  return String(value).padStart(length, "0");
+}
+
+function formatLogDateTime(dateTimeText){
+  const date = dateTimeText ? new Date(dateTimeText) : new Date();
+  const validDate = Number.isNaN(date.getTime()) ? new Date() : date;
+  return validDate.getFullYear()
+    + "-" + padNumber(validDate.getMonth() + 1, 2)
+    + "-" + padNumber(validDate.getDate(), 2)
+    + "_" + padNumber(validDate.getHours(), 2)
+    + "-" + padNumber(validDate.getMinutes(), 2)
+    + "-" + padNumber(validDate.getSeconds(), 2);
+}
+
+function sanitizeFileNamePart(value){
+  return String(value).replace(/[\\/:*?"<>|]/g, "_");
+}
+
+function makeOperationLogCsvFileName(operationLogs){
+  const firstLog = operationLogs.length > 0 ? operationLogs[0] : null;
+  const lastLog = operationLogs.length > 0 ? operationLogs[operationLogs.length - 1] : null;
+  return sanitizeFileNamePart(getOriginalId())
+    + "__" + formatLogDateTime(firstLog == null ? "" : firstLog["datetime"])
+    + "__" + formatLogDateTime(lastLog == null ? "" : lastLog["datetime"])
+    + "__" + padNumber(operationLogs.length, 7)
+    + ".csv";
 }
 
 function getAllLinkInfoIds(){

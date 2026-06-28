@@ -2,6 +2,7 @@ const key_highlight = [];
 const targetDateList = [];
 const targetWeekList = [];
 const key_icon = [];
+const originalId = "HTML-JavaScript-LinkLists";
 const operationLogMax = 100;
 
 // ----- カテゴリキーに背景色を設定する ----- //

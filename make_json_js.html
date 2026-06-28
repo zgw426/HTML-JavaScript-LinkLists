@@ -147,6 +147,7 @@ const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
+const DEFAULT_ORIGINAL_ID = "HTML-JavaScript-LinkLists";
 const DEFAULT_OPERATION_LOG_MAX = 100;
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 
@@ -187,6 +188,11 @@ function isValidEnhancementData(enhancementData){
     && typeof enhancementData["key_icon"] === "object"
     && Array.isArray(enhancementData["targetDateList"])
     && Array.isArray(enhancementData["targetWeekList"]);
+}
+
+function getValidatedOriginalId(value){
+  const originalIdValue = String(value == null ? "" : value).trim();
+  return originalIdValue == "" ? DEFAULT_ORIGINAL_ID : originalIdValue;
 }
 
 function getValidatedOperationLogMax(value){
@@ -260,6 +266,7 @@ function getEnhancementDataFromStorage(){
 
 function setEnhancementDataToStorage(enhancementData){
   enhancementData["type"] = "function_enhancement";
+  enhancementData["originalId"] = getValidatedOriginalId(enhancementData["originalId"]);
   enhancementData["operationLogMax"] = getValidatedOperationLogMax(enhancementData["operationLogMax"]);
   storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
   saveOperationLogs(getOperationLogs());
@@ -607,6 +614,7 @@ function updateEnhancementStorageFromForm(){
     "key_icon": collectEnhancementPairs(formElements, "iconFile", "iconKeyword"),
     "targetDateList": collectEnhancementList(formElements, ["targetDate", "targetDateIcon", "targetDateText"]),
     "targetWeekList": collectEnhancementList(formElements, ["targetWeek", "targetWeekIcon", "targetWeekText"]),
+    "originalId": getValidatedOriginalId(formElements.originalId.value),
     "operationLogMax": getValidatedOperationLogMax(formElements.operationLogMax.value)
   };
 
@@ -632,6 +640,8 @@ function editEnhancementData(){
   let formHtml = "";
   formHtml += '<form name="enhancementDataForm" action="" onsubmit="">';
   formHtml += "<h3>" + makeEnhancementJsonFileName() + "</h3>";
+  formHtml += "<h4>originalId</h4>";
+  formHtml += makeInputCell("originalId", getValidatedOriginalId(enhancementData["originalId"]), 40);
   formHtml += "<h4>operationLogMax</h4>";
   formHtml += makeInputCell("operationLogMax", getValidatedOperationLogMax(enhancementData["operationLogMax"]), 10);
 
