@@ -137,7 +137,6 @@
 <div id="form_area">※Web Storageのリンク情報をフォーム形式で表示※</div>
 <div id="savebutton_area">※更新ボタンを表示※</div>
 <div id="message_area">※警告メッセージなどを表示※</div>
-<textarea id="json_area" cols="80" rows="10">※更新後のjson情報※</textarea>
 
 <script>
 
@@ -433,8 +432,6 @@ function updateLinkStorageFromForm(){
   let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
-  let warningMessage = "";
-  let warningMessageCell = "";
 
   const formElements = document.forms.linklist;
 
@@ -461,30 +458,27 @@ function updateLinkStorageFromForm(){
         break;
       case "category":
         currentItem[fieldName] = parseCategoryInput(fieldValue);
-        if(currentItem[fieldName].length == 0){
-          warningMessageCell += "categoryが空です。<BR />";
-        }
         break;
       case "note":
         currentItem[fieldName] = fieldValue;
         if(shouldWrite){
           linkData["list"].push(currentItem);
-          warningMessage += warningMessageCell;
         }
         currentItem = {};
         shouldWrite = true;
-        warningMessageCell = "";
         break;
     }
   }
 
-  const generatedJson = JSON.stringify(linkData, null, 2);
-  document.getElementById("json_area").value = generatedJson;
-  setLinkDataToStorage(currentListKey, linkData);
-  renderLinkStorageControls();
-  warningMessage += "Web Storageを更新しました。<BR />";
-  refreshParentAreas();
-  document.getElementById("message_area").innerHTML = '<font color="red">' + warningMessage + "</font>";
+  try {
+    setLinkDataToStorage(currentListKey, linkData);
+    renderLinkStorageControls();
+    refreshParentAreas();
+    document.getElementById("message_area").innerHTML = "更新しました";
+  } catch (error) {
+    console.error("Failed to update Web Storage:", error);
+    document.getElementById("message_area").innerHTML = '<font color="red">エラーが発生し更新できませんでした</font>';
+  }
 }
 
 function parseCategoryInput(categoryInput){
@@ -518,7 +512,6 @@ function parseCategoryInput(categoryInput){
 function set_init(){
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
-  document.getElementById("json_area").value = "";
   wStr = "";
   document.getElementById("savebutton_area").innerHTML = "";  // 更新ボタンを消す
 }
