@@ -4,7 +4,7 @@ const targetWeekList = [];
 const key_icon = [];
 
 // ----- カテゴリキーに背景色を設定する ----- //
-key_highlight["資産"] = "#ffc0cb";
+key_highlight["ニュース"] = "#ffc0cb";
 key_highlight["動画"] = "#c0ffcb";
 
 // ----- アイコンボタン：検索キーの簡易登録 ----- //
@@ -23,7 +23,10 @@ targetDateList.push(["2023-10-16","x_mmdd_red.png","12:00～〇□△に行く"]
 
 
 // ----- イベント：曜日 指定 ----- //
-targetWeekList.push(["月","z_garbage_can.png","ゴミ出し(プラ)"]);
-targetWeekList.push(["火","z_garbage_can.png","ゴミ出し(可燃)"]);
-targetWeekList.push(["木","z_garbage_can.png","ゴミ出し(ビンor紙布)"]);
-targetWeekList.push(["金","z_garbage_can.png","ゴミ出し(可燃)"]);
+targetWeekList.push(["月","z_garbage_can.png","月曜日"]);
+targetWeekList.push(["火","z_garbage_can.png","火曜日"]);
+targetWeekList.push(["水","z_garbage_can.png","水曜日"]);
+targetWeekList.push(["木","z_garbage_can.png","木曜日"]);
+targetWeekList.push(["金","z_garbage_can.png","金曜日"]);
+targetWeekList.push(["土","z_garbage_can.png","土曜日"]);
+targetWeekList.push(["日","z_garbage_can.png","日曜日"]);

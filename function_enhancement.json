@@ -1,0 +1,68 @@
+{
+  "type": "function_enhancement",
+  "key_highlight": {
+    "aaaaa": "#AA0CCF",
+    "動画": "#c0ffcb"
+  },
+  "key_icon": {
+    "y_movie.png": "動画",
+    "y_money.png": "資産",
+    "y_cloud_aws.png": "クラウド aws",
+    "y_cloud.png": "クラウド",
+    "ai.png": "AI"
+  },
+  "targetDateList": [
+    [
+      "2026-06-28",
+      "x_mmdd_red.png",
+      "あああああああに行く"
+    ],
+    [
+      "YYYY-12-DD",
+      "x_month_red.png",
+      "今月のやることは〇〇です"
+    ],
+    [
+      "2023-12-09",
+      "x_mmdd_red.png",
+      "△〇に行く"
+    ],
+    [
+      "YYYY-01-DD",
+      "x_month_red.png",
+      "今月のやることは△△です"
+    ],
+    [
+      "2024-01-27",
+      "x_mmdd_red.png",
+      "〇〇に行く"
+    ],
+    [
+      "2023-10-16",
+      "x_mmdd_red.png",
+      "12:00～〇□△に行く"
+    ]
+  ],
+  "targetWeekList": [
+    [
+      "月",
+      "z_garbage_can.png",
+      "ゴミ出し(プラ)"
+    ],
+    [
+      "火",
+      "z_garbage_can.png",
+      "ゴミ出し(可燃)"
+    ],
+    [
+      "木",
+      "z_garbage_can.png",
+      "ゴミ出し(ビンor紙布)"
+    ],
+    [
+      "日",
+      "z_garbage_can.png",
+      "日曜日です"
+    ]
+  ]
+}
