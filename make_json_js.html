@@ -145,6 +145,7 @@ const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
+const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 
 function getLinkStorageKey(listKey){
@@ -175,8 +176,44 @@ function setLinkDataToStorage(listKey, linkData){
   storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
 }
 
+function isValidEnhancementData(enhancementData){
+  return enhancementData
+    && typeof enhancementData === "object"
+    && enhancementData["key_highlight"]
+    && typeof enhancementData["key_highlight"] === "object"
+    && enhancementData["key_icon"]
+    && typeof enhancementData["key_icon"] === "object"
+    && Array.isArray(enhancementData["targetDateList"])
+    && Array.isArray(enhancementData["targetWeekList"]);
+}
+
+function getEnhancementDataFromStorage(){
+  const storedValue = storage.getItem(ENHANCEMENT_STORAGE_KEY);
+  if(storedValue == null) return null;
+  try {
+    const enhancementData = JSON.parse(storedValue);
+    return isValidEnhancementData(enhancementData) ? enhancementData : null;
+  } catch (error) {
+    console.warn("Invalid function enhancement data in Web Storage:", error);
+    return null;
+  }
+}
+
+function setEnhancementDataToStorage(enhancementData){
+  enhancementData["type"] = "function_enhancement";
+  storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
+}
+
+function deleteEnhancementDataFromStorage(){
+  storage.removeItem(ENHANCEMENT_STORAGE_KEY);
+}
+
 function makeJsonFileName(listData){
   return "links_" + String(listData["info"]["ID"]).padStart(2, "0") + ".json";
+}
+
+function makeEnhancementJsonFileName(){
+  return "function_enhancement.json";
 }
 
 function downloadTextFile(fileName, fileContent, contentType){
@@ -194,6 +231,14 @@ function exportStoredLinkData(listKey){
     return;
   }
   downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+}
+
+function exportStoredEnhancementData(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return;
+  }
+  downloadTextFile(makeEnhancementJsonFileName(), JSON.stringify(enhancementData, null, 2), "application/json");
 }
 
 function deleteLinkDataFromStorage(listKey){
@@ -266,10 +311,20 @@ function refreshParentAreas(){
   }
 }
 
+function escapeHtml(value){
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function renderLinkStorageControls(){
   let controlsHtml = "";
   const visibleLinkIds = getVisibleLinkIds();
   const areaBVisibleLinkIds = getAreaBVisibleLinkIds();
+  const enhancementData = getEnhancementDataFromStorage();
 
   controlsHtml += "<HR>";
   controlsHtml += "<form name='linkStorageControls'>";
@@ -296,6 +351,19 @@ function renderLinkStorageControls(){
     controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
 
+    controlsHtml += "</div>";
+  }
+
+  if(enhancementData != null){
+    controlsHtml += "<div class='div_f1'>";
+    controlsHtml += "<b>" + makeEnhancementJsonFileName() + "</b>";
+    controlsHtml += " <input type='button' value='修正' onclick='editEnhancementData()' />";
+    controlsHtml += " <input type='button' value='削除' onclick='deleteStoredEnhancementData()' />";
+    controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredEnhancementData()' />";
+    controlsHtml += "<BR /><small>key_highlight: " + Object.keys(enhancementData["key_highlight"]).length;
+    controlsHtml += " / key_icon: " + Object.keys(enhancementData["key_icon"]).length;
+    controlsHtml += " / targetDateList: " + enhancementData["targetDateList"].length;
+    controlsHtml += " / targetWeekList: " + enhancementData["targetWeekList"].length + "</small>";
     controlsHtml += "</div>";
   }
 
@@ -360,6 +428,164 @@ function deleteStoredLinkData(listKey){
 }
 
 // 項目-群
+function deleteStoredEnhancementData(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return;
+  }
+
+  if(!confirm(makeEnhancementJsonFileName() + " をWeb Storageから削除しますか？")){
+    return;
+  }
+
+  deleteEnhancementDataFromStorage();
+  set_init();
+  renderLinkStorageControls();
+}
+
+function getFormElements(formElements, fieldName){
+  const elements = formElements[fieldName];
+  if(elements == null){
+    return [];
+  }
+  return typeof elements.length === "number" ? Array.from(elements) : [elements];
+}
+
+function makeInputCell(name, value, size){
+  return '<input type="text" name="' + name + '" value="' + escapeHtml(value == null ? "" : value) + '" size="' + size + '" />';
+}
+
+function makeEnhancementPairRows(sourceObject, keyName, valueName, blankRowCount){
+  let formHtml = "";
+  for(const key in sourceObject){
+    formHtml += "<tr>";
+    formHtml += "<td>" + makeInputCell(keyName, key, 30) + "</td>";
+    formHtml += "<td>" + makeInputCell(valueName, sourceObject[key], 40) + "</td>";
+    formHtml += "</tr>";
+  }
+
+  for(let rowIndex = 0; rowIndex < blankRowCount; rowIndex++){
+    formHtml += "<tr>";
+    formHtml += "<td>" + makeInputCell(keyName, "", 30) + "</td>";
+    formHtml += "<td>" + makeInputCell(valueName, "", 40) + "</td>";
+    formHtml += "</tr>";
+  }
+
+  return formHtml;
+}
+
+function makeEnhancementListRows(sourceList, fieldNames, blankRowCount){
+  let formHtml = "";
+  for(let rowIndex = 0; rowIndex < sourceList.length; rowIndex++){
+    formHtml += "<tr>";
+    for(let cellIndex = 0; cellIndex < fieldNames.length; cellIndex++){
+      const inputSize = cellIndex == fieldNames.length - 1 ? 60 : 20;
+      formHtml += "<td>" + makeInputCell(fieldNames[cellIndex], sourceList[rowIndex][cellIndex], inputSize) + "</td>";
+    }
+    formHtml += "</tr>";
+  }
+
+  for(let rowIndex = 0; rowIndex < blankRowCount; rowIndex++){
+    formHtml += "<tr>";
+    for(let cellIndex = 0; cellIndex < fieldNames.length; cellIndex++){
+      const inputSize = cellIndex == fieldNames.length - 1 ? 60 : 20;
+      formHtml += "<td>" + makeInputCell(fieldNames[cellIndex], "", inputSize) + "</td>";
+    }
+    formHtml += "</tr>";
+  }
+
+  return formHtml;
+}
+
+function collectEnhancementPairs(formElements, keyName, valueName){
+  const keys = getFormElements(formElements, keyName);
+  const values = getFormElements(formElements, valueName);
+  const result = {};
+
+  for(let rowIndex = 0; rowIndex < keys.length; rowIndex++){
+    const key = keys[rowIndex].value.trim();
+    const value = values[rowIndex].value.trim();
+    if(key != ""){
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+function collectEnhancementList(formElements, fieldNames){
+  const fieldElementLists = fieldNames.map(fieldName => getFormElements(formElements, fieldName));
+  const rowCount = fieldElementLists.length == 0 ? 0 : fieldElementLists[0].length;
+  const result = [];
+
+  for(let rowIndex = 0; rowIndex < rowCount; rowIndex++){
+    const row = fieldElementLists.map(elements => elements[rowIndex].value.trim());
+    if(row.some(value => value != "")){
+      result.push(row);
+    }
+  }
+
+  return result;
+}
+
+function updateEnhancementStorageFromForm(){
+  const formElements = document.forms.enhancementDataForm;
+  const enhancementData = {
+    "type": "function_enhancement",
+    "key_highlight": collectEnhancementPairs(formElements, "highlightKey", "highlightColor"),
+    "key_icon": collectEnhancementPairs(formElements, "iconFile", "iconKeyword"),
+    "targetDateList": collectEnhancementList(formElements, ["targetDate", "targetDateIcon", "targetDateText"]),
+    "targetWeekList": collectEnhancementList(formElements, ["targetWeek", "targetWeekIcon", "targetWeekText"])
+  };
+
+  try {
+    setEnhancementDataToStorage(enhancementData);
+    renderLinkStorageControls();
+    refreshParentAreas();
+    document.getElementById("message_area").innerHTML = "更新しました";
+  } catch (error) {
+    console.error("Failed to update function enhancement data:", error);
+    document.getElementById("message_area").innerHTML = '<font color="red">エラーが発生し更新できませんでした</font>';
+  }
+}
+
+function editEnhancementData(){
+  set_init();
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    document.getElementById("message_area").innerHTML = "Web Storage に " + makeEnhancementJsonFileName() + " がありません。";
+    return;
+  }
+
+  let formHtml = "";
+  formHtml += '<form name="enhancementDataForm" action="" onsubmit="">';
+  formHtml += "<h3>" + makeEnhancementJsonFileName() + "</h3>";
+
+  formHtml += "<h4>key_highlight</h4>";
+  formHtml += "<table><tr><th>キーワード</th><th>色</th></tr>";
+  formHtml += makeEnhancementPairRows(enhancementData["key_highlight"], "highlightKey", "highlightColor", 3);
+  formHtml += "</table>";
+
+  formHtml += "<h4>key_icon</h4>";
+  formHtml += "<table><tr><th>アイコン</th><th>キーワード</th></tr>";
+  formHtml += makeEnhancementPairRows(enhancementData["key_icon"], "iconFile", "iconKeyword", 3);
+  formHtml += "</table>";
+
+  formHtml += "<h4>targetDateList</h4>";
+  formHtml += "<table><tr><th>日付</th><th>アイコン</th><th>テキスト</th></tr>";
+  formHtml += makeEnhancementListRows(enhancementData["targetDateList"], ["targetDate", "targetDateIcon", "targetDateText"], 3);
+  formHtml += "</table>";
+
+  formHtml += "<h4>targetWeekList</h4>";
+  formHtml += "<table><tr><th>曜日</th><th>アイコン</th><th>テキスト</th></tr>";
+  formHtml += makeEnhancementListRows(enhancementData["targetWeekList"], ["targetWeek", "targetWeekIcon", "targetWeekText"], 3);
+  formHtml += "</table>";
+  formHtml += "</form>";
+
+  document.getElementById("form_area").innerHTML = formHtml;
+  document.getElementById("savebutton_area").innerHTML = '<input type="button" value="Web Storage更新" onclick="updateEnhancementStorageFromForm();" />';
+}
+
 const itemDefinitions = [
   {"item": "icon"   , "line_flg": 0, "mustFlg": "OPTION"},
   {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
