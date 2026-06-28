@@ -237,8 +237,12 @@ function saveAreaBVisibleLinkIds(linkInfoIds){
 }
 
 function refreshParentAreas(){
-  if(parent && typeof parent.refreshAllAreas === "function"){
-    parent.refreshAllAreas();
+  try {
+    if(parent && typeof parent.refreshAllAreas === "function"){
+      parent.refreshAllAreas();
+    }
+  } catch (error) {
+    console.warn("Skipped parent refresh:", error);
   }
 }
 
