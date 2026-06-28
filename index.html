@@ -197,10 +197,26 @@ function saveOperationLogs(operationLogs){
   storage.setItem(OPERATION_LOG_STORAGE_KEY, JSON.stringify(trimmedLogs));
 }
 
+function getWeekdayText(date){
+  return ["日","月","火","水","木","金","土"][date.getDay()];
+}
+
+function getOperationLogWeekday(operationLog){
+  if(operationLog["weekday"]){
+    return operationLog["weekday"];
+  }
+  if(operationLog["datetime"]){
+    return getWeekdayText(new Date(operationLog["datetime"]));
+  }
+  return "";
+}
+
 function recordOperationLog(action, detail){
+  const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
-    "datetime": new Date().toISOString(),
+    "datetime": logDate.toISOString(),
+    "weekday": getWeekdayText(logDate),
     "action": action,
     "detail": detail
   });
@@ -223,12 +239,13 @@ function escapeCsvValue(value){
 function exportOperationLogCsv(){
   const operationLogs = getOperationLogs();
   let csvText = "\uFEFF";
-  csvText += ["datetime", "action", "detail"].map(escapeCsvValue).join(",") + "\r\n";
+  csvText += ["datetime", "weekday", "action", "detail"].map(escapeCsvValue).join(",") + "\r\n";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     csvText += [
       operationLog["datetime"] || "",
+      getOperationLogWeekday(operationLog),
       operationLog["action"] || "",
       operationLog["detail"] || ""
     ].map(escapeCsvValue).join(",") + "\r\n";
@@ -838,12 +855,13 @@ function showOperationLog(){
   logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
   logHtml += "<div><input type='button' value='CSV出力' onclick='exportOperationLogCsv()' /></div>";
   logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
-  logHtml += "<tr><th>日時</th><th>操作</th><th>詳細</th></tr>";
+  logHtml += "<tr><th>日時</th><th>曜日</th><th>操作</th><th>詳細</th></tr>";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     logHtml += "<tr>";
     logHtml += "<td>" + escapeHtml(operationLog["datetime"] || "") + "</td>";
+    logHtml += "<td>" + escapeHtml(getOperationLogWeekday(operationLog)) + "</td>";
     logHtml += "<td>" + escapeHtml(operationLog["action"] || "") + "</td>";
     logHtml += "<td>" + escapeHtml(operationLog["detail"] || "") + "</td>";
     logHtml += "</tr>";
@@ -1325,7 +1343,7 @@ function showArea100(){
 function selectEventFlowB(controlName, changedValue, checked)
 {
   if(typeof changedValue !== "undefined"){
-    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + "____checked=" + checked);
   }
   set_Initial();      // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
@@ -1338,7 +1356,7 @@ function selectEventFlowB(controlName, changedValue, checked)
 function selectEventFlowC(actionSource, changedValue, checked)
 {
   if(actionSource == "checkbox"){
-    recordOperationLog("チェックボックス変更", "areaC1=" + changedValue + ", checked=" + checked);
+    recordOperationLog("チェックボックス変更", "areaC1=" + changedValue + "____checked=" + checked);
   } else if(actionSource == "search"){
     recordOperationLog("検索", document.getElementById("inputKey").value.trim());
   }

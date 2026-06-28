@@ -230,10 +230,16 @@ function saveOperationLogs(operationLogs){
   storage.setItem(OPERATION_LOG_STORAGE_KEY, JSON.stringify(trimmedLogs));
 }
 
+function getWeekdayText(date){
+  return ["日","月","火","水","木","金","土"][date.getDay()];
+}
+
 function recordOperationLog(action, detail){
+  const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
-    "datetime": new Date().toISOString(),
+    "datetime": logDate.toISOString(),
+    "weekday": getWeekdayText(logDate),
     "action": action,
     "detail": detail
   });
@@ -432,7 +438,7 @@ function renderLinkStorageControls(){
 
 function updateVisibleLinksFromForm(controlName, changedValue, checked){
   if(typeof changedValue !== "undefined"){
-    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + "____checked=" + checked);
   }
   const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
   const visibleCheckboxes = toElementArray(document.linkStorageControls.visibleLinkInfoId);
@@ -452,7 +458,7 @@ function updateVisibleLinksFromForm(controlName, changedValue, checked){
 
 function updateAreaBVisibleLinksFromForm(controlName, changedValue, checked){
   if(typeof changedValue !== "undefined"){
-    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + "____checked=" + checked);
   }
   const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
   const areaBVisibleCheckboxes = toElementArray(document.linkStorageControls.areaBVisibleLinkInfoId);
