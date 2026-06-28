@@ -175,6 +175,27 @@ function setLinkDataToStorage(listKey, linkData){
   storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
 }
 
+function makeJsonFileName(listData){
+  return "links_" + String(listData["info"]["ID"]).padStart(2, "0") + ".json";
+}
+
+function downloadTextFile(fileName, fileContent, contentType){
+  const blob = new Blob([fileContent], {type: contentType});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function exportStoredLinkData(listKey){
+  const linkData = getLinkDataFromStorage(listKey);
+  if(linkData == null){
+    return;
+  }
+  downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+}
+
 function deleteLinkDataFromStorage(listKey){
   storage.removeItem(getLinkStorageKey(listKey));
 }
@@ -272,6 +293,7 @@ function renderLinkStorageControls(){
     controlsHtml += "<HR>";    
     controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
+    controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
 
     controlsHtml += "</div>";
