@@ -216,6 +216,27 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
+function escapeCsvValue(value){
+  return '"' + String(value == null ? "" : value).replace(/"/g, '""') + '"';
+}
+
+function exportOperationLogCsv(){
+  const operationLogs = getOperationLogs();
+  let csvText = "\uFEFF";
+  csvText += ["datetime", "action", "detail"].map(escapeCsvValue).join(",") + "\r\n";
+
+  for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
+    const operationLog = operationLogs[logIndex];
+    csvText += [
+      operationLog["datetime"] || "",
+      operationLog["action"] || "",
+      operationLog["detail"] || ""
+    ].map(escapeCsvValue).join(",") + "\r\n";
+  }
+
+  downloadTextFile("operation_log.csv", csvText, "text/csv");
+}
+
 function getAllLinkInfoIds(){
   const linkInfoIds = [];
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
@@ -661,10 +682,11 @@ function showOperationLog(){
   let logHtml = "";
   logHtml += "<h3>操作ログ</h3>";
   logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
+  logHtml += "<div><input type='button' value='CSV出力' onclick='exportOperationLogCsv()' /></div>";
   logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
   logHtml += "<tr><th>日時</th><th>操作</th><th>詳細</th></tr>";
 
-  for(let logIndex = operationLogs.length - 1; logIndex >= 0; logIndex--){
+  for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     logHtml += "<tr>";
     logHtml += "<td>" + escapeHtml(operationLog["datetime"] || "") + "</td>";
