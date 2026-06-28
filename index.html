@@ -15,6 +15,7 @@ const storage = localStorage;
 const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
+const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 let load_arr = [];
 //let linkListKeys = ["list01","list02","list03","list05"];
@@ -69,6 +70,85 @@ function getLinkDataFromStorage(listKey){
 
 function setLinkDataToStorage(listKey, linkData){
   storage.setItem(getLinkStorageKey(listKey), JSON.stringify(linkData));
+}
+
+function getObjectFromKeyedArray(keyedArray){
+  const object = {};
+  for(let key in keyedArray){
+    object[key] = keyedArray[key];
+  }
+  return object;
+}
+
+function replaceKeyedArrayValues(keyedArray, sourceObject){
+  for(let key in keyedArray){
+    delete keyedArray[key];
+  }
+  for(let key in sourceObject){
+    keyedArray[key] = sourceObject[key];
+  }
+}
+
+function replaceListValues(targetList, sourceList){
+  targetList.length = 0;
+  for(let index = 0; index < sourceList.length; index++){
+    targetList.push(sourceList[index]);
+  }
+}
+
+function makeEnhancementDataFromGlobals(){
+  return {
+    "type": "function_enhancement",
+    "key_highlight": getObjectFromKeyedArray(key_highlight),
+    "key_icon": getObjectFromKeyedArray(key_icon),
+    "targetDateList": targetDateList,
+    "targetWeekList": targetWeekList
+  };
+}
+
+function isValidEnhancementData(enhancementData){
+  return enhancementData
+    && typeof enhancementData === "object"
+    && typeof enhancementData["key_highlight"] === "object"
+    && typeof enhancementData["key_icon"] === "object"
+    && Array.isArray(enhancementData["targetDateList"])
+    && Array.isArray(enhancementData["targetWeekList"]);
+}
+
+function getEnhancementDataFromStorage(){
+  const storedValue = storage.getItem(ENHANCEMENT_STORAGE_KEY);
+  if(storedValue == null) return null;
+  try {
+    const enhancementData = JSON.parse(storedValue);
+    return isValidEnhancementData(enhancementData) ? enhancementData : null;
+  } catch (error) {
+    console.warn("Invalid function enhancement data in Web Storage:", error);
+    return null;
+  }
+}
+
+function setEnhancementDataToStorage(enhancementData){
+  storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
+}
+
+function applyEnhancementData(enhancementData){
+  replaceKeyedArrayValues(key_highlight, enhancementData["key_highlight"]);
+  replaceKeyedArrayValues(key_icon, enhancementData["key_icon"]);
+  replaceListValues(targetDateList, enhancementData["targetDateList"]);
+  replaceListValues(targetWeekList, enhancementData["targetWeekList"]);
+}
+
+function loadEnhancementDataFromStorage(){
+  let enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    enhancementData = makeEnhancementDataFromGlobals();
+    setEnhancementDataToStorage(enhancementData);
+  }
+  applyEnhancementData(enhancementData);
+}
+
+function makeEnhancementJsonFileName(){
+  return "function_enhancement.json";
 }
 
 function getAllLinkInfoIds(){
@@ -142,6 +222,7 @@ function refreshLoadArrFromStorage(){
 
 function refreshAllAreas(){
   set_Initial();
+  loadEnhancementDataFromStorage();
   refreshLoadArrFromStorage();
   loadVisibleLinkIds();
   loadAreaBVisibleLinkIds();
@@ -157,13 +238,20 @@ function importLinkJsonFiles(files){
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const linkData = JSON.parse(reader.result);
-        if(!isValidLinkData(linkData)){
-          throw new Error("invalid link json");
+        const jsonData = JSON.parse(reader.result);
+        if(isValidLinkData(jsonData)){
+          const listKey = makeListKeyFromInfoId(jsonData["info"]["ID"]);
+          setLinkDataToStorage(listKey, jsonData);
+          resolve({"fileName": file.name, "kind": "link", "infoId": jsonData["info"]["ID"]});
+          return;
         }
-        const listKey = makeListKeyFromInfoId(linkData["info"]["ID"]);
-        setLinkDataToStorage(listKey, linkData);
-        resolve({"fileName": file.name, "infoId": linkData["info"]["ID"]});
+        if(isValidEnhancementData(jsonData)){
+          setEnhancementDataToStorage(jsonData);
+          applyEnhancementData(jsonData);
+          resolve({"fileName": file.name, "kind": "enhancement"});
+          return;
+        }
+        throw new Error("invalid json");
       } catch (error) {
         reject(new Error(file.name + ": " + error.message));
       }
@@ -174,12 +262,16 @@ function importLinkJsonFiles(files){
 
   Promise.all(readers)
     .then(importedFiles => {
-      loadVisibleLinkIds();
-      const importedInfoIds = importedFiles.map(importedFile => importedFile["infoId"]);
-      saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat(importedInfoIds))));
-      b1key.length = 0;
-      loadAreaBVisibleLinkIds();
-      storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(Array.from(new Set(b1key.concat(importedInfoIds)))));
+      const importedInfoIds = importedFiles
+        .filter(importedFile => importedFile["kind"] == "link")
+        .map(importedFile => importedFile["infoId"]);
+      if(importedInfoIds.length > 0){
+        loadVisibleLinkIds();
+        saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat(importedInfoIds))));
+        b1key.length = 0;
+        loadAreaBVisibleLinkIds();
+        storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(Array.from(new Set(b1key.concat(importedInfoIds)))));
+      }
       refreshAllAreas();
       alert(importedFiles.length + " file(s) imported.");
     })
@@ -199,13 +291,17 @@ function downloadTextFile(fileName, fileContent, contentType){
 
 function exportAllLinkJsonFiles(){
   refreshLoadArrFromStorage();
-  if(load_arr.length == 0){
-    alert("No link data in Web Storage.");
+  const enhancementData = getEnhancementDataFromStorage();
+  if(load_arr.length == 0 && enhancementData == null){
+    alert("No data in Web Storage.");
     return;
   }
   for(let linkIndex = 0; linkIndex < load_arr.length; linkIndex++){
     const linkData = load_arr[linkIndex];
     downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+  }
+  if(enhancementData != null){
+    downloadTextFile(makeEnhancementJsonFileName(), JSON.stringify(enhancementData, null, 2), "application/json");
   }
 }
 
@@ -977,6 +1073,7 @@ function selectEventFlowC()
 
 //-----------------------------------
 // ROOTフロー：起動時の処理
+loadEnhancementDataFromStorage();
 refreshLoadArrFromStorage();
 loadVisibleLinkIds();
 loadAreaBVisibleLinkIds();
