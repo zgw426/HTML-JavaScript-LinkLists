@@ -318,6 +318,101 @@ function refreshAllAreas(){
   showAreaD();
 }
 
+function getLinkItemDuplicateKey(linkItem){
+  return String(linkItem["Name"] || "") + "\u0001" + String(linkItem["URL"] || "");
+}
+
+function appendImportedNote(registeredNote, importedNote){
+  if(importedNote == null || importedNote == ""){
+    return registeredNote || "";
+  }
+  if(registeredNote == null || registeredNote == ""){
+    return importedNote;
+  }
+  return registeredNote + "\n" + importedNote;
+}
+
+function mergeLinkData(registeredLinkData, importedLinkData, duplicateStrategy){
+  const mergedLinkData = {
+    "info": registeredLinkData["info"],
+    "list": []
+  };
+  const importedItemByDuplicateKey = {};
+
+  for(let importedIndex = 0; importedIndex < importedLinkData["list"].length; importedIndex++){
+    const importedItem = importedLinkData["list"][importedIndex];
+    importedItemByDuplicateKey[getLinkItemDuplicateKey(importedItem)] = importedItem;
+  }
+
+  for(let registeredIndex = 0; registeredIndex < registeredLinkData["list"].length; registeredIndex++){
+    const registeredItem = registeredLinkData["list"][registeredIndex];
+    const duplicateKey = getLinkItemDuplicateKey(registeredItem);
+    const importedItem = importedItemByDuplicateKey[duplicateKey];
+
+    if(typeof importedItem === "undefined"){
+      mergedLinkData["list"].push(registeredItem);
+      continue;
+    }
+
+    if(duplicateStrategy == "overwrite"){
+      mergedLinkData["list"].push(importedItem);
+    }else if(duplicateStrategy == "appendNote"){
+      const mergedItem = Object.assign({}, registeredItem);
+      mergedItem["note"] = appendImportedNote(registeredItem["note"], importedItem["note"]);
+      mergedLinkData["list"].push(mergedItem);
+    }else{
+      mergedLinkData["list"].push(registeredItem);
+    }
+
+    delete importedItemByDuplicateKey[duplicateKey];
+  }
+
+  for(let importedIndex = 0; importedIndex < importedLinkData["list"].length; importedIndex++){
+    const importedItem = importedLinkData["list"][importedIndex];
+    const duplicateKey = getLinkItemDuplicateKey(importedItem);
+    if(typeof importedItemByDuplicateKey[duplicateKey] !== "undefined"){
+      mergedLinkData["list"].push(importedItem);
+      delete importedItemByDuplicateKey[duplicateKey];
+    }
+  }
+
+  return mergedLinkData;
+}
+
+function getLinkImportOptions(hasExistingLinkData){
+  const importOptions = {
+    "mode": "overwrite",
+    "duplicateStrategy": "keepRegistered"
+  };
+
+  if(!hasExistingLinkData){
+    return importOptions;
+  }
+
+  const modeInput = prompt("既存のリンク情報があります。取込方法を選択してください。\n1: 上書き\n2: マージ", "1");
+  if(modeInput == null){
+    return null;
+  }
+  if(modeInput == "2"){
+    importOptions["mode"] = "merge";
+  }else{
+    importOptions["mode"] = "overwrite";
+    return importOptions;
+  }
+
+  const strategyInput = prompt("重複するリンク情報の扱いを選択してください。\n1: 登録されているデータのみ残す\n2: インポートするデータで上書きする\n3: 登録されているデータの note にインポートする note を追記する", "1");
+  if(strategyInput == null){
+    return null;
+  }
+  if(strategyInput == "2"){
+    importOptions["duplicateStrategy"] = "overwrite";
+  }else if(strategyInput == "3"){
+    importOptions["duplicateStrategy"] = "appendNote";
+  }
+
+  return importOptions;
+}
+
 function importLinkJsonFiles(files){
   const fileList = Array.from(files);
   const readers = fileList.map(file => new Promise((resolve, reject) => {
@@ -325,19 +420,7 @@ function importLinkJsonFiles(files){
     reader.onload = () => {
       try {
         const jsonData = JSON.parse(reader.result);
-        if(isValidLinkData(jsonData)){
-          const listKey = makeListKeyFromInfoId(jsonData["info"]["ID"]);
-          setLinkDataToStorage(listKey, jsonData);
-          resolve({"fileName": file.name, "kind": "link", "infoId": jsonData["info"]["ID"]});
-          return;
-        }
-        if(isValidEnhancementData(jsonData)){
-          setEnhancementDataToStorage(jsonData);
-          applyEnhancementData(jsonData);
-          resolve({"fileName": file.name, "kind": "enhancement"});
-          return;
-        }
-        throw new Error("invalid json");
+        resolve({"fileName": file.name, "jsonData": jsonData});
       } catch (error) {
         reject(new Error(file.name + ": " + error.message));
       }
@@ -347,7 +430,40 @@ function importLinkJsonFiles(files){
   }));
 
   Promise.all(readers)
-    .then(importedFiles => {
+    .then(importedJsonFiles => {
+      const hasExistingLinkData = importedJsonFiles.some(importedJsonFile => {
+        const jsonData = importedJsonFile["jsonData"];
+        return isValidLinkData(jsonData) && getLinkDataFromStorage(makeListKeyFromInfoId(jsonData["info"]["ID"])) != null;
+      });
+      const importOptions = getLinkImportOptions(hasExistingLinkData);
+      if(importOptions == null){
+        return;
+      }
+
+      const importedFiles = [];
+      for(let importedFileIndex = 0; importedFileIndex < importedJsonFiles.length; importedFileIndex++){
+        const importedJsonFile = importedJsonFiles[importedFileIndex];
+        const jsonData = importedJsonFile["jsonData"];
+        if(isValidLinkData(jsonData)){
+          const listKey = makeListKeyFromInfoId(jsonData["info"]["ID"]);
+          const registeredLinkData = getLinkDataFromStorage(listKey);
+          if(importOptions["mode"] == "merge" && registeredLinkData != null){
+            setLinkDataToStorage(listKey, mergeLinkData(registeredLinkData, jsonData, importOptions["duplicateStrategy"]));
+          }else{
+            setLinkDataToStorage(listKey, jsonData);
+          }
+          importedFiles.push({"fileName": importedJsonFile["fileName"], "kind": "link", "infoId": jsonData["info"]["ID"]});
+          continue;
+        }
+        if(isValidEnhancementData(jsonData)){
+          setEnhancementDataToStorage(jsonData);
+          applyEnhancementData(jsonData);
+          importedFiles.push({"fileName": importedJsonFile["fileName"], "kind": "enhancement"});
+          continue;
+        }
+        throw new Error(importedJsonFile["fileName"] + ": invalid json");
+      }
+
       for(let importedFileIndex = 0; importedFileIndex < importedFiles.length; importedFileIndex++){
         recordOperationLog("JSON取込", importedFiles[importedFileIndex]["fileName"]);
       }
