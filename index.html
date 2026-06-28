@@ -16,6 +16,8 @@ const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
+const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
+const DEFAULT_OPERATION_LOG_MAX = 100;
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 let load_arr = [];
 //let linkListKeys = ["list01","list02","list03","list05"];
@@ -102,7 +104,8 @@ function makeEnhancementDataFromGlobals(){
     "key_highlight": getObjectFromKeyedArray(key_highlight),
     "key_icon": getObjectFromKeyedArray(key_icon),
     "targetDateList": targetDateList,
-    "targetWeekList": targetWeekList
+    "targetWeekList": targetWeekList,
+    "operationLogMax": typeof operationLogMax === "undefined" ? DEFAULT_OPERATION_LOG_MAX : operationLogMax
   };
 }
 
@@ -128,7 +131,9 @@ function getEnhancementDataFromStorage(){
 }
 
 function setEnhancementDataToStorage(enhancementData){
+  enhancementData["operationLogMax"] = getValidatedOperationLogMax(enhancementData["operationLogMax"]);
   storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
+  saveOperationLogs(getOperationLogs());
 }
 
 function applyEnhancementData(enhancementData){
@@ -149,6 +154,66 @@ function loadEnhancementDataFromStorage(){
 
 function makeEnhancementJsonFileName(){
   return "function_enhancement.json";
+}
+
+function getValidatedOperationLogMax(value){
+  const operationLogMax = Number(value);
+  if(Number.isFinite(operationLogMax) && operationLogMax >= 0){
+    return Math.floor(operationLogMax);
+  }
+
+  return DEFAULT_OPERATION_LOG_MAX;
+}
+
+function getOperationLogMax(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return DEFAULT_OPERATION_LOG_MAX;
+  }
+
+  return getValidatedOperationLogMax(enhancementData["operationLogMax"]);
+}
+
+function getOperationLogs(){
+  const storedValue = storage.getItem(OPERATION_LOG_STORAGE_KEY);
+  if(storedValue == null){
+    return [];
+  }
+
+  try {
+    const operationLogs = JSON.parse(storedValue);
+    return Array.isArray(operationLogs) ? operationLogs : [];
+  } catch (error) {
+    console.warn("Invalid operation log data in Web Storage:", error);
+    return [];
+  }
+}
+
+function saveOperationLogs(operationLogs){
+  const operationLogMax = getOperationLogMax();
+  const trimmedLogs = operationLogMax == 0
+    ? []
+    : operationLogs.slice(Math.max(operationLogs.length - operationLogMax, 0));
+  storage.setItem(OPERATION_LOG_STORAGE_KEY, JSON.stringify(trimmedLogs));
+}
+
+function recordOperationLog(action, detail){
+  const operationLogs = getOperationLogs();
+  operationLogs.push({
+    "datetime": new Date().toISOString(),
+    "action": action,
+    "detail": detail
+  });
+  saveOperationLogs(operationLogs);
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function getAllLinkInfoIds(){
@@ -262,6 +327,9 @@ function importLinkJsonFiles(files){
 
   Promise.all(readers)
     .then(importedFiles => {
+      for(let importedFileIndex = 0; importedFileIndex < importedFiles.length; importedFileIndex++){
+        recordOperationLog("JSON取込", importedFiles[importedFileIndex]["fileName"]);
+      }
       const importedInfoIds = importedFiles
         .filter(importedFile => importedFile["kind"] == "link")
         .map(importedFile => importedFile["infoId"]);
@@ -298,10 +366,14 @@ function exportAllLinkJsonFiles(){
   }
   for(let linkIndex = 0; linkIndex < load_arr.length; linkIndex++){
     const linkData = load_arr[linkIndex];
-    downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+    const fileName = makeJsonFileName(linkData);
+    downloadTextFile(fileName, JSON.stringify(linkData, null, 2), "application/json");
+    recordOperationLog("JSON出力", fileName);
   }
   if(enhancementData != null){
-    downloadTextFile(makeEnhancementJsonFileName(), JSON.stringify(enhancementData, null, 2), "application/json");
+    const fileName = makeEnhancementJsonFileName();
+    downloadTextFile(fileName, JSON.stringify(enhancementData, null, 2), "application/json");
+    recordOperationLog("JSON出力", fileName);
   }
 }
 
@@ -460,10 +532,10 @@ textarea{
 </head>
 <body>
 <div class="areaA">
-  <form action="" onsubmit="selectEventFlowC();return false;">
+  <form action="" onsubmit="selectEventFlowC('search');return false;">
     <span class="areaA_main_controls">
     <input type="text" id="inputKey" size="50">
-    <input type="button" value="検索" onclick="selectEventFlowC();" />
+    <input type="button" value="検索" onclick="selectEventFlowC('search');" />
     <input type="button" value="リセット" onclick="pageReload();" />
     </span>
     <span class="areaA_json_controls">
@@ -492,6 +564,7 @@ function hiraToKana(str) {
 }
 
 function pageReload(){ // ページ再読み込み
+  recordOperationLog("リセット", "リセットボタン");
   window.location.reload();
 }
 
@@ -509,7 +582,7 @@ function showAreaB()
         const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfo["ID"])) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
+        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
         wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -517,6 +590,7 @@ function showAreaB()
     wStr += "</form>";
     wStr += "<HR>";
     wStr += "<center><input type='button' value='登録情報の更新' onclick='editLinkInfo()' /></center>";
+    wStr += "<center><input type='button' value='ログ表示' onclick='showOperationLog()' /></center>";
 
     //------------//
     //フィルター用アイコンを描画
@@ -560,7 +634,7 @@ function selectEventFilterIcon(argKey){
   resultStr = tmpArr.join(" ");
 
   document.getElementById("inputKey").value = resultStr;
-  selectEventFlowC();
+  selectEventFlowC("search");
 }
 
 
@@ -580,6 +654,27 @@ function editLinkInfo(){
 
   let editorHtml = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
   document.getElementById("areaD").innerHTML = editorHtml;
+}
+
+function showOperationLog(){
+  const operationLogs = getOperationLogs();
+  let logHtml = "";
+  logHtml += "<h3>操作ログ</h3>";
+  logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
+  logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
+  logHtml += "<tr><th>日時</th><th>操作</th><th>詳細</th></tr>";
+
+  for(let logIndex = operationLogs.length - 1; logIndex >= 0; logIndex--){
+    const operationLog = operationLogs[logIndex];
+    logHtml += "<tr>";
+    logHtml += "<td>" + escapeHtml(operationLog["datetime"] || "") + "</td>";
+    logHtml += "<td>" + escapeHtml(operationLog["action"] || "") + "</td>";
+    logHtml += "<td>" + escapeHtml(operationLog["detail"] || "") + "</td>";
+    logHtml += "</tr>";
+  }
+
+  logHtml += "</table>";
+  document.getElementById("areaD").innerHTML = logHtml;
 }
 
 function showAreaC(showFlg){
@@ -686,7 +781,7 @@ function showAreaC(showFlg){
       wStr += "<div class='div_f2'>";
     }
 
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC()' "+checkedAttr +" >" ;
+    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC(\"checkbox\", this.value, this.checked)' "+checkedAttr +" >" ;
 
     iconMapKey = arr[o]["key"].toLowerCase(); // 小文字変換
 
@@ -854,7 +949,7 @@ function showAreaD()
       }
 
       wStr += "<div class='div_f1'>";
-      wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer'>";
+      wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer' onclick='recordOperationLog(\"リンククリック\", this.textContent.trim())'>";
 
       // アイコン情報あれば表示
       if(typeof list[lp0]["icon"] !== 'undefined'){
@@ -1051,8 +1146,11 @@ function showArea100(){
 
 ////////////////////////////////////////////////////////////////////////
 // areaB (jsファイル一覧) チェックボックスの選択時の処理フロー
-function selectEventFlowB()
+function selectEventFlowB(controlName, changedValue, checked)
 {
+  if(typeof changedValue !== "undefined"){
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+  }
   set_Initial();      // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定
@@ -1061,8 +1159,13 @@ function selectEventFlowB()
 }
 
 // areaC (カテゴリ一覧) チェックボックスの選択時の処理フロー
-function selectEventFlowC()
+function selectEventFlowC(actionSource, changedValue, checked)
 {
+  if(actionSource == "checkbox"){
+    recordOperationLog("チェックボックス変更", "areaC1=" + changedValue + ", checked=" + checked);
+  } else if(actionSource == "search"){
+    recordOperationLog("検索", document.getElementById("inputKey").value.trim());
+  }
   set_Initial();     // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
   set_List();        // b1key をもとに list を設定

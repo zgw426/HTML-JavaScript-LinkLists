@@ -146,6 +146,8 @@ const LINK_STORAGE_PREFIX = "HTML-JavaScript-LinkLists.links.";
 const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
+const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
+const DEFAULT_OPERATION_LOG_MAX = 100;
 const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
 
 function getLinkStorageKey(listKey){
@@ -187,6 +189,57 @@ function isValidEnhancementData(enhancementData){
     && Array.isArray(enhancementData["targetWeekList"]);
 }
 
+function getValidatedOperationLogMax(value){
+  const operationLogMax = Number(value);
+  if(Number.isFinite(operationLogMax) && operationLogMax >= 0){
+    return Math.floor(operationLogMax);
+  }
+
+  return DEFAULT_OPERATION_LOG_MAX;
+}
+
+function getOperationLogMax(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return DEFAULT_OPERATION_LOG_MAX;
+  }
+
+  return getValidatedOperationLogMax(enhancementData["operationLogMax"]);
+}
+
+function getOperationLogs(){
+  const storedValue = storage.getItem(OPERATION_LOG_STORAGE_KEY);
+  if(storedValue == null){
+    return [];
+  }
+
+  try {
+    const operationLogs = JSON.parse(storedValue);
+    return Array.isArray(operationLogs) ? operationLogs : [];
+  } catch (error) {
+    console.warn("Invalid operation log data in Web Storage:", error);
+    return [];
+  }
+}
+
+function saveOperationLogs(operationLogs){
+  const operationLogMax = getOperationLogMax();
+  const trimmedLogs = operationLogMax == 0
+    ? []
+    : operationLogs.slice(Math.max(operationLogs.length - operationLogMax, 0));
+  storage.setItem(OPERATION_LOG_STORAGE_KEY, JSON.stringify(trimmedLogs));
+}
+
+function recordOperationLog(action, detail){
+  const operationLogs = getOperationLogs();
+  operationLogs.push({
+    "datetime": new Date().toISOString(),
+    "action": action,
+    "detail": detail
+  });
+  saveOperationLogs(operationLogs);
+}
+
 function getEnhancementDataFromStorage(){
   const storedValue = storage.getItem(ENHANCEMENT_STORAGE_KEY);
   if(storedValue == null) return null;
@@ -201,7 +254,9 @@ function getEnhancementDataFromStorage(){
 
 function setEnhancementDataToStorage(enhancementData){
   enhancementData["type"] = "function_enhancement";
+  enhancementData["operationLogMax"] = getValidatedOperationLogMax(enhancementData["operationLogMax"]);
   storage.setItem(ENHANCEMENT_STORAGE_KEY, JSON.stringify(enhancementData));
+  saveOperationLogs(getOperationLogs());
 }
 
 function deleteEnhancementDataFromStorage(){
@@ -230,7 +285,9 @@ function exportStoredLinkData(listKey){
   if(linkData == null){
     return;
   }
-  downloadTextFile(makeJsonFileName(linkData), JSON.stringify(linkData, null, 2), "application/json");
+  const fileName = makeJsonFileName(linkData);
+  downloadTextFile(fileName, JSON.stringify(linkData, null, 2), "application/json");
+  recordOperationLog("JSON出力", fileName);
 }
 
 function exportStoredEnhancementData(){
@@ -238,7 +295,9 @@ function exportStoredEnhancementData(){
   if(enhancementData == null){
     return;
   }
-  downloadTextFile(makeEnhancementJsonFileName(), JSON.stringify(enhancementData, null, 2), "application/json");
+  const fileName = makeEnhancementJsonFileName();
+  downloadTextFile(fileName, JSON.stringify(enhancementData, null, 2), "application/json");
+  recordOperationLog("JSON出力", fileName);
 }
 
 function deleteLinkDataFromStorage(listKey){
@@ -341,9 +400,9 @@ function renderLinkStorageControls(){
     const areaBCheckedAttr = areaBVisibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
     const areaBDisabledAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "" : "disabled='disabled'";
     controlsHtml += "<div class='div_f1'>";
-    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm()' " + checkedAttr + ">";
+    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm(this.name, this.value, this.checked)' " + checkedAttr + ">";
     controlsHtml += " 常時表示";
-    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateAreaBVisibleLinksFromForm()' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
+    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
     controlsHtml += " AreaB初期表示";
     controlsHtml += "<HR>";    
     controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
@@ -371,7 +430,10 @@ function renderLinkStorageControls(){
   document.getElementById("link_storage_area").innerHTML = controlsHtml;
 }
 
-function updateVisibleLinksFromForm(){
+function updateVisibleLinksFromForm(controlName, changedValue, checked){
+  if(typeof changedValue !== "undefined"){
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+  }
   const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
   const visibleCheckboxes = toElementArray(document.linkStorageControls.visibleLinkInfoId);
   const visibleLinkInfoIds = [];
@@ -388,7 +450,10 @@ function updateVisibleLinksFromForm(){
   refreshParentAreas();
 }
 
-function updateAreaBVisibleLinksFromForm(){
+function updateAreaBVisibleLinksFromForm(controlName, changedValue, checked){
+  if(typeof changedValue !== "undefined"){
+    recordOperationLog("チェックボックス変更", controlName + "=" + changedValue + ", checked=" + checked);
+  }
   const toElementArray = (elements) => elements == null ? [] : (typeof elements.length === "number" ? Array.from(elements) : [elements]);
   const areaBVisibleCheckboxes = toElementArray(document.linkStorageControls.areaBVisibleLinkInfoId);
   const areaBVisibleLinkInfoIds = [];
@@ -535,7 +600,8 @@ function updateEnhancementStorageFromForm(){
     "key_highlight": collectEnhancementPairs(formElements, "highlightKey", "highlightColor"),
     "key_icon": collectEnhancementPairs(formElements, "iconFile", "iconKeyword"),
     "targetDateList": collectEnhancementList(formElements, ["targetDate", "targetDateIcon", "targetDateText"]),
-    "targetWeekList": collectEnhancementList(formElements, ["targetWeek", "targetWeekIcon", "targetWeekText"])
+    "targetWeekList": collectEnhancementList(formElements, ["targetWeek", "targetWeekIcon", "targetWeekText"]),
+    "operationLogMax": getValidatedOperationLogMax(formElements.operationLogMax.value)
   };
 
   try {
@@ -560,6 +626,8 @@ function editEnhancementData(){
   let formHtml = "";
   formHtml += '<form name="enhancementDataForm" action="" onsubmit="">';
   formHtml += "<h3>" + makeEnhancementJsonFileName() + "</h3>";
+  formHtml += "<h4>operationLogMax</h4>";
+  formHtml += makeInputCell("operationLogMax", getValidatedOperationLogMax(enhancementData["operationLogMax"]), 10);
 
   formHtml += "<h4>key_highlight</h4>";
   formHtml += "<table><tr><th>キーワード</th><th>色</th></tr>";

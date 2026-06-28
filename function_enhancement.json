@@ -1,5 +1,6 @@
 {
   "type": "function_enhancement",
+  "operationLogMax": 100,
   "key_highlight": {
     "aaaaa": "#AA0CCF",
     "動画": "#c0ffcb"
