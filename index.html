@@ -386,31 +386,69 @@ function getLinkImportOptions(hasExistingLinkData){
   };
 
   if(!hasExistingLinkData){
-    return importOptions;
+    return Promise.resolve(importOptions);
   }
 
-  const modeInput = prompt("既存のリンク情報があります。取込方法を選択してください。\n1: 上書き\n2: マージ", "1");
-  if(modeInput == null){
-    return null;
-  }
-  if(modeInput == "2"){
-    importOptions["mode"] = "merge";
-  }else{
-    importOptions["mode"] = "overwrite";
-    return importOptions;
-  }
+  return new Promise(resolve => {
+    const dialogOverlay = document.createElement("div");
+    dialogOverlay.style.position = "fixed";
+    dialogOverlay.style.top = "0";
+    dialogOverlay.style.left = "0";
+    dialogOverlay.style.width = "100%";
+    dialogOverlay.style.height = "100%";
+    dialogOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.35)";
+    dialogOverlay.style.zIndex = "1000";
 
-  const strategyInput = prompt("重複するリンク情報の扱いを選択してください。\n1: 登録されているデータのみ残す\n2: インポートするデータで上書きする\n3: 登録されているデータの note にインポートする note を追記する", "1");
-  if(strategyInput == null){
-    return null;
-  }
-  if(strategyInput == "2"){
-    importOptions["duplicateStrategy"] = "overwrite";
-  }else if(strategyInput == "3"){
-    importOptions["duplicateStrategy"] = "appendNote";
-  }
+    const dialogPanel = document.createElement("div");
+    dialogPanel.style.backgroundColor = "#ffffff";
+    dialogPanel.style.border = "solid 1px #444444";
+    dialogPanel.style.margin = "80px auto";
+    dialogPanel.style.padding = "16px";
+    dialogPanel.style.width = "min(520px, calc(100% - 40px))";
 
-  return importOptions;
+    dialogPanel.innerHTML = ""
+      + "<h3>リンクJSON取込</h3>"
+      + "<p>すでにWebストレージに登録されているリンク情報があります。</p>"
+      + "<label>取込方法 "
+      + "<select id='linkImportModeSelect'>"
+      + "<option value='overwrite'>上書き</option>"
+      + "<option value='merge'>マージ</option>"
+      + "</select>"
+      + "</label>"
+      + "<div id='linkImportDuplicateStrategyArea' style='display:none; margin-top:12px;'>"
+      + "<label>重複時の扱い "
+      + "<select id='linkImportDuplicateStrategySelect'>"
+      + "<option value='keepRegistered'>登録されているデータのみ残す</option>"
+      + "<option value='overwrite'>インポートするデータで上書きする</option>"
+      + "<option value='appendNote'>登録されているデータの note に、インポートするデータの note を追記する</option>"
+      + "</select>"
+      + "</label>"
+      + "</div>"
+      + "<div style='margin-top:16px; text-align:right;'>"
+      + "<input type='button' id='linkImportCancelButton' value='キャンセル' /> "
+      + "<input type='button' id='linkImportOkButton' value='取込' />"
+      + "</div>";
+
+    dialogOverlay.appendChild(dialogPanel);
+    document.body.appendChild(dialogOverlay);
+
+    const modeSelect = document.getElementById("linkImportModeSelect");
+    const duplicateStrategyArea = document.getElementById("linkImportDuplicateStrategyArea");
+    const duplicateStrategySelect = document.getElementById("linkImportDuplicateStrategySelect");
+    const closeDialog = (selectedOptions) => {
+      document.body.removeChild(dialogOverlay);
+      resolve(selectedOptions);
+    };
+
+    modeSelect.onchange = () => {
+      duplicateStrategyArea.style.display = modeSelect.value == "merge" ? "block" : "none";
+    };
+    document.getElementById("linkImportCancelButton").onclick = () => closeDialog(null);
+    document.getElementById("linkImportOkButton").onclick = () => closeDialog({
+      "mode": modeSelect.value,
+      "duplicateStrategy": duplicateStrategySelect.value
+    });
+  });
 }
 
 function importLinkJsonFiles(files){
@@ -430,12 +468,12 @@ function importLinkJsonFiles(files){
   }));
 
   Promise.all(readers)
-    .then(importedJsonFiles => {
+    .then(async importedJsonFiles => {
       const hasExistingLinkData = importedJsonFiles.some(importedJsonFile => {
         const jsonData = importedJsonFile["jsonData"];
         return isValidLinkData(jsonData) && getLinkDataFromStorage(makeListKeyFromInfoId(jsonData["info"]["ID"])) != null;
       });
-      const importOptions = getLinkImportOptions(hasExistingLinkData);
+      const importOptions = await getLinkImportOptions(hasExistingLinkData);
       if(importOptions == null){
         return;
       }
