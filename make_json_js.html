@@ -115,16 +115,7 @@
   </style>
 </head>
 <body>
-<input type="button" value="links_01" onclick='root_flow("list01");' />
-<input type="button" value="links_02" onclick='root_flow("list02");' />
-<input type="button" value="links_03" onclick='root_flow("list03");' />
-<input type="button" value="links_04" onclick='root_flow("list04");' />
-<input type="button" value="links_05" onclick='root_flow("list05");' />
-<input type="button" value="links_06" onclick='root_flow("list06");' />
-<input type="button" value="links_07" onclick='root_flow("list07");' />
-<input type="button" value="links_08" onclick='root_flow("list08");' />
-<input type="button" value="links_09" onclick='root_flow("list09");' />
-<input type="button" value="links_10" onclick='root_flow("list10");' />
+<div id="link_list_buttons"></div>
 <div id="link_storage_area">※Web StorageのJSON情報を表示※</div>
 <!--
 <HR>
@@ -149,10 +140,19 @@ const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
 const DEFAULT_ORIGINAL_ID = "HTML-JavaScript-LinkLists";
 const DEFAULT_OPERATION_LOG_MAX = 100;
-const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
+const linkListKeys = Array.from({length: 99}, (_, index) => "list" + String(index + 1).padStart(2, "0"));
 
 function getLinkStorageKey(listKey){
   return LINK_STORAGE_PREFIX + listKey;
+}
+
+function renderLinkListButtons(){
+  let buttonsHtml = "";
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const linkNumber = String(keyIndex + 1).padStart(2, "0");
+    buttonsHtml += '<input type="button" value="links_' + linkNumber + '" onclick=\'root_flow("' + linkListKeys[keyIndex] + '");\' />';
+  }
+  document.getElementById("link_list_buttons").innerHTML = buttonsHtml;
 }
 
 function isValidLinkData(linkData){
@@ -908,6 +908,7 @@ function root_flow(selectedListKey){
 // ----------------------------------- //
 // ROOT FLOW
 
+renderLinkListButtons();
 set_init();  // 初期値設定
 renderLinkStorageControls();
 

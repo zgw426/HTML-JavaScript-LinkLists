@@ -19,7 +19,7 @@ const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
 const DEFAULT_ORIGINAL_ID = "HTML-JavaScript-LinkLists";
 const DEFAULT_OPERATION_LOG_MAX = 100;
-const linkListKeys = ["list01","list02","list03","list04","list05","list06","list07","list08","list09","list10"];
+const linkListKeys = Array.from({length: 99}, (_, index) => "list" + String(index + 1).padStart(2, "0"));
 let load_arr = [];
 //let linkListKeys = ["list01","list02","list03","list05"];
 
