@@ -228,12 +228,20 @@ function getOperationLogWeekday(operationLog){
   return "";
 }
 
+function getOperationLogOriginalId(operationLog){
+  if(operationLog["originalId"]){
+    return operationLog["originalId"];
+  }
+  return "";
+}
+
 function recordOperationLog(action, detail){
   const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
     "datetime": logDate.toISOString(),
     "weekday": getWeekdayText(logDate),
+    "originalId": getOriginalId(),
     "action": action,
     "detail": detail
   });
@@ -256,13 +264,14 @@ function escapeCsvValue(value){
 function exportOperationLogCsv(){
   const operationLogs = getOperationLogs();
   let csvText = "\uFEFF";
-  csvText += ["datetime", "weekday", "action", "detail"].map(escapeCsvValue).join(",") + "\r\n";
+  csvText += ["日時", "曜日", "originalId", "操作", "詳細"].map(escapeCsvValue).join(",") + "\r\n";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     csvText += [
       operationLog["datetime"] || "",
       getOperationLogWeekday(operationLog),
+      getOperationLogOriginalId(operationLog),
       operationLog["action"] || "",
       operationLog["detail"] || ""
     ].map(escapeCsvValue).join(",") + "\r\n";
@@ -908,13 +917,14 @@ function showOperationLog(){
   logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
   logHtml += "<div><input type='button' value='CSV出力' onclick='exportOperationLogCsv()' /></div>";
   logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
-  logHtml += "<tr><th>日時</th><th>曜日</th><th>操作</th><th>詳細</th></tr>";
+  logHtml += "<tr><th>日時</th><th>曜日</th><th>originalId</th><th>操作</th><th>詳細</th></tr>";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     logHtml += "<tr>";
     logHtml += "<td>" + escapeHtml(operationLog["datetime"] || "") + "</td>";
     logHtml += "<td>" + escapeHtml(getOperationLogWeekday(operationLog)) + "</td>";
+    logHtml += "<td>" + escapeHtml(getOperationLogOriginalId(operationLog)) + "</td>";
     logHtml += "<td>" + escapeHtml(operationLog["action"] || "") + "</td>";
     logHtml += "<td>" + escapeHtml(operationLog["detail"] || "") + "</td>";
     logHtml += "</tr>";

@@ -213,6 +213,15 @@ function getOperationLogMax(){
   return getValidatedOperationLogMax(enhancementData["operationLogMax"]);
 }
 
+function getOriginalId(){
+  const enhancementData = getEnhancementDataFromStorage();
+  if(enhancementData == null){
+    return DEFAULT_ORIGINAL_ID;
+  }
+
+  return getValidatedOriginalId(enhancementData["originalId"]);
+}
+
 function getOperationLogs(){
   const storedValue = storage.getItem(OPERATION_LOG_STORAGE_KEY);
   if(storedValue == null){
@@ -246,6 +255,7 @@ function recordOperationLog(action, detail){
   operationLogs.push({
     "datetime": logDate.toISOString(),
     "weekday": getWeekdayText(logDate),
+    "originalId": getOriginalId(),
     "action": action,
     "detail": detail
   });
