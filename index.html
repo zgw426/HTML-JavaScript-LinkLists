@@ -222,12 +222,21 @@ function getLocaleDateTimeText(date){
   return date.toLocaleString();
 }
 
+function getOperationLogUtcDateTime(operationLog){
+  return operationLog["utcDateTime"] || "";
+}
+
+function getOperationLogLocaleDateTime(operationLog){
+  return operationLog["localeDateTime"] || operationLog["datetime"] || "";
+}
+
 function getOperationLogWeekday(operationLog){
   if(operationLog["weekday"]){
     return operationLog["weekday"];
   }
-  if(operationLog["datetime"]){
-    return getWeekdayText(new Date(operationLog["datetime"]));
+  const dateTimeText = operationLog["localeDateTime"] || operationLog["utcDateTime"] || operationLog["datetime"];
+  if(dateTimeText){
+    return getWeekdayText(new Date(dateTimeText));
   }
   return "";
 }
@@ -243,7 +252,8 @@ function recordOperationLog(action, detail){
   const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
-    "datetime": getLocaleDateTimeText(logDate),
+    "utcDateTime": logDate.toISOString(),
+    "localeDateTime": getLocaleDateTimeText(logDate),
     "weekday": getWeekdayText(logDate),
     "originalId": getOriginalId(),
     "action": action,
@@ -268,12 +278,13 @@ function escapeCsvValue(value){
 function exportOperationLogCsv(){
   const operationLogs = getOperationLogs();
   let csvText = "\uFEFF";
-  csvText += ["日時", "曜日", "originalId", "操作", "詳細"].map(escapeCsvValue).join(",") + "\r\n";
+  csvText += ["日時(UTC)", "日時(ロケール)", "曜日", "originalId", "操作", "詳細"].map(escapeCsvValue).join(",") + "\r\n";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     csvText += [
-      operationLog["datetime"] || "",
+      getOperationLogUtcDateTime(operationLog),
+      getOperationLogLocaleDateTime(operationLog),
       getOperationLogWeekday(operationLog),
       getOperationLogOriginalId(operationLog),
       operationLog["action"] || "",
@@ -307,8 +318,8 @@ function makeOperationLogCsvFileName(operationLogs){
   const firstLog = operationLogs.length > 0 ? operationLogs[0] : null;
   const lastLog = operationLogs.length > 0 ? operationLogs[operationLogs.length - 1] : null;
   return sanitizeFileNamePart(getOriginalId())
-    + "__" + formatLogDateTime(firstLog == null ? "" : firstLog["datetime"])
-    + "__" + formatLogDateTime(lastLog == null ? "" : lastLog["datetime"])
+    + "__" + formatLogDateTime(firstLog == null ? "" : getOperationLogLocaleDateTime(firstLog))
+    + "__" + formatLogDateTime(lastLog == null ? "" : getOperationLogLocaleDateTime(lastLog))
     + "__" + padNumber(operationLogs.length, 7)
     + ".csv";
 }
@@ -926,12 +937,13 @@ function showOperationLog(){
   logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
   logHtml += "<div><input type='button' value='CSV出力' onclick='exportOperationLogCsv()' /></div>";
   logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
-  logHtml += "<tr><th>日時</th><th>曜日</th><th>originalId</th><th>操作</th><th>詳細</th></tr>";
+  logHtml += "<tr><th>日時(UTC)</th><th>日時(ロケール)</th><th>曜日</th><th>originalId</th><th>操作</th><th>詳細</th></tr>";
 
   for(let logIndex = 0; logIndex < operationLogs.length; logIndex++){
     const operationLog = operationLogs[logIndex];
     logHtml += "<tr>";
-    logHtml += "<td>" + escapeHtml(operationLog["datetime"] || "") + "</td>";
+    logHtml += "<td>" + escapeHtml(getOperationLogUtcDateTime(operationLog)) + "</td>";
+    logHtml += "<td>" + escapeHtml(getOperationLogLocaleDateTime(operationLog)) + "</td>";
     logHtml += "<td>" + escapeHtml(getOperationLogWeekday(operationLog)) + "</td>";
     logHtml += "<td>" + escapeHtml(getOperationLogOriginalId(operationLog)) + "</td>";
     logHtml += "<td>" + escapeHtml(operationLog["action"] || "") + "</td>";

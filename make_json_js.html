@@ -257,7 +257,8 @@ function recordOperationLog(action, detail){
   const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
-    "datetime": getLocaleDateTimeText(logDate),
+    "utcDateTime": logDate.toISOString(),
+    "localeDateTime": getLocaleDateTimeText(logDate),
     "weekday": getWeekdayText(logDate),
     "originalId": getOriginalId(),
     "action": action,
