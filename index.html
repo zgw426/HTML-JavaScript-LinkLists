@@ -695,6 +695,13 @@ div.area100 {
     margin: 0px;
     overflow: hidden;
     background-color: #D3D3D3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.area100_original_id {
+    margin-left: auto;
+    padding-right: 8px;
 }
 
 .div_f0{
@@ -1380,7 +1387,7 @@ function checkWeekEventMsg(loTargetWeekList){
 
 function showArea100(){
   area100Str += `  令和${reiwa}年`;
-  document.getElementById("area100").innerHTML = area100Str;
+  document.getElementById("area100").innerHTML = "<span>" + escapeHtml(area100Str) + "</span><span class='area100_original_id'>" + escapeHtml(getOriginalId()) + "</span>";
 }
 
 
