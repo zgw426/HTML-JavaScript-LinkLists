@@ -249,11 +249,15 @@ function getWeekdayText(date){
   return ["日","月","火","水","木","金","土"][date.getDay()];
 }
 
+function getLocaleDateTimeText(date){
+  return date.toLocaleString();
+}
+
 function recordOperationLog(action, detail){
   const logDate = new Date();
   const operationLogs = getOperationLogs();
   operationLogs.push({
-    "datetime": logDate.toISOString(),
+    "datetime": getLocaleDateTimeText(logDate),
     "weekday": getWeekdayText(logDate),
     "originalId": getOriginalId(),
     "action": action,
