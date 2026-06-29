@@ -817,6 +817,11 @@ function hiraToKana(str) {
     });
 }
 
+function getNormalizedKanaInitial(str) {
+    if(str == null || str == "") return "";
+    return hiraToKana(str[0].toUpperCase()).normalize('NFD')[0];
+}
+
 function pageReload(){ // ページ再読み込み
   recordOperationLog("リセット", "リセットボタン____displayedLinkCount=" + getDisplayedLinkCount());
   window.location.reload();
@@ -1017,10 +1022,9 @@ function showAreaC(showFlg){
       checkedAttr = "checked='checked'"; // チェックを付ける
     }
 
-    if ( hiraToKana(headStr.toUpperCase()) != hiraToKana(arr[o]["value"][0].toUpperCase()) ){
+    if ( getNormalizedKanaInitial(headStr) != getNormalizedKanaInitial(arr[o]["value"]) ){
       headStr = arr[o]["value"][0];
-      let headingText = hiraToKana(headStr.toUpperCase());
-      headingText = headingText.normalize('NFD')[0];  // 濁音→静音
+      let headingText = getNormalizedKanaInitial(headStr);  // 濁音・半濁音→清音
 
       wStr += "<div class='div_f0'>";
       
