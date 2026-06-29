@@ -818,7 +818,7 @@ function hiraToKana(str) {
 }
 
 function pageReload(){ // ページ再読み込み
-  recordOperationLog("リセット", "リセットボタン");
+  recordOperationLog("リセット", "リセットボタン____displayedLinkCount=" + getDisplayedLinkCount());
   window.location.reload();
 }
 
@@ -1461,11 +1461,11 @@ function selectEventFlowC(actionSource, changedValue, checked)
 //-----------------------------------
 // ROOTフロー：起動時の処理
 loadEnhancementDataFromStorage();
-recordOperationLog("起動", "リンクリスト");
 refreshLoadArrFromStorage();
 loadVisibleLinkIds();
 loadAreaBVisibleLinkIds();
 set_List();
+recordOperationLog("起動", "リンクリスト____displayedLinkCount=" + getDisplayedLinkCount());
 showAreaB();
 showAreaC(0);
 showAreaD();
