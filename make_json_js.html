@@ -388,6 +388,11 @@ function saveAreaBVisibleLinkIds(linkInfoIds){
   storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds.filter(infoId => visibleLinkIds.includes(infoId))));
 }
 
+function addLinkInfoIdToVisibility(linkInfoId){
+  saveVisibleLinkIds(Array.from(new Set(getVisibleLinkIds().concat([linkInfoId]))));
+  saveAreaBVisibleLinkIds(Array.from(new Set(getAreaBVisibleLinkIds().concat([linkInfoId]))));
+}
+
 function refreshParentAreas(){
   try {
     if(parent && typeof parent.refreshAllAreas === "function"){
@@ -821,6 +826,7 @@ function updateLinkStorageFromForm(){
 
   try {
     setLinkDataToStorage(currentListKey, linkData);
+    addLinkInfoIdToVisibility(linkData["info"]["ID"]);
     renderLinkStorageControls();
     refreshParentAreas();
     document.getElementById("message_area").innerHTML = "更新しました";
