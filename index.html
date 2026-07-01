@@ -298,7 +298,7 @@ function recordCopyOperationLog(){
   recordOperationLog("コピー", "copyOperation");
 }
 
-function copyTextWithTemporaryInput(textToCopy){
+function copyTextWithTemporaryInput(textToCopy, shouldRecordCopyLog = true){
   const temporaryInput = document.createElement("textarea");
   temporaryInput.value = textToCopy;
   temporaryInput.setAttribute("readonly", "readonly");
@@ -310,22 +310,28 @@ function copyTextWithTemporaryInput(textToCopy){
   document.execCommand("copy");
   document.body.removeChild(temporaryInput);
   skipNextCopyEventLog = false;
-  recordOperationLog("コピー", "copyOperation");
+  if(shouldRecordCopyLog){
+    recordOperationLog("コピー", "copyOperation");
+  }
 }
 
-function copyTextToClipboard(textToCopy){
+function copyTextToClipboard(textToCopy, shouldRecordCopyLog = true){
   if(textToCopy == null || textToCopy == ""){
     return;
   }
 
   if(navigator.clipboard && typeof navigator.clipboard.writeText === "function"){
     navigator.clipboard.writeText(String(textToCopy))
-      .then(() => recordOperationLog("コピー", "copyOperation"))
-      .catch(() => copyTextWithTemporaryInput(String(textToCopy)));
+      .then(() => {
+        if(shouldRecordCopyLog){
+          recordOperationLog("コピー", "copyOperation");
+        }
+      })
+      .catch(() => copyTextWithTemporaryInput(String(textToCopy), shouldRecordCopyLog));
     return;
   }
 
-  copyTextWithTemporaryInput(String(textToCopy));
+  copyTextWithTemporaryInput(String(textToCopy), shouldRecordCopyLog);
 }
 
 function hasAccountValue(accountValue){
@@ -339,7 +345,8 @@ function copyLinkAccountValue(linkIndex, fieldName){
   if(fieldName != "accountId" && fieldName != "password"){
     return;
   }
-  copyTextToClipboard(list[linkIndex][fieldName]);
+  recordOperationLog("コピーボタンクリック", "fieldName=" + fieldName + "____linkName=" + (list[linkIndex]["Name"] || ""));
+  copyTextToClipboard(list[linkIndex][fieldName], false);
 }
 
 function escapeCsvValue(value){
