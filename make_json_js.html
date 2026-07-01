@@ -419,6 +419,29 @@ function refreshParentAreas(linkInfoId){
   }
 }
 
+function refreshParentAreaB(visibleLinkIds, areaBVisibleLinkIds){
+  try {
+    if(parent && parent !== window && typeof parent.refreshAreaBWithVisibility === "function"){
+      parent.refreshAreaBWithVisibility(visibleLinkIds, areaBVisibleLinkIds);
+      return;
+    }
+  } catch (error) {
+    console.warn("Skipped direct parent AreaB refresh:", error);
+  }
+
+  try {
+    if(parent && parent !== window){
+      parent.postMessage({
+        "type": "HTML-JavaScript-LinkLists.refreshAreaB",
+        "visibleLinkIds": visibleLinkIds,
+        "areaBVisibleLinkIds": areaBVisibleLinkIds
+      }, "*");
+    }
+  } catch (error) {
+    console.warn("Skipped parent AreaB refresh message:", error);
+  }
+}
+
 function escapeHtml(value){
   return String(value)
     .replace(/&/g, "&amp;")
@@ -496,8 +519,10 @@ function updateVisibleLinksFromForm(controlName, changedValue, checked){
 
   saveVisibleLinkIds(visibleLinkInfoIds);
   saveAreaBVisibleLinkIds(getAreaBVisibleLinkIds());
+  const latestVisibleLinkIds = getVisibleLinkIds();
+  const latestAreaBVisibleLinkIds = getAreaBVisibleLinkIds();
   renderLinkStorageControls();
-  refreshParentAreas();
+  refreshParentAreaB(latestVisibleLinkIds, latestAreaBVisibleLinkIds);
 }
 
 function updateAreaBVisibleLinksFromForm(controlName, changedValue, checked){
@@ -515,7 +540,7 @@ function updateAreaBVisibleLinksFromForm(controlName, changedValue, checked){
   }
 
   saveAreaBVisibleLinkIds(areaBVisibleLinkInfoIds);
-  refreshParentAreas();
+  refreshParentAreaB(getVisibleLinkIds(), getAreaBVisibleLinkIds());
 }
 
 function deleteStoredLinkData(listKey){

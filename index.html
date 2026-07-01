@@ -436,6 +436,41 @@ function refreshAllAreas(){
   showAreaD();
 }
 
+function refreshAreaBFromStorage(){
+  set_Initial();
+  loadEnhancementDataFromStorage();
+  refreshLoadArrFromStorage();
+  loadVisibleLinkIds();
+  loadAreaBVisibleLinkIds();
+  set_List();
+  showAreaB();
+}
+
+function refreshAreaBWithVisibility(nextVisibleLinkIds, nextAreaBVisibleLinkIds){
+  const allLinkInfoIds = getAllLinkInfoIds();
+  set_Initial();
+  loadEnhancementDataFromStorage();
+  refreshLoadArrFromStorage();
+  visibleLinkIds = normalizeLinkInfoIds(nextVisibleLinkIds).filter(infoId => allLinkInfoIds.includes(infoId));
+  b1key = normalizeLinkInfoIds(nextAreaBVisibleLinkIds).filter(infoId => visibleLinkIds.includes(infoId));
+  isAreaBFilterActive = true;
+  set_List();
+  showAreaB();
+}
+
+function handleLinkStorageMessage(event){
+  if(!event.data || event.data["type"] != "HTML-JavaScript-LinkLists.refreshAreaB"){
+    return;
+  }
+  if(Array.isArray(event.data["visibleLinkIds"]) && Array.isArray(event.data["areaBVisibleLinkIds"])){
+    refreshAreaBWithVisibility(event.data["visibleLinkIds"], event.data["areaBVisibleLinkIds"]);
+    return;
+  }
+  refreshAreaBFromStorage();
+}
+
+window.addEventListener("message", handleLinkStorageMessage);
+
 function getLinkItemDuplicateKey(linkItem){
   return String(linkItem["Name"] || "") + "\u0001" + String(linkItem["URL"] || "");
 }
