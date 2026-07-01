@@ -865,16 +865,27 @@ function set_init(){
   document.getElementById("savebutton_area").innerHTML = "";  // 更新ボタンを消す
 }
 
+function makeEmptyLinkData(selectedListKey){
+  const infoId = Number(selectedListKey.replace("list", ""));
+  return {
+    "info": {
+      "Title": "links_" + String(infoId).padStart(2, "0"),
+      "ID": infoId,
+      "NOTE": ""
+    },
+    "list": []
+  };
+}
+
 
 function root_flow(selectedListKey){
   set_init();  // 初期値設定
   currentListKey = selectedListKey;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
-  const targetData = getLinkDataFromStorage(selectedListKey);
+  let targetData = getLinkDataFromStorage(selectedListKey);
   if(targetData == null){
-    document.getElementById("message_area").innerHTML = "Web Storage に " + selectedListKey + " のリンク情報がありません。";
-    return;
+    targetData = makeEmptyLinkData(selectedListKey);
   }
 
   targetList = targetData["list"];
