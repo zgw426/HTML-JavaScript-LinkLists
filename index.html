@@ -273,6 +273,12 @@ function recordOperationLog(action, detail){
   saveOperationLogs(operationLogs);
 }
 
+function recordCopyOperationLog(){
+  recordOperationLog("コピー", "copyOperation");
+}
+
+document.addEventListener("copy", recordCopyOperationLog);
+
 function escapeHtml(value){
   return String(value)
     .replace(/&/g, "&amp;")
