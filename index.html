@@ -837,6 +837,10 @@ function getNormalizedKanaInitial(str) {
     return hiraToKana(str[0].toUpperCase()).normalize('NFD')[0];
 }
 
+function hasIconValue(iconValue) {
+    return typeof iconValue !== 'undefined' && iconValue != "";
+}
+
 function pageReload(){ // ページ再読み込み
   recordOperationLog("リセット", "リセットボタン____displayedLinkCount=" + getDisplayedLinkCount());
   window.location.reload();
@@ -992,7 +996,7 @@ function showAreaC(showFlg){
         kanas.push( list[lpa]["category"][lpf]["kana"].toLowerCase() );
 
         // ------------------- アイコン -------------------
-        if(typeof list[lpa]["icon"] !== 'undefined'){
+        if(hasIconValue(list[lpa]["icon"])){
           tmpIcons.push(list[lpa]["icon"]);
         }
         // ------------------- アイコン -------------------
@@ -1251,7 +1255,7 @@ function showAreaD()
       wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer' onclick='recordOperationLog(\"リンククリック\", this.textContent.trim())'>";
 
       // アイコン情報あれば表示
-      if(typeof list[lp0]["icon"] !== 'undefined'){
+      if(hasIconValue(list[lp0]["icon"])){
         wStr += "<img src='icon/"+ list[lp0]["icon"] +"' height='70' align='middle' hspace='3px' vspace='3px'>";
       }
       wStr += list[lp0]["Name"];
