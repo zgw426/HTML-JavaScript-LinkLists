@@ -737,6 +737,8 @@ const itemDefinitions = [
   {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "Name"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "URL"     , "line_flg": 0, "mustFlg": "MUST"},
+  {"item": "accountId", "line_flg": 0, "mustFlg": "OPTION"},
+  {"item": "password", "line_flg": 0, "mustFlg": "OPTION"},
   {"item": "category", "line_flg": 1, "mustFlg": "MUST"},
   {"item": "note"    , "line_flg": 2, "mustFlg": "OPTION"},
 ];
@@ -758,11 +760,11 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
   //fieldHtml+= "<div>";
   fieldHtml+= '<label for="'+element+'">'+element+'</label>';
   if(lineFlg == 0){
-    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ itemValue +'" size="100%" >';
+    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ escapeHtml(itemValue) +'" size="100%" >';
   }else if(lineFlg == 1){
-    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ itemValue +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ escapeHtml(itemValue) +'</textarea>';
   }else{
-    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ itemValue +'</textarea>';
+    fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="100%" rows="5">'+ escapeHtml(itemValue) +'</textarea>';
   }
   //fieldHtml+= '</div>';
 
@@ -851,6 +853,12 @@ function updateLinkStorageFromForm(){
         break;
       case "URL":
         currentItem[fieldName] = fieldValue;
+        break;
+      case "accountId":
+      case "password":
+        if(fieldValue != ""){
+          currentItem[fieldName] = fieldValue;
+        }
         break;
       case "category":
         currentItem[fieldName] = parseCategoryInput(fieldValue);

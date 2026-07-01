@@ -288,6 +288,60 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
+let skipNextCopyEventLog = false;
+
+function recordCopyOperationLog(){
+  if(skipNextCopyEventLog){
+    skipNextCopyEventLog = false;
+    return;
+  }
+  recordOperationLog("コピー", "copyOperation");
+}
+
+function copyTextWithTemporaryInput(textToCopy){
+  const temporaryInput = document.createElement("textarea");
+  temporaryInput.value = textToCopy;
+  temporaryInput.setAttribute("readonly", "readonly");
+  temporaryInput.style.position = "fixed";
+  temporaryInput.style.left = "-9999px";
+  document.body.appendChild(temporaryInput);
+  temporaryInput.select();
+  skipNextCopyEventLog = true;
+  document.execCommand("copy");
+  document.body.removeChild(temporaryInput);
+  skipNextCopyEventLog = false;
+  recordOperationLog("コピー", "copyOperation");
+}
+
+function copyTextToClipboard(textToCopy){
+  if(textToCopy == null || textToCopy == ""){
+    return;
+  }
+
+  if(navigator.clipboard && typeof navigator.clipboard.writeText === "function"){
+    navigator.clipboard.writeText(String(textToCopy))
+      .then(() => recordOperationLog("コピー", "copyOperation"))
+      .catch(() => copyTextWithTemporaryInput(String(textToCopy)));
+    return;
+  }
+
+  copyTextWithTemporaryInput(String(textToCopy));
+}
+
+function hasAccountValue(accountValue){
+  return typeof accountValue !== "undefined" && accountValue != "";
+}
+
+function copyLinkAccountValue(linkIndex, fieldName){
+  if(typeof list[linkIndex] === "undefined"){
+    return;
+  }
+  if(fieldName != "accountId" && fieldName != "password"){
+    return;
+  }
+  copyTextToClipboard(list[linkIndex][fieldName]);
+}
+
 function escapeCsvValue(value){
   return '"' + String(value == null ? "" : value).replace(/"/g, '""') + '"';
 }
@@ -1332,6 +1386,20 @@ function showAreaD()
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
       wStr += "</div>";
+      if(hasAccountValue(list[lp0]["accountId"]) || hasAccountValue(list[lp0]["password"])){
+        wStr += "<div class='div_account'>";
+        if(hasAccountValue(list[lp0]["accountId"])){
+          wStr += "アカウントID: " + escapeHtml(list[lp0]["accountId"]);
+          wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", \"accountId\")'>コピー</button>";
+          wStr += "<br>";
+        }
+        if(hasAccountValue(list[lp0]["password"])){
+          wStr += "パスワード: *****";
+          wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", \"password\")'>コピー</button>";
+          wStr += "<br>";
+        }
+        wStr += "</div>";
+      }
       wStr += "<hr width='100%'>";
 
       // note の改行(\n)を数えて textarea タグの高さを設定する
