@@ -737,11 +737,12 @@ const itemDefinitions = [
   {"item": "kana"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "Name"    , "line_flg": 0, "mustFlg": "MUST"},
   {"item": "URL"     , "line_flg": 0, "mustFlg": "MUST"},
-  {"item": "accountId", "line_flg": 0, "mustFlg": "OPTION"},
-  {"item": "password", "line_flg": 0, "mustFlg": "OPTION"},
+  {"item": "accounts", "line_flg": 3, "mustFlg": "OPTION"},
   {"item": "category", "line_flg": 1, "mustFlg": "MUST"},
   {"item": "note"    , "line_flg": 2, "mustFlg": "OPTION"},
 ];
+
+const BLANK_ACCOUNT_ROW_COUNT = 2;
 
 // formタグの情報を格納
 wStr = ""
@@ -775,6 +776,45 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
   return(fieldHtml);
 }
 
+function getLinkAccounts(linkItem){
+  const accounts = [];
+  if(linkItem && Array.isArray(linkItem["accounts"])){
+    for(let accountIndex = 0; accountIndex < linkItem["accounts"].length; accountIndex++){
+      const account = linkItem["accounts"][accountIndex];
+      if(account && (account["accountId"] != "" || account["password"] != "")){
+        accounts.push({
+          "accountId": account["accountId"] || "",
+          "password": account["password"] || ""
+        });
+      }
+    }
+  }
+  if(linkItem && (linkItem["accountId"] || linkItem["password"])){
+    accounts.push({
+      "accountId": linkItem["accountId"] || "",
+      "password": linkItem["password"] || ""
+    });
+  }
+  return accounts;
+}
+
+function setAccountFormCells(linkItem){
+  const accounts = getLinkAccounts(linkItem);
+  const rowCount = accounts.length + BLANK_ACCOUNT_ROW_COUNT;
+  let fieldHtml = "<fieldset>";
+  fieldHtml += "<legend>accounts</legend>";
+  for(let accountIndex = 0; accountIndex < rowCount; accountIndex++){
+    const account = accounts[accountIndex] || {"accountId": "", "password": ""};
+    fieldHtml += '<label for="accountId">accountId</label>';
+    fieldHtml += '<input type="text" name="accountId" value="' + escapeHtml(account["accountId"]) + '" size="45" >';
+    fieldHtml += '<label for="password">password</label>';
+    fieldHtml += '<input type="text" name="password" value="' + escapeHtml(account["password"]) + '" size="45" >';
+    fieldHtml += "<BR />";
+  }
+  fieldHtml += "</fieldset>";
+  return fieldHtml;
+}
+
 function set_form_flow(itemDefinitions, listItem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
@@ -791,6 +831,12 @@ function set_form_flow(itemDefinitions, listItem){
       formFlg = 0;
     }else if(itemNo == itemDefinitions.length){
       formFlg = -1;
+    }
+
+    if(itemName == "accounts"){
+      formHtml += setAccountFormCells(listItem);
+      formHtml += "<BR />";
+      continue;
     }
 
     itemValue = listItem[itemName];
@@ -827,6 +873,8 @@ function updateLinkStorageFromForm(){
     "list": []
   };
   let currentItem = {};
+  let currentAccounts = [];
+  let currentAccount = {};
   let shouldWrite = true;
   let fieldName = "";
   let fieldValue= "";
@@ -840,6 +888,8 @@ function updateLinkStorageFromForm(){
     switch (fieldName){
       case "icon":
         currentItem = {};
+        currentAccounts = [];
+        currentAccount = {};
         if(fieldValue != ""){
           currentItem[fieldName] = fieldValue;
         }
@@ -855,20 +905,33 @@ function updateLinkStorageFromForm(){
         currentItem[fieldName] = fieldValue;
         break;
       case "accountId":
+        if(fieldValue != ""){
+          currentAccount["accountId"] = fieldValue;
+        }
+        break;
       case "password":
         if(fieldValue != ""){
-          currentItem[fieldName] = fieldValue;
+          currentAccount["password"] = fieldValue;
         }
+        if(currentAccount["accountId"] || currentAccount["password"]){
+          currentAccounts.push(currentAccount);
+        }
+        currentAccount = {};
         break;
       case "category":
         currentItem[fieldName] = parseCategoryInput(fieldValue);
         break;
       case "note":
         currentItem[fieldName] = fieldValue;
+        if(currentAccounts.length > 0){
+          currentItem["accounts"] = currentAccounts;
+        }
         if(shouldWrite){
           linkData["list"].push(currentItem);
         }
         currentItem = {};
+        currentAccounts = [];
+        currentAccount = {};
         shouldWrite = true;
         break;
     }

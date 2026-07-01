@@ -338,15 +338,41 @@ function hasAccountValue(accountValue){
   return typeof accountValue !== "undefined" && accountValue != "";
 }
 
-function copyLinkAccountValue(linkIndex, fieldName){
+function getLinkAccounts(linkItem){
+  const accounts = [];
+  if(linkItem && Array.isArray(linkItem["accounts"])){
+    for(let accountIndex = 0; accountIndex < linkItem["accounts"].length; accountIndex++){
+      const account = linkItem["accounts"][accountIndex];
+      if(account && (hasAccountValue(account["accountId"]) || hasAccountValue(account["password"]))){
+        accounts.push({
+          "accountId": account["accountId"] || "",
+          "password": account["password"] || ""
+        });
+      }
+    }
+  }
+  if(linkItem && (hasAccountValue(linkItem["accountId"]) || hasAccountValue(linkItem["password"]))){
+    accounts.push({
+      "accountId": linkItem["accountId"] || "",
+      "password": linkItem["password"] || ""
+    });
+  }
+  return accounts;
+}
+
+function copyLinkAccountValue(linkIndex, accountIndex, fieldName){
   if(typeof list[linkIndex] === "undefined"){
+    return;
+  }
+  const accounts = getLinkAccounts(list[linkIndex]);
+  if(typeof accounts[accountIndex] === "undefined"){
     return;
   }
   if(fieldName != "accountId" && fieldName != "password"){
     return;
   }
-  recordOperationLog("コピーボタンクリック", "fieldName=" + fieldName + "____linkName=" + (list[linkIndex]["Name"] || ""));
-  copyTextToClipboard(list[linkIndex][fieldName], false);
+  recordOperationLog("コピーボタンクリック", "fieldName=" + fieldName + "____accountIndex=" + accountIndex + "____linkName=" + (list[linkIndex]["Name"] || ""));
+  copyTextToClipboard(accounts[accountIndex][fieldName], false);
 }
 
 function escapeCsvValue(value){
@@ -1393,7 +1419,35 @@ function showAreaD()
       wStr += "<div class='div_url'>";
       wStr += decoUrl;
       wStr += "</div>";
-      if(hasAccountValue(list[lp0]["accountId"]) || hasAccountValue(list[lp0]["password"])){
+      const accounts = getLinkAccounts(list[lp0]);
+      if(accounts.length > 0){
+        wStr += "<div class='div_account'>";
+        for(let accountIndex = 0; accountIndex < accounts.length; accountIndex++){
+          wStr += "account " + (accountIndex + 1) + "<br>";
+          if(hasAccountValue(accounts[accountIndex]["accountId"])){
+            wStr += "Account ID: " + escapeHtml(accounts[accountIndex]["accountId"]);
+            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"accountId\")'>Copy</button>";
+            wStr += "<br>";
+          }
+          if(hasAccountValue(accounts[accountIndex]["password"])){
+            wStr += "Password: *****";
+            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"password\")'>Copy</button>";
+            wStr += "<br>";
+          }
+          if(false && hasAccountValue(accounts[accountIndex]["accountId"])){
+            wStr += "繧｢繧ｫ繧ｦ繝ｳ繝・D: " + escapeHtml(accounts[accountIndex]["accountId"]);
+            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"accountId\")'>繧ｳ繝斐・</button>";
+            wStr += "<br>";
+          }
+          if(false && hasAccountValue(accounts[accountIndex]["password"])){
+            wStr += "繝代せ繝ｯ繝ｼ繝・ *****";
+            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"password\")'>繧ｳ繝斐・</button>";
+            wStr += "<br>";
+          }
+        }
+        wStr += "</div>";
+      }
+      if(false && (hasAccountValue(list[lp0]["accountId"]) || hasAccountValue(list[lp0]["password"]))){
         wStr += "<div class='div_account'>";
         if(hasAccountValue(list[lp0]["accountId"])){
           wStr += "アカウントID: " + escapeHtml(list[lp0]["accountId"]);
