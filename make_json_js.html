@@ -146,6 +146,15 @@ function getLinkStorageKey(listKey){
   return LINK_STORAGE_PREFIX + listKey;
 }
 
+function normalizeLinkInfoId(infoId){
+  const numberInfoId = Number(infoId);
+  return Number.isFinite(numberInfoId) ? numberInfoId : infoId;
+}
+
+function normalizeLinkInfoIds(linkInfoIds){
+  return linkInfoIds.map(infoId => normalizeLinkInfoId(infoId));
+}
+
 function renderLinkListButtons(){
   let buttonsHtml = "";
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
@@ -168,7 +177,9 @@ function getLinkDataFromStorage(listKey){
   if(storedValue == null) return null;
   try {
     const linkData = JSON.parse(storedValue);
-    return isValidLinkData(linkData) ? linkData : null;
+    if(!isValidLinkData(linkData)) return null;
+    linkData["info"]["ID"] = normalizeLinkInfoId(linkData["info"]["ID"]);
+    return linkData;
   } catch (error) {
     console.warn("Invalid link data in Web Storage:", listKey, error);
     return null;
@@ -337,7 +348,7 @@ function getAllLinkInfoIds(){
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
     const linkData = getLinkDataFromStorage(linkListKeys[keyIndex]);
     if(linkData != null){
-      linkInfoIds.push(linkData["info"]["ID"]);
+      linkInfoIds.push(normalizeLinkInfoId(linkData["info"]["ID"]));
     }
   }
   return linkInfoIds;
@@ -353,7 +364,7 @@ function getVisibleLinkIds(){
   try {
     const storedIds = JSON.parse(storedValue);
     return Array.isArray(storedIds)
-      ? storedIds.filter(infoId => allLinkInfoIds.includes(infoId))
+      ? normalizeLinkInfoIds(storedIds).filter(infoId => allLinkInfoIds.includes(infoId))
       : allLinkInfoIds;
   } catch (error) {
     console.warn("Invalid visible link ids in Web Storage:", error);
@@ -362,7 +373,7 @@ function getVisibleLinkIds(){
 }
 
 function saveVisibleLinkIds(linkInfoIds){
-  storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds));
+  storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(normalizeLinkInfoIds(linkInfoIds)));
 }
 
 function getAreaBVisibleLinkIds(){
@@ -375,7 +386,7 @@ function getAreaBVisibleLinkIds(){
   try {
     const storedIds = JSON.parse(storedValue);
     return Array.isArray(storedIds)
-      ? storedIds.filter(infoId => visibleLinkIds.includes(infoId))
+      ? normalizeLinkInfoIds(storedIds).filter(infoId => visibleLinkIds.includes(infoId))
       : visibleLinkIds;
   } catch (error) {
     console.warn("Invalid AreaB visible link ids in Web Storage:", error);
@@ -385,16 +396,21 @@ function getAreaBVisibleLinkIds(){
 
 function saveAreaBVisibleLinkIds(linkInfoIds){
   const visibleLinkIds = getVisibleLinkIds();
-  storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(linkInfoIds.filter(infoId => visibleLinkIds.includes(infoId))));
+  const normalizedLinkInfoIds = normalizeLinkInfoIds(linkInfoIds);
+  storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(normalizedLinkInfoIds.filter(infoId => visibleLinkIds.includes(infoId))));
 }
 
 function addLinkInfoIdToVisibility(linkInfoId){
-  saveVisibleLinkIds(Array.from(new Set(getVisibleLinkIds().concat([linkInfoId]))));
-  saveAreaBVisibleLinkIds(Array.from(new Set(getAreaBVisibleLinkIds().concat([linkInfoId]))));
+  const normalizedLinkInfoId = normalizeLinkInfoId(linkInfoId);
+  saveVisibleLinkIds(Array.from(new Set(getVisibleLinkIds().concat([normalizedLinkInfoId]))));
+  saveAreaBVisibleLinkIds(Array.from(new Set(getAreaBVisibleLinkIds().concat([normalizedLinkInfoId]))));
 }
 
-function refreshParentAreas(){
+function refreshParentAreas(linkInfoId){
   try {
+    if(parent && typeof parent.addLinkInfoIdToVisibility === "function" && typeof linkInfoId !== "undefined"){
+      parent.addLinkInfoIdToVisibility(linkInfoId);
+    }
     if(parent && typeof parent.refreshAllAreas === "function"){
       parent.refreshAllAreas();
     }
@@ -429,16 +445,17 @@ function renderLinkStorageControls(){
     }
 
     const linkInfo = linkData["info"];
-    const checkedAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
-    const areaBCheckedAttr = areaBVisibleLinkIds.includes(linkInfo["ID"]) ? "checked='checked'" : "";
-    const areaBDisabledAttr = visibleLinkIds.includes(linkInfo["ID"]) ? "" : "disabled='disabled'";
+    const linkInfoId = normalizeLinkInfoId(linkInfo["ID"]);
+    const checkedAttr = visibleLinkIds.includes(linkInfoId) ? "checked='checked'" : "";
+    const areaBCheckedAttr = areaBVisibleLinkIds.includes(linkInfoId) ? "checked='checked'" : "";
+    const areaBDisabledAttr = visibleLinkIds.includes(linkInfoId) ? "" : "disabled='disabled'";
     controlsHtml += "<div class='div_f1'>";
-    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateVisibleLinksFromForm(this.name, this.value, this.checked)' " + checkedAttr + ">";
+    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfoId + "' onclick='updateVisibleLinksFromForm(this.name, this.value, this.checked)' " + checkedAttr + ">";
     controlsHtml += " 常時表示";
-    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfo["ID"] + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
+    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfoId + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
     controlsHtml += " AreaB初期表示";
     controlsHtml += "<HR>";    
-    controlsHtml += linkInfo["ID"] + "-" + linkInfo["Title"];
+    controlsHtml += linkInfoId + "-" + linkInfo["Title"];
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
@@ -473,7 +490,7 @@ function updateVisibleLinksFromForm(controlName, changedValue, checked){
 
   for(let index = 0; index < visibleCheckboxes.length; index++){
     if(visibleCheckboxes[index].checked){
-      visibleLinkInfoIds.push(visibleCheckboxes[index].value);
+      visibleLinkInfoIds.push(normalizeLinkInfoId(visibleCheckboxes[index].value));
     }
   }
 
@@ -493,7 +510,7 @@ function updateAreaBVisibleLinksFromForm(controlName, changedValue, checked){
 
   for(let index = 0; index < areaBVisibleCheckboxes.length; index++){
     if(areaBVisibleCheckboxes[index].checked){
-      areaBVisibleLinkInfoIds.push(areaBVisibleCheckboxes[index].value);
+      areaBVisibleLinkInfoIds.push(normalizeLinkInfoId(areaBVisibleCheckboxes[index].value));
     }
   }
 
@@ -777,7 +794,7 @@ function updateLinkStorageFromForm(){
   const linkData = {
     "info": {
       "Title": targetInfo["Title"],
-      "ID": targetInfo["ID"],
+      "ID": normalizeLinkInfoId(targetInfo["ID"]),
       "NOTE": targetInfo["NOTE"]
     },
     "list": []
@@ -828,7 +845,7 @@ function updateLinkStorageFromForm(){
     setLinkDataToStorage(currentListKey, linkData);
     addLinkInfoIdToVisibility(linkData["info"]["ID"]);
     renderLinkStorageControls();
-    refreshParentAreas();
+    refreshParentAreas(linkData["info"]["ID"]);
     document.getElementById("message_area").innerHTML = "更新しました";
   } catch (error) {
     console.error("Failed to update Web Storage:", error);

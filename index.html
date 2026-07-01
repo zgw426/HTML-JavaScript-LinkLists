@@ -47,6 +47,15 @@ function makeListKeyFromInfoId(infoId){
   return "list" + String(infoId).padStart(2, "0");
 }
 
+function normalizeLinkInfoId(infoId){
+  const numberInfoId = Number(infoId);
+  return Number.isFinite(numberInfoId) ? numberInfoId : infoId;
+}
+
+function normalizeLinkInfoIds(linkInfoIds){
+  return linkInfoIds.map(infoId => normalizeLinkInfoId(infoId));
+}
+
 function makeJsonFileName(listData){
   return "links_" + String(listData["info"]["ID"]).padStart(2, "0") + ".json";
 }
@@ -64,7 +73,9 @@ function getLinkDataFromStorage(listKey){
   if(storedValue == null) return null;
   try {
     const linkData = JSON.parse(storedValue);
-    return isValidLinkData(linkData) ? linkData : null;
+    if(!isValidLinkData(linkData)) return null;
+    linkData["info"]["ID"] = normalizeLinkInfoId(linkData["info"]["ID"]);
+    return linkData;
   } catch (error) {
     console.warn("Invalid link data in Web Storage:", listKey, error);
     return null;
@@ -329,7 +340,7 @@ function getAllLinkInfoIds(){
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
     const linkData = getLinkDataFromStorage(linkListKeys[keyIndex]);
     if(linkData != null){
-      linkInfoIds.push(linkData["info"]["ID"]);
+      linkInfoIds.push(normalizeLinkInfoId(linkData["info"]["ID"]));
     }
   }
   return linkInfoIds;
@@ -346,7 +357,7 @@ function loadVisibleLinkIds(){
   try {
     const storedIds = JSON.parse(storedValue);
     visibleLinkIds = Array.isArray(storedIds)
-      ? storedIds.filter(infoId => allLinkInfoIds.includes(infoId))
+      ? normalizeLinkInfoIds(storedIds).filter(infoId => allLinkInfoIds.includes(infoId))
       : allLinkInfoIds;
   } catch (error) {
     console.warn("Invalid visible link ids in Web Storage:", error);
@@ -355,12 +366,26 @@ function loadVisibleLinkIds(){
 }
 
 function saveVisibleLinkIds(linkInfoIds){
-  visibleLinkIds = linkInfoIds;
+  visibleLinkIds = normalizeLinkInfoIds(linkInfoIds);
   storage.setItem(LINK_VISIBILITY_STORAGE_KEY, JSON.stringify(visibleLinkIds));
 }
 
+function saveAreaBVisibleLinkIds(linkInfoIds){
+  const normalizedLinkInfoIds = normalizeLinkInfoIds(linkInfoIds);
+  storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(normalizedLinkInfoIds.filter(infoId => visibleLinkIds.includes(infoId))));
+}
+
+function addLinkInfoIdToVisibility(linkInfoId){
+  const normalizedLinkInfoId = normalizeLinkInfoId(linkInfoId);
+  loadVisibleLinkIds();
+  saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat([normalizedLinkInfoId]))));
+  b1key.length = 0;
+  loadAreaBVisibleLinkIds();
+  saveAreaBVisibleLinkIds(Array.from(new Set(b1key.concat([normalizedLinkInfoId]))));
+}
+
 function isLinkInfoVisible(linkInfoId){
-  return visibleLinkIds.includes(linkInfoId);
+  return visibleLinkIds.includes(normalizeLinkInfoId(linkInfoId));
 }
 
 function loadAreaBVisibleLinkIds(){
@@ -374,7 +399,7 @@ function loadAreaBVisibleLinkIds(){
   try {
     const storedIds = JSON.parse(storedValue);
     b1key = Array.isArray(storedIds)
-      ? b1key.concat(storedIds.filter(infoId => visibleLinkIds.includes(infoId)))
+      ? b1key.concat(normalizeLinkInfoIds(storedIds).filter(infoId => visibleLinkIds.includes(infoId)))
       : b1key.concat(visibleLinkIds);
   } catch (error) {
     console.warn("Invalid AreaB visible link ids in Web Storage:", error);
@@ -570,6 +595,7 @@ function importLinkJsonFiles(files){
         const importedJsonFile = importedJsonFiles[importedFileIndex];
         const jsonData = importedJsonFile["jsonData"];
         if(isValidLinkData(jsonData)){
+          jsonData["info"]["ID"] = normalizeLinkInfoId(jsonData["info"]["ID"]);
           const listKey = makeListKeyFromInfoId(jsonData["info"]["ID"]);
           const registeredLinkData = getLinkDataFromStorage(listKey);
           if(importOptions["mode"] == "merge" && registeredLinkData != null){
@@ -643,7 +669,7 @@ function set_List(){
   list.length = 0;
   listinfo.length = 0;
   for(let lp=0; lp < load_arr.length; lp++){
-    const linkInfoId = load_arr[lp]["info"]["ID"];
+    const linkInfoId = normalizeLinkInfoId(load_arr[lp]["info"]["ID"]);
     if (visibleLinkIds.includes(linkInfoId) && (!isAreaBFilterActive || b1key.includes(linkInfoId))) {
       list = list.concat(load_arr[lp]["list"]);
       listinfo = listinfo.concat(load_arr[lp]["info"]);
@@ -852,15 +878,16 @@ function showAreaB()
     let linksno = 0;
     wStr += "<form name='areaB'>";
     for(lp0=0; lp0< load_arr.length; lp0++){
-        if (!isLinkInfoVisible(load_arr[lp0]["info"]["ID"])) {
+        const linkInfo = load_arr[lp0]["info"];
+        const linkInfoId = normalizeLinkInfoId(linkInfo["ID"]);
+        if (!isLinkInfoVisible(linkInfoId)) {
           continue;
         }
         linksno = lp0 + 1;
-        const linkInfo = load_arr[lp0]["info"];
-        const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfo["ID"])) ? "checked='checked'" : "";
+        const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfoId)) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfo["ID"] + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + linkInfo["ID"] + "-" + linkInfo["Title"];
+        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfoId + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + linkInfoId + "-" + linkInfo["Title"];
         wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -1292,7 +1319,7 @@ function set_C1key_B1key(){
   isAreaBFilterActive = areaB.length > 0;
   for (let i = 0; i < areaB.length; i++) {
     if (areaB[i].checked) {
-      areaB1.push(areaB[i].value);
+      areaB1.push(normalizeLinkInfoId(areaB[i].value));
     }
   }
   b1key = b1key.concat(areaB1);
