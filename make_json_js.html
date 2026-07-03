@@ -815,6 +815,15 @@ function setAccountFormCells(linkItem){
   return fieldHtml;
 }
 
+function setLinkInfoFormCells(linkInfo){
+  let fieldHtml = "<fieldset>";
+  fieldHtml += "<legend>link info</legend>";
+  fieldHtml += '<label for="linkInfoTitle">Title</label>';
+  fieldHtml += '<input type="text" id="linkInfoTitle" name="linkInfoTitle" value="' + escapeHtml(linkInfo["Title"] || "") + '" size="100%" >';
+  fieldHtml += "</fieldset>";
+  return fieldHtml;
+}
+
 function set_form_flow(itemDefinitions, listItem){
   // 指定データをもとにフォームを作る。指定データがなければ値は空になる
   let formHtml = "";
@@ -886,6 +895,9 @@ function updateLinkStorageFromForm(){
     fieldValue= formElements.elements.item(formIndex).value;
 
     switch (fieldName){
+      case "linkInfoTitle":
+        linkData["info"]["Title"] = fieldValue;
+        break;
       case "icon":
         currentItem = {};
         currentAccounts = [];
@@ -1009,6 +1021,8 @@ function root_flow(selectedListKey){
 
   targetList = targetData["list"];
   targetInfo = targetData["info"];
+  wStr += setLinkInfoFormCells(targetInfo);
+  wStr += "<HR />";
 
   for (const listIndex in targetList) {
     // jsonデータを設定値にしてフォームを作る
