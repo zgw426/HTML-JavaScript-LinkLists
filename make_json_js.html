@@ -953,7 +953,7 @@ function updateLinkStorageFromForm(){
     setLinkDataToStorage(currentListKey, linkData);
     addLinkInfoIdToVisibility(linkData["info"]["ID"]);
     renderLinkStorageControls();
-    refreshParentAreas(linkData["info"]["ID"]);
+    refreshParentAreaB(getVisibleLinkIds(), getAreaBVisibleLinkIds());
     document.getElementById("message_area").innerHTML = "更新しました";
   } catch (error) {
     console.error("Failed to update Web Storage:", error);
