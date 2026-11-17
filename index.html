@@ -952,7 +952,8 @@ function applyJsonImportPlan(importPlan){
     }
 
     saveVisibleLinkIds(Array.from(new Set(previousVisibleLinkIds.concat(newInfoIds))));
-    saveAreaBVisibleLinkIds(previousAreaBVisibleLinkIds);
+    const isFirstLinkImport = previousVisibleLinkIds.length == 0 && newInfoIds.length > 0;
+    saveAreaBVisibleLinkIds(isFirstLinkImport ? newInfoIds : previousAreaBVisibleLinkIds);
     return importedCount;
   } catch (error) {
     storageBackup.forEach((storedValue, storageKey) => restoreStorageValue(storageKey, storedValue));
