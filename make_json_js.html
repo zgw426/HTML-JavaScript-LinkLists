@@ -820,6 +820,9 @@ function setLinkInfoFormCells(linkInfo){
   fieldHtml += "<legend>link info</legend>";
   fieldHtml += '<label for="linkInfoTitle">Title</label>';
   fieldHtml += '<input type="text" id="linkInfoTitle" name="linkInfoTitle" value="' + escapeHtml(linkInfo["Title"] || "") + '" size="100%" >';
+  fieldHtml += "<BR />";
+  fieldHtml += '<label for="linkInfoNote">サブタイトル</label>';
+  fieldHtml += '<input type="text" id="linkInfoNote" name="linkInfoNote" value="' + escapeHtml(linkInfo["NOTE"] || "") + '" size="100%" >';
   fieldHtml += "</fieldset>";
   return fieldHtml;
 }
@@ -898,6 +901,9 @@ function updateLinkStorageFromForm(){
     switch (fieldName){
       case "linkInfoTitle":
         linkData["info"]["Title"] = fieldValue;
+        break;
+      case "linkInfoNote":
+        linkData["info"]["NOTE"] = fieldValue;
         break;
       case "icon":
         currentItem = {};
