@@ -1217,6 +1217,7 @@ textarea{
     <input type="button" value="検索" onclick="selectEventFlowC('search');" />
     <label class="areaA_search_scope"><input type="checkbox" id="includeAreaBUnselected" onchange="selectEventFlowC('search');">AreaB未選択も検索</label>
     <input type="button" value="リセット" onclick="pageReload();" />
+    <input type="button" value="ヘルプ" onclick="window.open('help.html', '_blank', 'noopener,noreferrer');" />
     </span>
     <span class="areaA_json_controls">
     <input type="file" id="linkJsonImportFiles" accept=".json,application/json" multiple style="display:none" onchange="importLinkJsonFiles(this.files); this.value='';" />

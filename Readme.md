@@ -4,6 +4,8 @@
 
 インストールやWebサーバーは不要です。ファイル一式をダウンロードし、`index.html` をブラウザで開くだけで利用できます。登録したデータはブラウザのWeb Storageに保存されます。
 
+![リンクリストの画面例](docs/images/link-list-overview.png)
+
 ## こんな人におすすめ
 
 - 仕事、開発、学習などのリンクが増え、必要なページを探すのに時間がかかる
@@ -47,6 +49,7 @@ git clone https://github.com/zgw426/HTML-JavaScript-LinkLists.git
 2. `links_51.json` から `links_60.json` のうち、試したいファイルを選びます。複数選択もできます。
 3. 初回は、選択されている `新規情報として取り込む` のまま進めます。
 4. 取込予定を確認し、`取込実行` を押します。
+5. 画面左側に追加されたリンク集のチェックボックスをオンにします。
 
 例えば、次のサンプルが含まれています。
 
@@ -61,7 +64,7 @@ git clone https://github.com/zgw426/HTML-JavaScript-LinkLists.git
 
 ### 4. 検索する
 
-画面上部の検索欄に、例えば `動画` や `検索 ニュース` と入力して `検索` を押します。
+画面左側で検索したいリンク集にチェックを入れ、画面上部の検索欄に、例えば `動画` や `検索 ニュース` と入力して `検索` を押します。
 
 複数の単語をスペースで区切ると、すべての単語に一致するリンクだけが表示されます。
 
@@ -135,6 +138,7 @@ git clone https://github.com/zgw426/HTML-JavaScript-LinkLists.git
 | ファイル | 説明 |
 |---|---|
 | `index.html` | アプリ本体 |
+| `help.html` | アプリ画面から開ける初心者向けヘルプ |
 | `USER_GUIDE.md` | 詳細な操作説明 |
 | `links_51.json` ～ `links_60.json` | 動作確認用のサンプルリンク集 |
 | `function_enhancement.json` | アイコン検索、日付・曜日表示などの設定例 |
@@ -145,6 +149,7 @@ git clone https://github.com/zgw426/HTML-JavaScript-LinkLists.git
 
 ## 詳細情報
 
+- [ブラウザで開ける初心者向けヘルプ](help.html)
 - [詳しい操作説明](USER_GUIDE.md)
 - [旧版の技術資料](README_type01.md)
 - [紹介動画（YouTube）](https://www.youtube.com/watch?v=x7VU7s56g4U)

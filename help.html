@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>リンクリスト ヘルプ</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f4f7fb;
+      --surface: #ffffff;
+      --text: #172033;
+      --muted: #5f6b7a;
+      --border: #d9e1ec;
+      --primary: #1769aa;
+      --primary-dark: #0f4f82;
+      --accent: #e8f3fc;
+      --warning: #fff7df;
+      --warning-border: #efc65c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+      line-height: 1.75;
+    }
+
+    a {
+      color: var(--primary);
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+    }
+
+    header {
+      background: linear-gradient(135deg, #104f7e, #1880c2);
+      color: #ffffff;
+      padding: 40px 24px 34px;
+    }
+
+    .header-inner,
+    .layout {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.3;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 0;
+      color: #eaf5ff;
+      font-size: 1.05rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 9px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 8px;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      padding: 28px 20px 56px;
+    }
+
+    nav {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    nav strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    nav a {
+      display: block;
+      padding: 5px 0;
+      text-decoration: none;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    section {
+      margin-bottom: 22px;
+      padding: 24px clamp(18px, 4vw, 32px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgba(25, 57, 91, 0.05);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      color: #123f62;
+      font-size: 1.45rem;
+    }
+
+    h3 {
+      margin: 24px 0 6px;
+      font-size: 1.08rem;
+    }
+
+    ol,
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    code,
+    kbd {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: #f6f8fb;
+      padding: 0.1em 0.38em;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    .quick-start {
+      border-left: 5px solid var(--primary);
+    }
+
+    .note {
+      margin: 16px 0 0;
+      padding: 13px 16px;
+      border-left: 4px solid var(--warning-border);
+      background: var(--warning);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .feature {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--accent);
+    }
+
+    .feature strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef4f9;
+    }
+
+    footer {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      nav {
+        position: static;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>リンクリスト ヘルプ</h1>
+      <p class="lead">リンクを取り込み、検索し、バックアップするまでの基本操作を説明します。このページはインターネット接続なしで参照できます。</p>
+      <a class="back-link" href="index.html">リンクリストへ戻る</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="ヘルプ目次">
+      <strong>目次</strong>
+      <a href="#quick-start">最初の3分</a>
+      <a href="#screen">画面の見方</a>
+      <a href="#search">検索と絞り込み</a>
+      <a href="#edit">リンクの登録・編集</a>
+      <a href="#backup">バックアップと移行</a>
+      <a href="#import-methods">JSON取込方法</a>
+      <a href="#faq">よくある質問</a>
+    </nav>
+
+    <main>
+      <section id="quick-start" class="quick-start">
+        <h2>最初の3分</h2>
+        <ol>
+          <li><code>index.html</code> をChrome、Edge、Braveなどのブラウザで開きます。</li>
+          <li>画面上部の <strong>JSON取込</strong> を押します。</li>
+          <li>同じフォルダにある <code>links_51.json</code> などを選びます。複数選択も可能です。</li>
+          <li>初回は <strong>新規情報として取り込む</strong> のまま進みます。</li>
+          <li>取込予定を確認し、<strong>取込実行</strong> を押します。</li>
+          <li>画面左側に追加されたリンク集のチェックボックスをオンにします。</li>
+          <li>検索欄へ <code>動画</code> などと入力し、<strong>検索</strong> を押します。</li>
+        </ol>
+        <p class="note"><strong>重要:</strong> 登録内容はブラウザ内に保存されます。ブラウザのサイトデータを削除する前に、JSON出力でバックアップしてください。</p>
+      </section>
+
+      <section id="screen">
+        <h2>画面の見方</h2>
+        <div class="feature-grid">
+          <div class="feature"><strong>画面上部</strong>検索、検索範囲、リセット、JSON取込を操作します。</div>
+          <div class="feature"><strong>左側</strong>登録済みのリンク集を切り替え、管理画面や操作ログを開きます。</div>
+          <div class="feature"><strong>中央</strong>表示中のリンクから作られたカテゴリで絞り込みます。</div>
+          <div class="feature"><strong>右側</strong>条件に一致したリンク、管理画面、操作ログを表示します。</div>
+        </div>
+      </section>
+
+      <section id="search">
+        <h2>検索と絞り込み</h2>
+        <h3>キーワードで検索する</h3>
+        <p>検索欄へ名前、URL、カテゴリ、メモに含まれる言葉を入力し、<strong>検索</strong> を押します。複数の言葉をスペースで区切るとAND検索になります。</p>
+        <p>例: <code>検索 ニュース</code></p>
+
+        <h3>リンク集を切り替える</h3>
+        <p>左側のチェックボックスで、現在の画面に表示するリンク集を切り替えます。<strong>AreaB未選択も検索</strong>を有効にすると、検索中だけ未選択のリンク集も検索対象にできます。</p>
+
+        <h3>カテゴリで絞り込む</h3>
+        <p>中央のカテゴリを選ぶと、該当するリンクだけを表示します。検索語とカテゴリは組み合わせて利用できます。</p>
+
+        <h3>最初の状態へ戻す</h3>
+        <p><strong>リセット</strong>を押すとページを再読み込みします。登録データそのものは削除されません。</p>
+      </section>
+
+      <section id="edit">
+        <h2>リンクの登録・編集</h2>
+        <ol>
+          <li>左側の <strong>登録情報の更新</strong> を押します。</li>
+          <li>新しいリンク集を作る場合は、管理画面右上の <strong>新規作成</strong> を押します。</li>
+          <li>既存のリンク集を変更する場合は、上部の一覧から対象を選びます。</li>
+          <li>Title、サブタイトル、リンク名、URL、カテゴリ、メモなどを入力します。</li>
+          <li><strong>Web Storage更新</strong> を押して保存します。</li>
+        </ol>
+        <p>アイコンを設定する場合は、編集フォームのicon欄を選択してから、左側に表示されたアイコンをクリックします。</p>
+      </section>
+
+      <section id="backup">
+        <h2>バックアップと移行</h2>
+        <h3>バックアップする</h3>
+        <ol>
+          <li><strong>登録情報の更新</strong>を開きます。</li>
+          <li>保存したいリンク集の <strong>JSON出力</strong> を押します。</li>
+          <li>出力されたJSONファイルを安全な場所に保管します。</li>
+        </ol>
+
+        <h3>別のPCやブラウザへ移す</h3>
+        <ol>
+          <li>移行元で必要なリンク集をJSON出力します。</li>
+          <li>移行先で <code>index.html</code> を開きます。</li>
+          <li><strong>JSON取込</strong>から、出力したJSONファイルを取り込みます。</li>
+        </ol>
+      </section>
+
+      <section id="import-methods">
+        <h2>JSON取込方法の違い</h2>
+        <table>
+          <thead>
+            <tr><th>方法</th><th>動作</th><th>使う場面</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>新規情報として取り込む</td><td>空きIDを自動で割り当てて追加</td><td>初回利用、既存データを残して試す</td></tr>
+            <tr><td>上書き</td><td>同じ内部IDのデータを置き換える</td><td>バックアップから元のリンク集を復元する</td></tr>
+            <tr><td>マージ</td><td>既存データと取込データを結合する</td><td>二つの環境のリンクをまとめる</td></tr>
+            <tr><td>取り込まない</td><td>そのファイルを処理対象から外す</td><td>選択を取り消す</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="faq">
+        <h2>よくある質問</h2>
+        <h3>起動してもリンクが表示されません</h3>
+        <p>初回はリンク情報が登録されていません。<strong>JSON取込</strong>から同梱のサンプルJSONを取り込んでください。</p>
+
+        <h3>JSONファイルを編集しても画面が変わりません</h3>
+        <p>画面はWeb Storageに保存されたデータを表示します。編集したJSONファイルを、もう一度<strong>JSON取込</strong>してください。</p>
+
+        <h3>データはどこに保存されますか</h3>
+        <p>このアプリを開いたブラウザのWeb Storage（Local Storage）に保存されます。別のブラウザやPCには自動で共有されません。</p>
+
+        <h3>ブラウザのブックマークを読み込めますか</h3>
+        <p>現在、ブラウザ標準のブックマークファイルの自動取込には対応していません。リンクリスト形式のJSONを取り込むか、管理画面から登録してください。</p>
+
+        <h3>ローカルファイルを開けません</h3>
+        <p>ブラウザのセキュリティ設定により、ローカルパスへのリンクが制限される場合があります。登録したパスを確認し、必要な場合はファイルを直接開いてください。</p>
+
+        <h3>もっと詳しい仕様を確認したい</h3>
+        <p><a href="USER_GUIDE.md">詳細操作ガイド（USER_GUIDE.md）</a>を参照してください。</p>
+      </section>
+    </main>
+  </div>
+
+  <footer>リンクリスト — アカウント登録・インストール不要のリンク管理アプリ</footer>
+</body>
+</html>
