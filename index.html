@@ -1038,13 +1038,24 @@ function exportAllLinkJsonFiles(){
 function set_List(){
   list.length = 0;
   listinfo.length = 0;
+  const includeAreaBUnselected = shouldIncludeAreaBUnselectedInSearch();
   for(let lp=0; lp < load_arr.length; lp++){
     const linkInfoId = normalizeLinkInfoId(load_arr[lp]["info"]["ID"]);
-    if (visibleLinkIds.includes(linkInfoId) && (!isAreaBFilterActive || b1key.includes(linkInfoId))) {
+    const matchesAreaBSelection = !isAreaBFilterActive || b1key.includes(linkInfoId);
+    if (visibleLinkIds.includes(linkInfoId) && (includeAreaBUnselected || matchesAreaBSelection)) {
       list = list.concat(load_arr[lp]["list"]);
       listinfo = listinfo.concat(load_arr[lp]["info"]);
     }
   }
+}
+
+function shouldIncludeAreaBUnselectedInSearch(){
+  const scopeCheckbox = document.getElementById("includeAreaBUnselected");
+  const searchInput = document.getElementById("inputKey");
+  return scopeCheckbox != null
+    && scopeCheckbox.checked
+    && searchInput != null
+    && searchInput.value.trim() != "";
 }
 </script>
 <style>
@@ -1080,6 +1091,9 @@ div.areaA form {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+.areaA_search_scope {
+  white-space: nowrap;
 }
 .areaA_json_controls {
   margin-left: auto;
@@ -1201,6 +1215,7 @@ textarea{
     <span class="areaA_main_controls">
     <input type="text" id="inputKey" size="50">
     <input type="button" value="検索" onclick="selectEventFlowC('search');" />
+    <label class="areaA_search_scope"><input type="checkbox" id="includeAreaBUnselected" onchange="selectEventFlowC('search');">AreaB未選択も検索</label>
     <input type="button" value="リセット" onclick="pageReload();" />
     </span>
     <span class="areaA_json_controls">
@@ -1864,9 +1879,11 @@ function selectEventFlowC(actionSource, changedValue, checked)
 {
   let operationLogDetail = "";
   if(actionSource == "checkbox"){
-    operationLogDetail = "areaC1=" + changedValue + "____checked=" + checked;
+    operationLogDetail = "areaC1=" + changedValue + "____checked=" + checked
+      + "____includeAreaBUnselected=" + shouldIncludeAreaBUnselectedInSearch();
   } else if(actionSource == "search"){
-    operationLogDetail = "searchKey=" + document.getElementById("inputKey").value.trim();
+    operationLogDetail = "searchKey=" + document.getElementById("inputKey").value.trim()
+      + "____includeAreaBUnselected=" + shouldIncludeAreaBUnselectedInSearch();
   }
   set_Initial();     // 変数を初期化
   set_C1key_B1key(); // b1key c1key を設定
