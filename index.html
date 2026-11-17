@@ -619,76 +619,348 @@ function mergeLinkData(registeredLinkData, importedLinkData, duplicateStrategy){
   return mergedLinkData;
 }
 
-function getLinkImportOptions(hasExistingLinkData){
-  const importOptions = {
-    "mode": "overwrite",
-    "duplicateStrategy": "keepRegistered"
-  };
+function escapeImportHtml(value){
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  if(!hasExistingLinkData){
-    return Promise.resolve(importOptions);
+function isAssignableLinkInfoId(infoId){
+  const normalizedInfoId = normalizeLinkInfoId(infoId);
+  return Number.isInteger(normalizedInfoId) && normalizedInfoId >= 1 && normalizedInfoId <= 99;
+}
+
+function getFirstAvailableImportInfoId(reservedInfoIds){
+  for(let infoId = 1; infoId <= 99; infoId++){
+    if(!reservedInfoIds.has(infoId)){
+      return infoId;
+    }
   }
+  return null;
+}
 
+function makeImportDialogOverlay(){
+  const dialogOverlay = document.createElement("div");
+  dialogOverlay.style.position = "fixed";
+  dialogOverlay.style.top = "0";
+  dialogOverlay.style.left = "0";
+  dialogOverlay.style.width = "100%";
+  dialogOverlay.style.height = "100%";
+  dialogOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.35)";
+  dialogOverlay.style.zIndex = "1000";
+  return dialogOverlay;
+}
+
+function makeImportDialogPanel(){
+  const dialogPanel = document.createElement("div");
+  dialogPanel.style.backgroundColor = "#ffffff";
+  dialogPanel.style.border = "solid 1px #444444";
+  dialogPanel.style.margin = "40px auto";
+  dialogPanel.style.padding = "16px";
+  dialogPanel.style.width = "min(680px, calc(100% - 40px))";
+  dialogPanel.style.maxHeight = "calc(100% - 112px)";
+  dialogPanel.style.overflow = "auto";
+  return dialogPanel;
+}
+
+function getLinkImportConflictResolution(importedFile, registeredLinkData, suggestedInfoId, isValidImportedInfoId){
   return new Promise(resolve => {
-    const dialogOverlay = document.createElement("div");
-    dialogOverlay.style.position = "fixed";
-    dialogOverlay.style.top = "0";
-    dialogOverlay.style.left = "0";
-    dialogOverlay.style.width = "100%";
-    dialogOverlay.style.height = "100%";
-    dialogOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.35)";
-    dialogOverlay.style.zIndex = "1000";
+    const importedLinkData = importedFile["jsonData"];
+    const importedInfo = importedLinkData["info"];
+    const importedInfoId = normalizeLinkInfoId(importedInfo["ID"]);
+    const dialogOverlay = makeImportDialogOverlay();
+    const dialogPanel = makeImportDialogPanel();
+    const registeredInfo = registeredLinkData == null ? null : registeredLinkData["info"];
+    const newModeDisabledAttr = suggestedInfoId == null ? " disabled='disabled'" : "";
+    const newModeCheckedAttr = suggestedInfoId == null ? "" : " checked='checked'";
+    const skipModeCheckedAttr = suggestedInfoId == null ? " checked='checked'" : "";
 
-    const dialogPanel = document.createElement("div");
-    dialogPanel.style.backgroundColor = "#ffffff";
-    dialogPanel.style.border = "solid 1px #444444";
-    dialogPanel.style.margin = "80px auto";
-    dialogPanel.style.padding = "16px";
-    dialogPanel.style.width = "min(520px, calc(100% - 40px))";
+    let conflictMessage = "JSONの内部IDが利用できないため、新しい空きIDを割り当てます。";
+    if(isValidImportedInfoId){
+      conflictMessage = "同じ内部IDのリンク情報が、すでに登録または取込予定になっています。";
+    }
+
+    let registeredInfoHtml = "";
+    if(registeredInfo != null){
+      registeredInfoHtml = "<p><b>登録済み・取込予定:</b> "
+        + escapeImportHtml(registeredInfo["Title"] || "Title未設定") + "<br><small>"
+        + escapeImportHtml(registeredInfo["NOTE"] || "") + "</small></p>";
+    }
+
+    const technicalInfoHtml = "<details><summary>技術情報</summary><small>JSON内部ID: "
+      + escapeImportHtml(importedInfoId)
+      + (suggestedInfoId == null ? "" : " / 新規取込時の割当予定ID: " + escapeImportHtml(suggestedInfoId))
+      + "</small></details>";
 
     dialogPanel.innerHTML = ""
-      + "<h3>リンクJSON取込</h3>"
-      + "<p>すでにWebストレージに登録されているリンク情報があります。</p>"
-      + "<label>取込方法 "
-      + "<select id='linkImportModeSelect'>"
-      + "<option value='overwrite'>上書き</option>"
-      + "<option value='merge'>マージ</option>"
-      + "</select>"
-      + "</label>"
+      + "<h3>リンクJSONの取込方法</h3>"
+      + "<p><b>" + escapeImportHtml(importedFile["fileName"]) + "</b><br>" + escapeImportHtml(conflictMessage) + "</p>"
+      + registeredInfoHtml
+      + "<p><b>取込対象:</b> " + escapeImportHtml(importedInfo["Title"] || "Title未設定") + "<br><small>"
+      + escapeImportHtml(importedInfo["NOTE"] || "") + "</small></p>"
+      + technicalInfoHtml
+      + "<fieldset><legend>取込方法</legend>"
+      + "<label><input type='radio' name='linkImportConflictMode' value='new'" + newModeCheckedAttr + newModeDisabledAttr + "> 新規情報として取り込む"
+      + (suggestedInfoId == null ? "（空きIDなし）" : "（空きIDを自動割り当て）") + "</label><br>"
+      + (isValidImportedInfoId ? "<label><input type='radio' name='linkImportConflictMode' value='overwrite'> 登録済み情報を上書きする</label><br>" : "")
+      + (isValidImportedInfoId ? "<label><input type='radio' name='linkImportConflictMode' value='merge'> 登録済み情報とマージする</label><br>" : "")
+      + "<label><input type='radio' name='linkImportConflictMode' value='skip'" + skipModeCheckedAttr + "> このファイルを取り込まない</label>"
+      + "</fieldset>"
       + "<div id='linkImportDuplicateStrategyArea' style='display:none; margin-top:12px;'>"
-      + "<label>重複時の扱い "
-      + "<select id='linkImportDuplicateStrategySelect'>"
+      + "<label>重複リンクの扱い <select id='linkImportDuplicateStrategySelect'>"
       + "<option value='keepRegistered'>登録されているデータのみ残す</option>"
       + "<option value='overwrite'>インポートするデータで上書きする</option>"
       + "<option value='appendNote'>登録されているデータの note に、インポートするデータの note を追記する</option>"
-      + "</select>"
-      + "</label>"
-      + "</div>"
+      + "</select></label></div>"
       + "<div style='margin-top:16px; text-align:right;'>"
-      + "<input type='button' id='linkImportCancelButton' value='キャンセル' /> "
-      + "<input type='button' id='linkImportOkButton' value='取込' />"
+      + "<input type='button' id='linkImportCancelButton' value='取込を中止' /> "
+      + "<input type='button' id='linkImportOkButton' value='この方法で続ける' />"
       + "</div>";
 
     dialogOverlay.appendChild(dialogPanel);
     document.body.appendChild(dialogOverlay);
 
-    const modeSelect = document.getElementById("linkImportModeSelect");
-    const duplicateStrategyArea = document.getElementById("linkImportDuplicateStrategyArea");
-    const duplicateStrategySelect = document.getElementById("linkImportDuplicateStrategySelect");
+    const modeInputs = dialogPanel.querySelectorAll("input[name='linkImportConflictMode']");
+    const duplicateStrategyArea = dialogPanel.querySelector("#linkImportDuplicateStrategyArea");
+    const duplicateStrategySelect = dialogPanel.querySelector("#linkImportDuplicateStrategySelect");
     const closeDialog = (selectedOptions) => {
       document.body.removeChild(dialogOverlay);
       resolve(selectedOptions);
     };
-
-    modeSelect.onchange = () => {
-      duplicateStrategyArea.style.display = modeSelect.value == "merge" ? "block" : "none";
+    const updateDuplicateStrategyVisibility = () => {
+      const selectedMode = dialogPanel.querySelector("input[name='linkImportConflictMode']:checked");
+      duplicateStrategyArea.style.display = selectedMode != null && selectedMode.value == "merge" ? "block" : "none";
     };
-    document.getElementById("linkImportCancelButton").onclick = () => closeDialog(null);
-    document.getElementById("linkImportOkButton").onclick = () => closeDialog({
-      "mode": modeSelect.value,
-      "duplicateStrategy": duplicateStrategySelect.value
-    });
+
+    for(let modeIndex = 0; modeIndex < modeInputs.length; modeIndex++){
+      modeInputs[modeIndex].onchange = updateDuplicateStrategyVisibility;
+    }
+    dialogPanel.querySelector("#linkImportCancelButton").onclick = () => closeDialog(null);
+    dialogPanel.querySelector("#linkImportOkButton").onclick = () => {
+      const selectedMode = dialogPanel.querySelector("input[name='linkImportConflictMode']:checked");
+      if(selectedMode == null){
+        return;
+      }
+      if(selectedMode.value == "overwrite"){
+        const overwriteTargetTitle = registeredInfo == null ? "登録済み情報" : "「" + (registeredInfo["Title"] || "Title未設定") + "」";
+        const overwriteConfirmed = confirm(
+          overwriteTargetTitle + "を完全に上書きします。\nこの操作を続けますか？"
+        );
+        if(!overwriteConfirmed){
+          return;
+        }
+      }
+      closeDialog({
+        "mode": selectedMode.value,
+        "duplicateStrategy": duplicateStrategySelect.value
+      });
+    };
   });
+}
+
+function getImportPlanActionText(planItem){
+  if(planItem["mode"] == "skip") return "取込しない";
+  if(planItem["kind"] == "enhancement") return "設定を更新";
+  const title = planItem["data"] && planItem["data"]["info"]
+    ? planItem["data"]["info"]["Title"] || "Title未設定"
+    : "Title未設定";
+  if(planItem["mode"] == "overwrite") return "登録済み情報を「" + title + "」で上書き";
+  if(planItem["mode"] == "merge") return "「" + title + "」にマージ";
+  return "「" + title + "」を新規登録";
+}
+
+function getImportPlanLogDetail(planItem){
+  let logDetail = planItem["fileName"] + "____" + getImportPlanActionText(planItem);
+  if(planItem["kind"] == "link" && planItem["mode"] != "skip"){
+    logDetail += "____targetInfoId=" + planItem["targetInfoId"];
+  }
+  return logDetail;
+}
+
+async function buildJsonImportPlan(importedJsonFiles){
+  const stagedLinkDataByInfoId = new Map();
+  const reservedInfoIds = new Set();
+  const importPlan = [];
+
+  for(let infoId = 1; infoId <= 99; infoId++){
+    const registeredLinkData = getLinkDataFromStorage(makeListKeyFromInfoId(infoId));
+    if(registeredLinkData != null){
+      stagedLinkDataByInfoId.set(infoId, registeredLinkData);
+      reservedInfoIds.add(infoId);
+    }
+  }
+
+  for(let importedFileIndex = 0; importedFileIndex < importedJsonFiles.length; importedFileIndex++){
+    const importedFile = importedJsonFiles[importedFileIndex];
+    const jsonData = importedFile["jsonData"];
+    if(isValidEnhancementData(jsonData)){
+      importPlan.push({"fileName": importedFile["fileName"], "kind": "enhancement", "mode": "overwrite", "data": jsonData});
+      continue;
+    }
+
+    const importedLinkData = JSON.parse(JSON.stringify(jsonData));
+    const sourceInfoId = normalizeLinkInfoId(importedLinkData["info"]["ID"]);
+    const isValidSourceInfoId = isAssignableLinkInfoId(sourceInfoId);
+    const registeredLinkData = isValidSourceInfoId ? stagedLinkDataByInfoId.get(sourceInfoId) : null;
+
+    if(isValidSourceInfoId && registeredLinkData == null){
+      importedLinkData["info"]["ID"] = sourceInfoId;
+      stagedLinkDataByInfoId.set(sourceInfoId, importedLinkData);
+      reservedInfoIds.add(sourceInfoId);
+      importPlan.push({
+        "fileName": importedFile["fileName"], "kind": "link", "mode": "new",
+        "sourceInfoId": sourceInfoId, "targetInfoId": sourceInfoId, "data": importedLinkData
+      });
+      continue;
+    }
+
+    const suggestedInfoId = getFirstAvailableImportInfoId(reservedInfoIds);
+    const resolution = await getLinkImportConflictResolution(importedFile, registeredLinkData, suggestedInfoId, isValidSourceInfoId);
+    if(resolution == null){
+      return null;
+    }
+    if(resolution["mode"] == "skip"){
+      importPlan.push({
+        "fileName": importedFile["fileName"], "kind": "link", "mode": "skip",
+        "sourceInfoId": sourceInfoId, "targetInfoId": null
+      });
+      continue;
+    }
+    if(resolution["mode"] == "new"){
+      if(suggestedInfoId == null){
+        throw new Error(importedFile["fileName"] + ": 空き番号がありません。");
+      }
+      importedLinkData["info"]["ID"] = suggestedInfoId;
+      stagedLinkDataByInfoId.set(suggestedInfoId, importedLinkData);
+      reservedInfoIds.add(suggestedInfoId);
+      importPlan.push({
+        "fileName": importedFile["fileName"], "kind": "link", "mode": "new",
+        "sourceInfoId": sourceInfoId, "targetInfoId": suggestedInfoId, "data": importedLinkData
+      });
+      continue;
+    }
+    if(resolution["mode"] == "merge"){
+      const mergedLinkData = mergeLinkData(registeredLinkData, importedLinkData, resolution["duplicateStrategy"]);
+      stagedLinkDataByInfoId.set(sourceInfoId, mergedLinkData);
+      importPlan.push({
+        "fileName": importedFile["fileName"], "kind": "link", "mode": "merge",
+        "sourceInfoId": sourceInfoId, "targetInfoId": sourceInfoId, "data": mergedLinkData
+      });
+      continue;
+    }
+
+    importedLinkData["info"]["ID"] = sourceInfoId;
+    stagedLinkDataByInfoId.set(sourceInfoId, importedLinkData);
+    importPlan.push({
+      "fileName": importedFile["fileName"], "kind": "link", "mode": "overwrite",
+      "sourceInfoId": sourceInfoId, "targetInfoId": sourceInfoId, "data": importedLinkData
+    });
+  }
+
+  return importPlan;
+}
+
+function confirmJsonImportPlan(importPlan){
+  return new Promise(resolve => {
+    const dialogOverlay = makeImportDialogOverlay();
+    const dialogPanel = makeImportDialogPanel();
+    let planRowsHtml = "";
+    let importCount = 0;
+    for(let planIndex = 0; planIndex < importPlan.length; planIndex++){
+      const planItem = importPlan[planIndex];
+      if(planItem["mode"] != "skip") importCount++;
+      planRowsHtml += "<tr><td>" + escapeImportHtml(planItem["fileName"]) + "</td><td>"
+        + escapeImportHtml(getImportPlanActionText(planItem)) + "</td></tr>";
+    }
+
+    dialogPanel.innerHTML = ""
+      + "<h3>JSON取込予定の確認</h3>"
+      + "<p>まだWeb Storageは更新されていません。次の内容で取り込みます。</p>"
+      + "<table style='width:100%; border-collapse:collapse;'>"
+      + "<thead><tr><th style='text-align:left; border-bottom:1px solid #888;'>ファイル</th><th style='text-align:left; border-bottom:1px solid #888;'>処理</th></tr></thead>"
+      + "<tbody>" + planRowsHtml + "</tbody></table>"
+      + "<div style='margin-top:16px; text-align:right;'>"
+      + "<input type='button' id='jsonImportPlanCancelButton' value='キャンセル' /> "
+      + "<input type='button' id='jsonImportPlanOkButton' value='取込実行'" + (importCount == 0 ? " disabled='disabled'" : "") + " />"
+      + "</div>";
+
+    dialogOverlay.appendChild(dialogPanel);
+    document.body.appendChild(dialogOverlay);
+    const closeDialog = result => {
+      document.body.removeChild(dialogOverlay);
+      resolve(result);
+    };
+    dialogPanel.querySelector("#jsonImportPlanCancelButton").onclick = () => closeDialog(false);
+    dialogPanel.querySelector("#jsonImportPlanOkButton").onclick = () => closeDialog(true);
+  });
+}
+
+function restoreStorageValue(storageKey, storedValue){
+  if(storedValue == null){
+    storage.removeItem(storageKey);
+  }else{
+    storage.setItem(storageKey, storedValue);
+  }
+}
+
+function applyJsonImportPlan(importPlan){
+  loadVisibleLinkIds();
+  const previousVisibleLinkIds = visibleLinkIds.slice();
+  b1key.length = 0;
+  loadAreaBVisibleLinkIds();
+  const previousAreaBVisibleLinkIds = b1key.slice();
+  const previousEnhancementData = JSON.parse(JSON.stringify(makeEnhancementDataFromGlobals()));
+  const storageBackup = new Map();
+  storageBackup.set(LINK_VISIBILITY_STORAGE_KEY, storage.getItem(LINK_VISIBILITY_STORAGE_KEY));
+  storageBackup.set(AREA_B_VISIBILITY_STORAGE_KEY, storage.getItem(AREA_B_VISIBILITY_STORAGE_KEY));
+  storageBackup.set(ENHANCEMENT_STORAGE_KEY, storage.getItem(ENHANCEMENT_STORAGE_KEY));
+  storageBackup.set(OPERATION_LOG_STORAGE_KEY, storage.getItem(OPERATION_LOG_STORAGE_KEY));
+
+  for(let planIndex = 0; planIndex < importPlan.length; planIndex++){
+    const planItem = importPlan[planIndex];
+    if(planItem["kind"] == "link" && planItem["mode"] != "skip"){
+      const storageKey = getLinkStorageKey(makeListKeyFromInfoId(planItem["targetInfoId"]));
+      if(!storageBackup.has(storageKey)){
+        storageBackup.set(storageKey, storage.getItem(storageKey));
+      }
+    }
+  }
+
+  try {
+    const newInfoIds = [];
+    let importedCount = 0;
+    for(let planIndex = 0; planIndex < importPlan.length; planIndex++){
+      const planItem = importPlan[planIndex];
+      if(planItem["mode"] == "skip"){
+        continue;
+      }
+      if(planItem["kind"] == "enhancement"){
+        setEnhancementDataToStorage(planItem["data"]);
+        applyEnhancementData(planItem["data"]);
+      }else{
+        setLinkDataToStorage(makeListKeyFromInfoId(planItem["targetInfoId"]), planItem["data"]);
+        if(planItem["mode"] == "new"){
+          newInfoIds.push(planItem["targetInfoId"]);
+        }
+      }
+      importedCount++;
+      recordOperationLog("JSON取込", getImportPlanLogDetail(planItem));
+    }
+
+    saveVisibleLinkIds(Array.from(new Set(previousVisibleLinkIds.concat(newInfoIds))));
+    saveAreaBVisibleLinkIds(previousAreaBVisibleLinkIds);
+    return importedCount;
+  } catch (error) {
+    storageBackup.forEach((storedValue, storageKey) => restoreStorageValue(storageKey, storedValue));
+    visibleLinkIds = previousVisibleLinkIds.slice();
+    b1key.length = 0;
+    b1key = b1key.concat(previousAreaBVisibleLinkIds);
+    applyEnhancementData(previousEnhancementData);
+    throw error;
+  }
 }
 
 function importLinkJsonFiles(files){
@@ -709,55 +981,24 @@ function importLinkJsonFiles(files){
 
   Promise.all(readers)
     .then(async importedJsonFiles => {
-      const hasExistingLinkData = importedJsonFiles.some(importedJsonFile => {
-        const jsonData = importedJsonFile["jsonData"];
-        return isValidLinkData(jsonData) && getLinkDataFromStorage(makeListKeyFromInfoId(jsonData["info"]["ID"])) != null;
-      });
-      const importOptions = await getLinkImportOptions(hasExistingLinkData);
-      if(importOptions == null){
+      for(let importedFileIndex = 0; importedFileIndex < importedJsonFiles.length; importedFileIndex++){
+        const importedFile = importedJsonFiles[importedFileIndex];
+        if(!isValidLinkData(importedFile["jsonData"]) && !isValidEnhancementData(importedFile["jsonData"])){
+          throw new Error(importedFile["fileName"] + ": invalid json");
+        }
+      }
+
+      const importPlan = await buildJsonImportPlan(importedJsonFiles);
+      if(importPlan == null){
         return;
       }
-
-      const importedFiles = [];
-      for(let importedFileIndex = 0; importedFileIndex < importedJsonFiles.length; importedFileIndex++){
-        const importedJsonFile = importedJsonFiles[importedFileIndex];
-        const jsonData = importedJsonFile["jsonData"];
-        if(isValidLinkData(jsonData)){
-          jsonData["info"]["ID"] = normalizeLinkInfoId(jsonData["info"]["ID"]);
-          const listKey = makeListKeyFromInfoId(jsonData["info"]["ID"]);
-          const registeredLinkData = getLinkDataFromStorage(listKey);
-          if(importOptions["mode"] == "merge" && registeredLinkData != null){
-            setLinkDataToStorage(listKey, mergeLinkData(registeredLinkData, jsonData, importOptions["duplicateStrategy"]));
-          }else{
-            setLinkDataToStorage(listKey, jsonData);
-          }
-          importedFiles.push({"fileName": importedJsonFile["fileName"], "kind": "link", "infoId": jsonData["info"]["ID"]});
-          continue;
-        }
-        if(isValidEnhancementData(jsonData)){
-          setEnhancementDataToStorage(jsonData);
-          applyEnhancementData(jsonData);
-          importedFiles.push({"fileName": importedJsonFile["fileName"], "kind": "enhancement"});
-          continue;
-        }
-        throw new Error(importedJsonFile["fileName"] + ": invalid json");
+      const shouldImport = await confirmJsonImportPlan(importPlan);
+      if(!shouldImport){
+        return;
       }
-
-      for(let importedFileIndex = 0; importedFileIndex < importedFiles.length; importedFileIndex++){
-        recordOperationLog("JSON取込", importedFiles[importedFileIndex]["fileName"]);
-      }
-      const importedInfoIds = importedFiles
-        .filter(importedFile => importedFile["kind"] == "link")
-        .map(importedFile => importedFile["infoId"]);
-      if(importedInfoIds.length > 0){
-        loadVisibleLinkIds();
-        saveVisibleLinkIds(Array.from(new Set(visibleLinkIds.concat(importedInfoIds))));
-        b1key.length = 0;
-        loadAreaBVisibleLinkIds();
-        storage.setItem(AREA_B_VISIBILITY_STORAGE_KEY, JSON.stringify(Array.from(new Set(b1key.concat(importedInfoIds)))));
-      }
+      const importedCount = applyJsonImportPlan(importPlan);
       refreshAllAreas();
-      alert(importedFiles.length + " file(s) imported.");
+      alert(importedCount + " file(s) imported.");
     })
     .catch(error => {
       alert("Import failed. " + error.message);
@@ -1015,8 +1256,8 @@ function showAreaB()
         const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfoId)) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfoId + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + linkInfoId + "-" + linkInfo["Title"];
-        wStr += "<BR />　<small>"+ linkInfo["NOTE"] +"</small>";
+        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfoId + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + escapeImportHtml(linkInfo["Title"] || "Title未設定");
+        wStr += "<BR />　<small>"+ escapeImportHtml(linkInfo["NOTE"] || "") +"</small>";
         wStr += "</div>";
         wStr += "</label>";
     }

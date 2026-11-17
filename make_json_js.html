@@ -111,12 +111,46 @@
     textarea{
       width: calc(90%);
     }
+
+    #link_storage_details > summary{
+      cursor: pointer;
+    }
+
+    .link_list_toolbar{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .link_list_toolbar input[type="search"]{
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .link_list_items{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .link_list_item{
+      text-align: left;
+    }
+
+    .link_list_item small{
+      display: block;
+    }
     
   </style>
 </head>
 <body>
 <div id="link_list_buttons"></div>
-<div id="link_storage_area">※Web StorageのJSON情報を表示※</div>
+<details id="link_storage_details" open>
+  <summary>登録済み情報の設定</summary>
+  <div id="link_storage_area">※Web StorageのJSON情報を表示※</div>
+</details>
 <!--
 <HR>
 <label for="number_of_blank_cells">新規登録枠数</label>
@@ -155,12 +189,67 @@ function normalizeLinkInfoIds(linkInfoIds){
   return linkInfoIds.map(infoId => normalizeLinkInfoId(infoId));
 }
 
-function renderLinkListButtons(){
-  let buttonsHtml = "";
+function getFirstAvailableListKey(){
   for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
-    const linkNumber = String(keyIndex + 1).padStart(2, "0");
-    buttonsHtml += '<input type="button" value="links_' + linkNumber + '" onclick=\'root_flow("' + linkListKeys[keyIndex] + '");\' />';
+    if(getLinkDataFromStorage(linkListKeys[keyIndex]) == null){
+      return linkListKeys[keyIndex];
+    }
   }
+  return null;
+}
+
+function filterLinkListButtons(){
+  const searchInput = document.getElementById("link_list_search");
+  if(searchInput == null){
+    return;
+  }
+  const searchValue = searchInput.value.trim().toLowerCase();
+  const linkButtons = document.querySelectorAll(".link_list_item");
+  for(let buttonIndex = 0; buttonIndex < linkButtons.length; buttonIndex++){
+    const searchText = linkButtons[buttonIndex].getAttribute("data-search-text") || "";
+    linkButtons[buttonIndex].style.display = searchText.includes(searchValue) ? "" : "none";
+  }
+}
+
+function createNewLinkData(){
+  const availableListKey = getFirstAvailableListKey();
+  if(availableListKey == null){
+    alert("登録可能な上限（99件）に達しているため、新規作成できません。");
+    return;
+  }
+  root_flow(availableListKey);
+}
+
+function renderLinkListButtons(){
+  let buttonsHtml = "<div class='link_list_toolbar'>";
+  buttonsHtml += "<input type='search' id='link_list_search' placeholder='Title、サブタイトルで検索' oninput='filterLinkListButtons()'>";
+  const availableListKey = getFirstAvailableListKey();
+  const disabledAttr = availableListKey == null ? " disabled='disabled'" : "";
+  buttonsHtml += "<input type='button' value='新規作成' onclick='createNewLinkData()'" + disabledAttr + ">";
+  buttonsHtml += "</div>";
+  buttonsHtml += "<div class='link_list_items'>";
+  let registeredCount = 0;
+  for(let keyIndex = 0; keyIndex < linkListKeys.length; keyIndex++){
+    const listKey = linkListKeys[keyIndex];
+    const linkData = getLinkDataFromStorage(listKey);
+    if(linkData == null){
+      continue;
+    }
+    registeredCount++;
+    const linkInfo = linkData["info"];
+    const linkNumber = String(normalizeLinkInfoId(linkInfo["ID"])).padStart(2, "0");
+    const title = String(linkInfo["Title"] || "");
+    const note = String(linkInfo["NOTE"] || "");
+    const searchText = ("links_" + linkNumber + " " + title + " " + note).toLowerCase();
+    buttonsHtml += '<button type="button" class="link_list_item" data-search-text="' + escapeHtml(searchText) + '" onclick=\'root_flow("' + listKey + '");\'>';
+    buttonsHtml += escapeHtml(title || "（Title未設定）");
+    if(note != ""){
+      buttonsHtml += "<small>" + escapeHtml(note) + "</small>";
+    }
+    buttonsHtml += "</button>";
+  }
+  buttonsHtml += "</div>";
+  buttonsHtml += "<small>登録済み " + registeredCount + "件</small>";
   document.getElementById("link_list_buttons").innerHTML = buttonsHtml;
 }
 
@@ -478,10 +567,10 @@ function renderLinkStorageControls(){
     controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfoId + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
     controlsHtml += " AreaB初期表示";
     controlsHtml += "<HR>";    
-    controlsHtml += linkInfoId + "-" + linkInfo["Title"];
+    controlsHtml += "<b>" + escapeHtml(linkInfo["Title"] || "（Title未設定）") + "</b>";
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
     controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredLinkData(\"" + listKey + "\")' />";
-    controlsHtml += "<BR />　<small>" + linkInfo["NOTE"] + "</small>";
+    controlsHtml += "<BR />　<small>" + escapeHtml(linkInfo["NOTE"] || "") + "</small>";
 
     controlsHtml += "</div>";
   }
@@ -550,7 +639,7 @@ function deleteStoredLinkData(listKey){
   }
 
   const linkInfo = linkData["info"];
-  if(!confirm(linkInfo["ID"] + "-" + linkInfo["Title"] + " をWeb Storageから削除しますか？")){
+  if(!confirm("「" + (linkInfo["Title"] || "Title未設定") + "」をWeb Storageから削除しますか？")){
     return;
   }
 
@@ -563,6 +652,7 @@ function deleteStoredLinkData(listKey){
     set_init();
   }
 
+  renderLinkListButtons();
   renderLinkStorageControls();
   refreshParentAreas();
 }
@@ -749,6 +839,7 @@ wStr = ""
 
 // 更新対象のWeb Storage情報
 let currentListKey = "";
+let isCreatingNewLinkData = false;
 
 // 更新対象のjson変数
 let targetList = "";
@@ -818,8 +909,8 @@ function setAccountFormCells(linkItem){
 function setLinkInfoFormCells(linkInfo){
   let fieldHtml = "<fieldset>";
   fieldHtml += "<legend>link info</legend>";
-  fieldHtml += '<label for="linkInfoTitle">Title</label>';
-  fieldHtml += '<input type="text" id="linkInfoTitle" name="linkInfoTitle" value="' + escapeHtml(linkInfo["Title"] || "") + '" size="100%" >';
+  fieldHtml += '<font color="red"><label for="linkInfoTitle">Title</label></font>';
+  fieldHtml += '<input type="text" id="linkInfoTitle" name="linkInfoTitle" value="' + escapeHtml(linkInfo["Title"] || "") + '" size="100%" required>';
   fieldHtml += "<BR />";
   fieldHtml += '<label for="linkInfoNote">サブタイトル</label>';
   fieldHtml += '<input type="text" id="linkInfoNote" name="linkInfoNote" value="' + escapeHtml(linkInfo["NOTE"] || "") + '" size="100%" >';
@@ -876,7 +967,18 @@ function set_form_flow(itemDefinitions, listItem){
 
 
 function updateLinkStorageFromForm(){
-  const isNewLinkData = getLinkDataFromStorage(currentListKey) == null;
+  const isNewLinkData = isCreatingNewLinkData;
+  let reassignedInfoId = null;
+  if(isNewLinkData && getLinkDataFromStorage(currentListKey) != null){
+    const availableListKey = getFirstAvailableListKey();
+    if(availableListKey == null){
+      document.getElementById("message_area").innerHTML = '<font color="red">空き番号がないため更新できませんでした</font>';
+      return;
+    }
+    currentListKey = availableListKey;
+    targetInfo["ID"] = Number(availableListKey.replace("list", ""));
+    reassignedInfoId = targetInfo["ID"];
+  }
   const linkData = {
     "info": {
       "Title": targetInfo["Title"],
@@ -956,14 +1058,25 @@ function updateLinkStorageFromForm(){
     }
   }
 
+  linkData["info"]["Title"] = linkData["info"]["Title"].trim();
+  if(linkData["info"]["Title"] == ""){
+    document.getElementById("message_area").innerHTML = '<font color="red">Titleを入力してください</font>';
+    document.getElementById("linkInfoTitle").focus();
+    return;
+  }
+
   try {
     setLinkDataToStorage(currentListKey, linkData);
     if(isNewLinkData){
       addLinkInfoIdToVisibility(linkData["info"]["ID"]);
     }
+    renderLinkListButtons();
     renderLinkStorageControls();
     refreshParentAreaB(getVisibleLinkIds(), getAreaBVisibleLinkIds());
-    document.getElementById("message_area").innerHTML = "更新しました";
+    isCreatingNewLinkData = false;
+    document.getElementById("message_area").innerHTML = reassignedInfoId == null
+      ? "更新しました"
+      : "編集中の内部IDが使用されたため、別の空きIDを割り当てて更新しました";
   } catch (error) {
     console.error("Failed to update Web Storage:", error);
     document.getElementById("message_area").innerHTML = '<font color="red">エラーが発生し更新できませんでした</font>';
@@ -1005,11 +1118,15 @@ function set_init(){
   document.getElementById("savebutton_area").innerHTML = "";  // 更新ボタンを消す
 }
 
+function collapseLinkStorageControls(){
+  document.getElementById("link_storage_details").open = false;
+}
+
 function makeEmptyLinkData(selectedListKey){
   const infoId = Number(selectedListKey.replace("list", ""));
   return {
     "info": {
-      "Title": "links_" + String(infoId).padStart(2, "0"),
+      "Title": "",
       "ID": infoId,
       "NOTE": ""
     },
@@ -1020,10 +1137,12 @@ function makeEmptyLinkData(selectedListKey){
 
 function root_flow(selectedListKey){
   set_init();  // 初期値設定
+  collapseLinkStorageControls();
   currentListKey = selectedListKey;
   wStr += '<form name="linklist" action="" onsubmit="">'
 
   let targetData = getLinkDataFromStorage(selectedListKey);
+  isCreatingNewLinkData = targetData == null;
   if(targetData == null){
     targetData = makeEmptyLinkData(selectedListKey);
   }
