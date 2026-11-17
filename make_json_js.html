@@ -873,6 +873,7 @@ function set_form_flow(itemDefinitions, listItem){
 
 
 function updateLinkStorageFromForm(){
+  const isNewLinkData = getLinkDataFromStorage(currentListKey) == null;
   const linkData = {
     "info": {
       "Title": targetInfo["Title"],
@@ -951,7 +952,9 @@ function updateLinkStorageFromForm(){
 
   try {
     setLinkDataToStorage(currentListKey, linkData);
-    addLinkInfoIdToVisibility(linkData["info"]["ID"]);
+    if(isNewLinkData){
+      addLinkInfoIdToVisibility(linkData["info"]["ID"]);
+    }
     renderLinkStorageControls();
     refreshParentAreaB(getVisibleLinkIds(), getAreaBVisibleLinkIds());
     document.getElementById("message_area").innerHTML = "更新しました";
