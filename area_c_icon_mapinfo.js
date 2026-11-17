@@ -1,8 +1,6 @@
 // カテゴリキーにアイコンを表示する
 let iconMapInfo = new Array();
-let defaultIcons = new Array();
 iconMapInfo.length = 0;
-defaultIcons.length = 0;
 
 // ----- category key icon ----- //
 iconMapInfo["ニュース"] = "z_news.png";
@@ -70,16 +68,3 @@ iconMapInfo["office"] = "z_office.png";
 iconMapInfo["excel"] = "z_office.png";
 iconMapInfo["word"] = "z_office.png";
 iconMapInfo["powerpoint"] = "z_office.png";
-
-// ----- defaultIcons ----- //
-defaultIcons.push("analytics.png");
-defaultIcons.push("cloud.png");
-defaultIcons.push("console.png");
-defaultIcons.push("dashboard.png");
-defaultIcons.push("mng.png");
-defaultIcons.push("program.png");
-defaultIcons.push("schedule.png");
-defaultIcons.push("search.png");
-defaultIcons.push("study.png");
-defaultIcons.push("user.png");
-defaultIcons.push("ai.png");

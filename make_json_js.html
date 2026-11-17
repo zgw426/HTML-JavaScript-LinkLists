@@ -142,6 +142,11 @@
     .link_list_item small{
       display: block;
     }
+
+    .active_icon_input{
+      outline: solid 3px #4169e1;
+      background-color: #fffacd;
+    }
     
   </style>
 </head>
@@ -840,6 +845,7 @@ wStr = ""
 // 更新対象のWeb Storage情報
 let currentListKey = "";
 let isCreatingNewLinkData = false;
+let activeIconInput = null;
 
 // 更新対象のjson変数
 let targetList = "";
@@ -852,7 +858,8 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
   //fieldHtml+= "<div>";
   fieldHtml+= '<label for="'+element+'">'+element+'</label>';
   if(lineFlg == 0){
-    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ escapeHtml(itemValue) +'" size="100%" >';
+    const iconInputAttributes = element == "icon" ? ' onfocus="setActiveIconInput(this)" onclick="setActiveIconInput(this)"' : "";
+    fieldHtml+= '<input type="text" id="'+element+'" name="'+element+'" value="'+ escapeHtml(itemValue) +'" size="100%"'+iconInputAttributes+' >';
   }else if(lineFlg == 1){
     fieldHtml+= '<textarea id="'+element+'" name="'+element+'" cols="50" rows="7">'+ escapeHtml(itemValue) +'</textarea>';
   }else{
@@ -866,6 +873,40 @@ function set_form_cell(formFlg, lineFlg, element, itemValue, mustFlag){
 
   return(fieldHtml);
 }
+
+function setActiveIconInput(iconInput){
+  const iconInputs = document.querySelectorAll('input[name="icon"]');
+  for(let iconIndex = 0; iconIndex < iconInputs.length; iconIndex++){
+    iconInputs[iconIndex].classList.remove("active_icon_input");
+  }
+  activeIconInput = iconInput;
+  activeIconInput.classList.add("active_icon_input");
+  document.getElementById("message_area").innerHTML = "アイコンの入力先を選択しました。左の一覧からアイコンをクリックしてください。";
+}
+
+function applyIconCatalogSelection(iconName){
+  if(activeIconInput == null || !document.contains(activeIconInput)){
+    document.getElementById("message_area").innerHTML = '<font color="red">先に変更するicon欄を選択してください</font>';
+    return false;
+  }
+  activeIconInput.value = iconName;
+  document.getElementById("message_area").innerHTML = escapeHtml(iconName) + " を設定しました";
+  return true;
+}
+
+function handleIconCatalogMessage(event){
+  if(event.source !== parent || !event.data || event.data["type"] != "HTML-JavaScript-LinkLists.selectIcon"){
+    return;
+  }
+  const iconName = String(event.data["iconName"] || "");
+  if(!/^[A-Za-z0-9_.-]+\.png$/.test(iconName)){
+    document.getElementById("message_area").innerHTML = '<font color="red">無効なアイコン名です</font>';
+    return;
+  }
+  applyIconCatalogSelection(iconName);
+}
+
+window.addEventListener("message", handleIconCatalogMessage);
 
 function getLinkAccounts(linkItem){
   const accounts = [];
@@ -1115,6 +1156,7 @@ function set_init(){
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
   wStr = "";
+  activeIconInput = null;
   document.getElementById("savebutton_area").innerHTML = "";  // 更新ボタンを消す
 }
 

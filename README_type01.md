@@ -12,6 +12,7 @@
 |---|---|
 |index.html|アプリ本体|
 |make_json_js.html|jsonファイルの更新補助ツール|
+|icon_catalog.json.js|登録情報の更新画面に表示するアイコン一覧|
 |area_c_icon_mapinfo.js|カテゴリキーアイコンのマップ情報|
 |area_c_key_highlight.js|強調表示するカテゴリキーの設定|
 |links_01.json|リンク情報を含むjsファイル|
@@ -90,6 +91,8 @@
 
 パラメータ `icon` には表示する画像ファイル名を記載します。
 画像ファイルは、`icon`フォルダ配下に格納しておきます。
+登録情報の更新画面に表示するアイコンは、`icon_catalog.json.js`で管理します。
+編集フォームの`icon`欄を選択してからアイコン一覧の画像をクリックすると、ファイル名を入力できます。
 サンプルとして以下の画像ファイルを格納しています。
 
 - ./HTML-JavaScript-LinkLists/icon

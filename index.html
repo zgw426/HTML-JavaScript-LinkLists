@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
+  <script src="icon_catalog.json.js"></script>
   <script src="area_c_icon_mapinfo.js"></script>
   <script src="function_enhancement.js"></script>
 <script>
@@ -1314,20 +1315,33 @@ function selectEventFilterIcon(argKey){
 
 function editLinkInfo(){
   let iconListHtml = "";
+  iconListHtml += "<p>編集フォームのicon欄を選択してから、使用するアイコンをクリックしてください。</p>";
   iconListHtml += "<center>";
   // アイコン情報を表示
   for (let iconName in icons) {
-    iconListHtml += "<div class='div_f2'>";
-    iconListHtml += "<img src='icon/"+ iconName +"' alt='" + iconName + "' height='40'>";
+    iconListHtml += "<button type='button' class='div_f2' data-icon-name='" + escapeHtml(iconName) + "' onclick='selectLinkIconFromCatalog(this.dataset.iconName)'>";
+    iconListHtml += "<img src='icon/"+ escapeHtml(iconName) +"' alt='" + escapeHtml(iconName) + "' height='40'>";
     iconListHtml += "<BR/>";
-    iconListHtml += iconName;
-    iconListHtml += "</div>";
+    iconListHtml += escapeHtml(iconName);
+    iconListHtml += "</button>";
   }
   iconListHtml += "</center>";
   document.getElementById("areaC").innerHTML = iconListHtml;
 
   let editorHtml = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
   document.getElementById("areaD").innerHTML = editorHtml;
+}
+
+function selectLinkIconFromCatalog(iconName){
+  const editorFrame = document.getElementById("iFrameArea");
+  if(editorFrame == null || editorFrame.contentWindow == null){
+    alert("編集画面の読み込み後に、もう一度アイコンを選択してください。");
+    return;
+  }
+  editorFrame.contentWindow.postMessage({
+    "type": "HTML-JavaScript-LinkLists.selectIcon",
+    "iconName": iconName
+  }, "*");
 }
 
 function showOperationLog(){
@@ -1365,7 +1379,7 @@ function showAreaC(showFlg){
   let wdcount = {};
   let isSelected = 1;
 
-  tmpIcons = setDefaultIcons(tmpIcons);
+  tmpIcons = setAvailableIcons(tmpIcons);
 
   for(lpa=0; lpa<list.length; lpa++){
     lp0 = lpa;
@@ -1505,67 +1519,13 @@ function setSelectFlg(tgtIcon, tgtName, tgtUrl, tgtCategory, tgtNote, tgtDecoUrl
   return(ctn);
 }
 
-function setDefaultIcons(iconNames){
-  //登録情報の更新のときに表示するアイコン用の画像を設定
-  iconNames.push("analytics.png");
-  iconNames.push("cloud.png");
-  iconNames.push("console.png");
-  iconNames.push("dashboard.png");
-  iconNames.push("mng.png");
-  iconNames.push("program.png");
-  iconNames.push("schedule.png");
-  iconNames.push("search.png");
-  iconNames.push("study.png");
-  iconNames.push("user.png");
-  iconNames.push("x_board.png");
-  iconNames.push("x_checkbox-false.png");
-  iconNames.push("x_checkbox-true.png");
-  iconNames.push("x_day.png");
-  iconNames.push("x_day_red.png");
-  iconNames.push("x_mmdd.png");
-  iconNames.push("x_mmdd_red.png");
-  iconNames.push("x_month.png");
-  iconNames.push("x_month_red.png");
-  iconNames.push("x_question.png");
-  iconNames.push("x_trash.png");
-  iconNames.push("x_week.png");
-  iconNames.push("x_week_red.png");
-  iconNames.push("yahoo.png");
-  iconNames.push("youtube.png");
-  iconNames.push("y_cloud.png");
-  iconNames.push("y_cloud_aws.png");
-  iconNames.push("y_money.png");
-  iconNames.push("y_movie.png");
-  iconNames.push("z_3d.png");
-  iconNames.push("z_ai.png");
-  iconNames.push("z_analytics.png");
-  iconNames.push("z_ar.png");
-  iconNames.push("z_cloud.png");
-  iconNames.push("z_console.png");
-  iconNames.push("z_dashboard.png");
-  iconNames.push("z_docker.png");
-  iconNames.push("z_file.png");
-  iconNames.push("z_folder.png");
-  iconNames.push("z_garbage_can.png");
-  iconNames.push("z_mng.png");
-  iconNames.push("z_money.png");
-  iconNames.push("z_movie.png");
-  iconNames.push("z_news.png");
-  iconNames.push("z_office.png");
-  iconNames.push("z_program.png");
-  iconNames.push("z_schedule.png");
-  iconNames.push("z_search.png");
-  iconNames.push("z_study.png");
-  iconNames.push("z_user.png");
-  iconNames.push("z_windows.png");
-
-
-
-
-  for(let iconIndex=0; iconIndex< defaultIcons.length; iconIndex++){
-    iconNames.push(defaultIcons[iconIndex]);
+function setAvailableIcons(iconNames){
+  // 登録情報の更新に表示するアイコンをカタログから設定
+  if(typeof iconCatalog !== "undefined" && Array.isArray(iconCatalog["icons"])){
+    for(let iconIndex = 0; iconIndex < iconCatalog["icons"].length; iconIndex++){
+      iconNames.push(iconCatalog["icons"][iconIndex]);
+    }
   }
-
   return iconNames;
 }
 
