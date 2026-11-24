@@ -918,10 +918,11 @@ function getLinkAccounts(linkItem){
   if(linkItem && Array.isArray(linkItem["accounts"])){
     for(let accountIndex = 0; accountIndex < linkItem["accounts"].length; accountIndex++){
       const account = linkItem["accounts"][accountIndex];
-      if(account && (account["accountId"] != "" || account["password"] != "")){
+      if(account && (account["accountId"] || account["password"])){
         accounts.push({
           "accountId": account["accountId"] || "",
-          "password": account["password"] || ""
+          "password": account["password"] || "",
+          "description": typeof account["description"] === "string" ? account["description"] : ""
         });
       }
     }
@@ -942,10 +943,14 @@ function setAccountFormCells(linkItem){
   fieldHtml += "<legend>accounts</legend>";
   for(let accountIndex = 0; accountIndex < rowCount; accountIndex++){
     const account = accounts[accountIndex] || {"accountId": "", "password": ""};
-    fieldHtml += '<label for="accountId">accountId</label>';
+    fieldHtml += '<div>account ' + (accountIndex + 1) + '</div>';
+    fieldHtml += '<label>accountId ';
     fieldHtml += '<input type="text" name="accountId" value="' + escapeHtml(account["accountId"]) + '" size="45" >';
-    fieldHtml += '<label for="password">password</label>';
+    fieldHtml += '</label> <label>password ';
     fieldHtml += '<input type="text" name="password" value="' + escapeHtml(account["password"]) + '" size="45" >';
+    fieldHtml += '</label><br>';
+    fieldHtml += '<label>アカウントの説明（任意） ';
+    fieldHtml += '<input type="text" name="accountDescription" value="' + escapeHtml(account["description"] || "") + '" size="45"></label>';
     fieldHtml += "<BR />";
   }
   fieldHtml += "</fieldset>";
@@ -1079,6 +1084,11 @@ function updateLinkStorageFromForm(){
       case "password":
         if(fieldValue != ""){
           currentAccount["password"] = fieldValue;
+        }
+        break;
+      case "accountDescription":
+        if(fieldValue.trim() != ""){
+          currentAccount["description"] = fieldValue.trim();
         }
         if(currentAccount["accountId"] || currentAccount["password"]){
           currentAccounts.push(currentAccount);

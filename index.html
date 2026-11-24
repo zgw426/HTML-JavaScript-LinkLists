@@ -18,6 +18,8 @@ const LINK_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.visibleLinkIds";
 const AREA_B_VISIBILITY_STORAGE_KEY = "HTML-JavaScript-LinkLists.areaBVisibleLinkIds";
 const ENHANCEMENT_STORAGE_KEY = "HTML-JavaScript-LinkLists.functionEnhancement";
 const OPERATION_LOG_STORAGE_KEY = "HTML-JavaScript-LinkLists.operationLog";
+const BACKUP_FORMAT = "HTML-JavaScript-LinkLists.backup";
+const BACKUP_FORMAT_VERSION = 1;
 const DEFAULT_ORIGINAL_ID = "HTML-JavaScript-LinkLists";
 const DEFAULT_OPERATION_LOG_MAX = 100;
 const linkListKeys = Array.from({length: 99}, (_, index) => "list" + String(index + 1).padStart(2, "0"));
@@ -123,6 +125,8 @@ function makeEnhancementDataFromGlobals(){
   };
 }
 
+const defaultEnhancementSnapshot = JSON.stringify(makeEnhancementDataFromGlobals());
+
 function isValidEnhancementData(enhancementData){
   return enhancementData
     && typeof enhancementData === "object"
@@ -158,11 +162,13 @@ function applyEnhancementData(enhancementData){
   replaceListValues(targetWeekList, enhancementData["targetWeekList"]);
 }
 
-function loadEnhancementDataFromStorage(){
+function loadEnhancementDataFromStorage(saveDefaults = true){
   let enhancementData = getEnhancementDataFromStorage();
   if(enhancementData == null){
-    enhancementData = makeEnhancementDataFromGlobals();
-    setEnhancementDataToStorage(enhancementData);
+    enhancementData = JSON.parse(defaultEnhancementSnapshot);
+    if(saveDefaults){
+      setEnhancementDataToStorage(enhancementData);
+    }
   }
   applyEnhancementData(enhancementData);
 }
@@ -347,7 +353,8 @@ function getLinkAccounts(linkItem){
       if(account && (hasAccountValue(account["accountId"]) || hasAccountValue(account["password"]))){
         accounts.push({
           "accountId": account["accountId"] || "",
-          "password": account["password"] || ""
+          "password": account["password"] || "",
+          "description": typeof account["description"] === "string" ? account["description"].trim() : ""
         });
       }
     }
@@ -512,16 +519,18 @@ function refreshLoadArrFromStorage(){
   }
 }
 
-function refreshAllAreas(){
+function refreshAllAreas(saveDefaults = true){
   set_Initial();
-  loadEnhancementDataFromStorage();
+  loadEnhancementDataFromStorage(saveDefaults);
   refreshLoadArrFromStorage();
   loadVisibleLinkIds();
   loadAreaBVisibleLinkIds();
   set_List();
+  area100Str = "";
   showAreaB();
   showAreaC(0);
   showAreaD();
+  showArea100();
 }
 
 function refreshAreaBFromStorage(){
@@ -1016,6 +1025,121 @@ function downloadTextFile(fileName, fileContent, contentType){
   URL.revokeObjectURL(link.href);
 }
 
+function getBackupStorageKeys(){
+  return [
+    ...linkListKeys.map(getLinkStorageKey),
+    LINK_VISIBILITY_STORAGE_KEY,
+    AREA_B_VISIBILITY_STORAGE_KEY,
+    ENHANCEMENT_STORAGE_KEY,
+    OPERATION_LOG_STORAGE_KEY
+  ];
+}
+
+function collectBackupEntries(){
+  const entries = {};
+  for(const key of getBackupStorageKeys()){
+    const value = storage.getItem(key);
+    if(value !== null){
+      entries[key] = value;
+    }
+  }
+  return entries;
+}
+
+function exportStorageBackup(){
+  const exportedAt = new Date().toISOString();
+  const backup = {format: BACKUP_FORMAT, version: BACKUP_FORMAT_VERSION, exportedAt, entries: collectBackupEntries()};
+  const timestamp = exportedAt.slice(0, 19).replace(/:/g, "-");
+  downloadTextFile("LinkLists-backup-" + timestamp + "Z.json", JSON.stringify(backup, null, 2), "application/json");
+}
+
+function parseStorageBackup(fileContent){
+  const backup = JSON.parse(fileContent.replace(/^\uFEFF/, ""));
+  if(!backup || backup.format !== BACKUP_FORMAT || backup.version !== BACKUP_FORMAT_VERSION){
+    throw new Error("対応している完全バックアップファイルを選択してください。");
+  }
+  if(!backup.entries || typeof backup.entries !== "object" || Array.isArray(backup.entries)){
+    throw new Error("バックアップの保存データが見つかりません。");
+  }
+
+  const allowedKeys = new Set(getBackupStorageKeys());
+  for(const [key, rawValue] of Object.entries(backup.entries)){
+    if(!allowedKeys.has(key) || typeof rawValue !== "string"){
+      throw new Error("バックアップに未対応の保存項目があります。");
+    }
+    const value = JSON.parse(rawValue);
+    if(key.startsWith(LINK_STORAGE_PREFIX)){
+      if(!isValidLinkData(value) || makeListKeyFromInfoId(normalizeLinkInfoId(value.info.ID)) !== key.slice(LINK_STORAGE_PREFIX.length)){
+        throw new Error("登録リンクの形式が正しくありません。");
+      }
+    }else if(key === ENHANCEMENT_STORAGE_KEY){
+      if(!isValidEnhancementData(value)){
+        throw new Error("拡張設定の形式が正しくありません。");
+      }
+    }else if(!Array.isArray(value)){
+      throw new Error("表示設定または操作ログの形式が正しくありません。");
+    }
+  }
+  return backup.entries;
+}
+
+function restoreBackupEntries(entries){
+  const previousEntries = collectBackupEntries();
+  const changedKeys = getBackupStorageKeys().filter(key => previousEntries[key] !== entries[key]);
+  try {
+    // 先に差し替え対象の容量を空けてから、バックアップを書き込む。
+    for(const key of changedKeys){
+      storage.removeItem(key);
+    }
+    for(const key of changedKeys){
+      if(Object.hasOwn(entries, key)){
+        storage.setItem(key, entries[key]);
+      }
+    }
+    refreshAllAreas(false);
+  } catch (error) {
+    try {
+      for(const key of changedKeys){
+        storage.removeItem(key);
+      }
+      for(const key of changedKeys){
+        if(Object.hasOwn(previousEntries, key)){
+          storage.setItem(key, previousEntries[key]);
+        }
+      }
+    } catch (rollbackError) {
+      console.error("Backup rollback failed:", rollbackError);
+      throw new Error("復元前の状態に戻せませんでした。事前に出力したバックアップを使用してください。");
+    }
+    refreshAllAreas(false);
+    throw error;
+  }
+}
+
+async function importStorageBackup(fileInput){
+  const file = fileInput.files[0];
+  if(!file) return;
+  fileInput.value = "";
+  fileInput.disabled = true;
+  try {
+    const entries = parseStorageBackup(await file.text());
+    const linkCount = Object.keys(entries).filter(key => key.startsWith(LINK_STORAGE_PREFIX)).length;
+    if(!confirm("登録リンク " + linkCount + "件と設定・操作ログを復元します。\nこのブラウザの登録内容はバックアップの内容に置き換わります。復元しますか？")){
+      return;
+    }
+    document.getElementById("inputKey").value = "";
+    document.getElementById("includeAreaBUnselected").checked = false;
+    restoreBackupEntries(entries);
+    document.getElementById("storageBackupDialog").close();
+    alert("バックアップを復元しました。");
+  } catch (error) {
+    console.error("Backup restore failed:", error);
+    alert("バックアップを復元できませんでした。\n" + error.message);
+  } finally {
+    fileInput.disabled = false;
+  }
+}
+
 function exportAllLinkJsonFiles(){
   refreshLoadArrFromStorage();
   const enhancementData = getEnhancementDataFromStorage();
@@ -1232,6 +1356,16 @@ textarea{
   <div class="areaD" id="areaD">※AreaD※</div>
 </main>
 <div class="area100" id="area100"></div>
+<dialog id="storageBackupDialog" aria-labelledby="storageBackupTitle">
+  <h2 id="storageBackupTitle">データ移行</h2>
+  <p>リンク情報、表示設定、拡張設定、操作ログを1つのJSONに出力し、別のブラウザで復元できます。</p>
+  <p>登録済みのIDやパスワードも含まれます。自分で出力したファイルを使い、安全な場所に保管してください。</p>
+  <p>復元すると、このブラウザの登録内容が置き換わります。</p>
+  <button type="button" onclick="exportStorageBackup()">完全バックアップを出力</button>
+  <input type="file" id="storageBackupFile" accept=".json,application/json" hidden onchange="importStorageBackup(this)">
+  <button type="button" onclick="document.getElementById('storageBackupFile').click()">バックアップを復元</button>
+  <form method="dialog"><button type="submit">閉じる</button></form>
+</dialog>
 <script>
 function set_Initial(){
   list.length = listinfo.length = b1key.length = c1key.length = iptkey.length = 0;
@@ -1283,6 +1417,7 @@ function showAreaB()
     wStr += "<HR>";
     wStr += "<center><input type='button' value='登録情報の更新' onclick='editLinkInfo()' /></center>";
     wStr += "<center><input type='button' value='ログ表示' onclick='showOperationLog()' /></center>";
+    wStr += "<center><input type='button' value='データ移行' onclick='document.getElementById(\"storageBackupDialog\").showModal()' /></center>";
 
     //------------//
     //フィルター用アイコンを描画
@@ -1641,14 +1776,19 @@ function showAreaD()
       if(accounts.length > 0){
         wStr += "<div class='div_account'>";
         for(let accountIndex = 0; accountIndex < accounts.length; accountIndex++){
-          wStr += "account " + (accountIndex + 1) + "<br>";
+          const accountDescription = accounts[accountIndex]["description"];
+          wStr += "account " + (accountIndex + 1);
+          if(accountDescription){
+            wStr += " — " + escapeHtml(accountDescription);
+          }
+          wStr += "<br>";
           if(hasAccountValue(accounts[accountIndex]["accountId"])){
-            wStr += "Account ID: " + escapeHtml(accounts[accountIndex]["accountId"]);
+            wStr += "　Account ID: " + escapeHtml(accounts[accountIndex]["accountId"]);
             wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"accountId\")'>Copy</button>";
             wStr += "<br>";
           }
           if(hasAccountValue(accounts[accountIndex]["password"])){
-            wStr += "Password: *****";
+            wStr += "　Password: *****";
             wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"password\")'>Copy</button>";
             wStr += "<br>";
           }
