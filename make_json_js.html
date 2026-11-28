@@ -3,7 +3,13 @@
   <meta charset="UTF-8">
   <script src="link_export.js"></script>
   <script src="account_crypto.js"></script>
+  <script src="password_peek.js"></script>
   <style>
+    .password_toggle {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+    }
     html { height: 100%; }
     body { height: 100%; margin: 0; }
     main {
@@ -222,6 +228,7 @@ function normalizeLinkInfoIds(linkInfoIds){
 }
 
 function showEditorTab(tabName){
+  if(tabName !== "update") maskEditorPasswords();
   for(const name of ["settings", "update", "tools"]){
     const selected = name === tabName;
     const tab = document.getElementById(name + "_tab");
@@ -1005,6 +1012,24 @@ function getLinkAccounts(linkItem){
   return accounts;
 }
 
+function toggleEditorPassword(button){
+  setEditorPasswordVisible(button, button.getAttribute("aria-pressed") === "false");
+}
+
+function setEditorPasswordVisible(button, visible){
+  const field = button.previousElementSibling.querySelector('input[name="password"]');
+  field.type = visible ? "text" : "password";
+  button.setAttribute("aria-pressed", String(visible));
+  button.title = visible ? "パスワードを隠す" : "パスワードを表示";
+  button.innerHTML = renderPasswordEye(visible);
+}
+
+function maskEditorPasswords(){
+  for(const button of document.querySelectorAll(".password_toggle[aria-pressed='true']")){
+    setEditorPasswordVisible(button, false);
+  }
+}
+
 function setAccountFormCells(linkItem){
   const accounts = getLinkAccounts(linkItem);
   const rowCount = accounts.length + BLANK_ACCOUNT_ROW_COUNT;
@@ -1017,7 +1042,8 @@ function setAccountFormCells(linkItem){
     fieldHtml += '<input type="text" name="accountId" value="' + escapeHtml(account["accountId"]) + '" size="45" >';
     fieldHtml += '</label> <label>password ';
     fieldHtml += '<input type="password" name="password" autocomplete="off" value="' + escapeHtml(account["password"]) + '" size="45" >';
-    fieldHtml += '</label><br>';
+    fieldHtml += '</label> <button type="button" class="password_toggle" aria-label="パスワードの表示" aria-pressed="false" title="パスワードを表示" onclick="toggleEditorPassword(this)">';
+    fieldHtml += renderPasswordEye() + '</button><br>';
     fieldHtml += '<label>アカウントの説明（任意） ';
     fieldHtml += '<input type="text" name="accountDescription" value="' + escapeHtml(account["description"] || "") + '" size="45"></label>';
     fieldHtml += "<BR />";
@@ -1247,6 +1273,7 @@ function parseCategoryInput(categoryInput){
 
 
 function set_init(){
+  maskEditorPasswords();
   editorRevision++;
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
