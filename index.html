@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
   <script src="link_export.js"></script>
+  <script src="account_crypto.js"></script>
   <script src="icon_catalog.json.js"></script>
   <script src="area_c_icon_mapinfo.js"></script>
   <script src="function_enhancement.js"></script>
@@ -347,26 +348,73 @@ function hasAccountValue(accountValue){
 }
 
 function getLinkAccounts(linkItem){
-  const accounts = [];
-  if(linkItem && Array.isArray(linkItem["accounts"])){
-    for(let accountIndex = 0; accountIndex < linkItem["accounts"].length; accountIndex++){
-      const account = linkItem["accounts"][accountIndex];
-      if(account && (hasAccountValue(account["accountId"]) || hasAccountValue(account["password"]))){
-        accounts.push({
-          "accountId": account["accountId"] || "",
-          "password": account["password"] || "",
-          "description": typeof account["description"] === "string" ? account["description"].trim() : ""
-        });
-      }
+  return linkItem?.encryptedAccounts ? accountVault.cached(linkItem.encryptedAccounts) : [];
+}
+
+function renderLinkAccountControls(accounts, linkIndex){
+  let html = "";
+  for(const [accountIndex, account] of accounts.entries()){
+    html += "account " + (accountIndex + 1);
+    if(account.description) html += " — " + escapeHtml(account.description);
+    html += "<br>";
+    if(hasAccountValue(account.accountId)){
+      html += "　Account ID: " + escapeHtml(account.accountId);
+      html += " <button type='button' onclick='copyLinkAccountValue(" + linkIndex + ", " + accountIndex + ", \"accountId\")'>Copy</button><br>";
+    }
+    if(hasAccountValue(account.password)){
+      html += "　Password: *****";
+      html += " <button type='button' onclick='copyLinkAccountValue(" + linkIndex + ", " + accountIndex + ", \"password\")'>Copy</button><br>";
     }
   }
-  if(linkItem && (hasAccountValue(linkItem["accountId"]) || hasAccountValue(linkItem["password"]))){
-    accounts.push({
-      "accountId": linkItem["accountId"] || "",
-      "password": linkItem["password"] || ""
-    });
+  return html;
+}
+
+async function showAvailableLinkAccounts(area){
+  const pending = Array.from(area.querySelectorAll("[data-locked-account-index]"), node => {
+    const index = Number(node.dataset.lockedAccountIndex);
+    return {node, index, item:list[index]};
+  });
+  if(!pending.length) return;
+
+  await accountVault.run(() => accountVault.openAvailable(pending
+    .filter(({node}) => node.isConnected)
+    .map(({item}) => item.encryptedAccounts)));
+
+  for(const {node,index,item} of pending){
+    if(!node.isConnected || list[index] !== item) continue;
+    const accounts = getLinkAccounts(item);
+    if(accounts.length){
+      node.innerHTML = renderLinkAccountControls(accounts, index);
+      node.removeAttribute("data-locked-account-index");
+    }
   }
-  return accounts;
+}
+
+async function unlockLinkAccounts(linkIndex){
+  const linkItem = list[linkIndex];
+  if(!linkItem) return;
+  try {
+    await accountVault.run(async () => {
+      const migrated = await migrateStoredAccounts();
+      if(linkItem.encryptedAccounts){
+        await accountVault.open(linkItem.encryptedAccounts, storedAccountEnvelopes());
+      }
+      if(migrated || !linkItem.encryptedAccounts){
+        refreshLoadArrFromStorage();
+        set_List();
+      }
+    });
+    if(!document.getElementById("iFrameArea")) showAreaD();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function forgetAccountTrust(){
+  if(!await accountVault.run(accountVault.isTrusted)) return;
+  if(!confirm("このブラウザの信頼設定を解除しますか？\n次回のアカウント操作にはマスターパスフレーズが必要になります。編集中の未保存の変更は破棄されます。")) return;
+  await accountVault.run(accountVault.forget);
+  editLinkInfo("tools");
 }
 
 function copyLinkAccountValue(linkIndex, accountIndex, fieldName){
@@ -560,6 +608,8 @@ function handleLinkStorageMessage(event){
   if(!event.data || event.data["type"] != "HTML-JavaScript-LinkLists.refreshAreaB"){
     return;
   }
+  const editorFrame = document.getElementById("iFrameArea");
+  if(!editorFrame || event.source !== editorFrame.contentWindow) return;
   if(Array.isArray(event.data["visibleLinkIds"]) && Array.isArray(event.data["areaBVisibleLinkIds"])){
     refreshAreaBWithVisibility(event.data["visibleLinkIds"], event.data["areaBVisibleLinkIds"]);
     return;
@@ -1000,6 +1050,7 @@ function importLinkJsonFiles(files){
         }
       }
 
+      const originalLinks = linkListKeys.map(key => storage.getItem(getLinkStorageKey(key)));
       const importPlan = await buildJsonImportPlan(importedJsonFiles);
       if(importPlan == null){
         return;
@@ -1007,6 +1058,17 @@ function importLinkJsonFiles(files){
       const shouldImport = await confirmJsonImportPlan(importPlan);
       if(!shouldImport){
         return;
+      }
+      await accountVault.run(async () => {
+        const preferred = storedAccountEnvelopes()[0];
+        for(const item of importPlan){
+          if(item.kind === "link" && item.mode !== "skip"){
+            item.data = await accountVault.sealLinks(item.data, preferred);
+          }
+        }
+      });
+      if(linkListKeys.some((key, index) => storage.getItem(getLinkStorageKey(key)) !== originalLinks[index])){
+        throw new Error("登録内容が変更されました。もう一度取り込んでください。");
       }
       const importedCount = applyJsonImportPlan(importPlan);
       refreshAllAreas();
@@ -1047,16 +1109,17 @@ function collectBackupEntries(){
   return entries;
 }
 
-function exportStorageBackup(includeAccountInfo = false){
+async function exportStorageBackup(mode = "omit"){
   const exportedAt = new Date().toISOString();
   const entries = collectBackupEntries();
-  if(!includeAccountInfo){
-    for(const key of Object.keys(entries)){
+  await accountVault.run(async () => {
+    for(const [key, value] of Object.entries(entries)){
       if(key.startsWith(LINK_STORAGE_PREFIX)){
-        entries[key] = serializeLinkExport(JSON.parse(entries[key]), false);
+        const linkData = await prepareAccountExport(JSON.parse(value), mode);
+        entries[key] = serializeLinkExport(linkData, mode);
       }
     }
-  }
+  });
   const backup = {format: BACKUP_FORMAT, version: BACKUP_FORMAT_VERSION, exportedAt, entries};
   const timestamp = exportedAt.slice(0, 19).replace(/:/g, "-");
   downloadTextFile("LinkLists-backup-" + timestamp + "Z.json", JSON.stringify(backup, null, 2), "application/json");
@@ -1136,10 +1199,19 @@ async function importStorageBackup(fileInput){
     if(!confirm("登録リンク " + linkCount + "件と設定・操作ログを復元します。\nこのブラウザの登録内容はバックアップの内容に置き換わります。復元しますか？")){
       return;
     }
+    await accountVault.run(async () => {
+      const preferred = storedAccountEnvelopes()[0];
+      for(const [key, value] of Object.entries(entries)){
+        if(key.startsWith(LINK_STORAGE_PREFIX)){
+          entries[key] = JSON.stringify(await accountVault.sealLinks(JSON.parse(value), preferred));
+        }
+      }
+    });
     document.getElementById("inputKey").value = "";
     document.getElementById("includeAreaBUnselected").checked = false;
     restoreBackupEntries(entries);
     document.getElementById("storageBackupDialog").close();
+    editLinkInfo("tools");
     alert("バックアップを復元しました。");
   } catch (error) {
     console.error("Backup restore failed:", error);
@@ -1149,17 +1221,22 @@ async function importStorageBackup(fileInput){
   }
 }
 
-function exportAllLinkJsonFiles(includeAccountInfo = false){
+async function exportAllLinkJsonFiles(mode = "omit"){
   refreshLoadArrFromStorage();
   const enhancementData = getEnhancementDataFromStorage();
   if(load_arr.length == 0 && enhancementData == null){
     alert("No data in Web Storage.");
     return;
   }
-  for(let linkIndex = 0; linkIndex < load_arr.length; linkIndex++){
-    const linkData = load_arr[linkIndex];
+  const exportedLinks = [];
+  await accountVault.run(async () => {
+    for(const linkData of load_arr.slice()){
+      exportedLinks.push(await prepareAccountExport(linkData, mode));
+    }
+  });
+  for(const linkData of exportedLinks){
     const fileName = makeJsonFileName(linkData);
-    downloadTextFile(fileName, serializeLinkExport(linkData, includeAccountInfo, 2), "application/json");
+    downloadTextFile(fileName, serializeLinkExport(linkData, mode, 2), "application/json");
     recordOperationLog("JSON出力", fileName);
   }
   if(enhancementData != null){
@@ -1365,6 +1442,11 @@ textarea{
   <div class="areaD" id="areaD">※AreaD※</div>
 </main>
 <div class="area100" id="area100"></div>
+<dialog id="operationLogDialog" aria-labelledby="operationLogTitle">
+  <h2 id="operationLogTitle">操作ログ</h2>
+  <div id="operationLogContent"></div>
+  <form method="dialog"><button type="submit">閉じる</button></form>
+</dialog>
 <dialog id="storageBackupDialog" aria-labelledby="storageBackupTitle">
   <h2 id="storageBackupTitle">データ移行</h2>
   <p>リンク情報、表示設定、拡張設定、操作ログを1つのJSONに出力し、別のブラウザで復元できます。</p>
@@ -1418,7 +1500,7 @@ function showAreaB()
         const checkedAttr = (!isAreaBFilterActive || b1key.includes(linkInfoId)) ? "checked='checked'" : "";
         wStr += "<label>";
         wStr += "<div class='div_f1'>";
-        wStr += "<input type='checkbox' name='areaB1' value='" + linkInfoId + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + escapeImportHtml(linkInfo["Title"] || "Title未設定");
+        wStr += "<input type='checkbox' name='areaB1' value='" + escapeHtml(linkInfoId) + "' onclick='selectEventFlowB(this.name, this.value, this.checked)' " + checkedAttr + ">" + escapeImportHtml(linkInfo["Title"] || "Title未設定");
         wStr += "<BR />　<small>"+ escapeImportHtml(linkInfo["NOTE"] || "") +"</small>";
         wStr += "</div>";
         wStr += "</label>";
@@ -1426,8 +1508,6 @@ function showAreaB()
     wStr += "</form>";
     wStr += "<HR>";
     wStr += "<center><input type='button' value='登録情報の更新' onclick='editLinkInfo()' /></center>";
-    wStr += "<center><input type='button' value='ログ表示' onclick='showOperationLog()' /></center>";
-    wStr += "<center><input type='button' value='データ移行' onclick='document.getElementById(\"storageBackupDialog\").showModal()' /></center>";
 
     //------------//
     //フィルター用アイコンを描画
@@ -1451,7 +1531,7 @@ function addFilterIconOnAreaB(){
   filterHtml += "<form name='areaB-FilterIcon'>";
   for (let key in key_icon) {
       filterHtml += "<div class='div_f2'>";
-      filterHtml += "<img src='icon/"+ key +"' alt='"+key_icon[key]+"' width='60px' height='60px' onclick='selectEventFilterIcon(\""+ key +"\")'>";
+      filterHtml += "<img src='icon/"+ escapeHtml(key) +"' alt='"+escapeHtml(key_icon[key])+"' data-filter-icon='"+escapeHtml(key)+"' width='60px' height='60px' onclick='selectEventFilterIcon(this.dataset.filterIcon)'>";
       filterHtml += "</div>";
   }
   filterHtml += "</form>";
@@ -1475,7 +1555,7 @@ function selectEventFilterIcon(argKey){
 }
 
 
-function editLinkInfo(){
+function editLinkInfo(tabName){
   let iconListHtml = "";
   iconListHtml += "<p>編集フォームのicon欄を選択してから、使用するアイコンをクリックしてください。</p>";
   iconListHtml += "<center>";
@@ -1490,9 +1570,30 @@ function editLinkInfo(){
   iconListHtml += "</center>";
   document.getElementById("areaC").innerHTML = iconListHtml;
 
-  let editorHtml = "<iframe id='iFrameArea' width='100%' height='100%' src='make_json_js.html'></iframe>";
+  const editorUrl = tabName === "tools" ? "make_json_js.html#tools" : "make_json_js.html";
+  let editorHtml = "<iframe id='iFrameArea' title='登録情報の管理' width='100%' height='100%' src='" + editorUrl + "'></iframe>";
   document.getElementById("areaD").innerHTML = editorHtml;
 }
+
+window.addEventListener("message", async event => {
+  const frame = document.getElementById("iFrameArea");
+  if(!frame || event.source !== frame.contentWindow || event.data?.type !== "LinkLists.accountRequest") return;
+  const {id, action, data} = event.data;
+  const origin = location.protocol === "file:" ? "*" : location.origin;
+  if(origin !== "*" && event.origin !== origin) return;
+  let response;
+  try {
+    if(action === "showLog") showOperationLog();
+    else if(action === "showMigration") document.getElementById("storageBackupDialog").showModal();
+    else if(action === "forgetTrust") await forgetAccountTrust();
+    else response = {result: await accountEditorOperation(action, data)};
+  } catch (error) {
+    response = {error:error.message};
+  }
+  if(document.getElementById("iFrameArea") === frame){
+    event.source.postMessage({type:"LinkLists.accountResponse", id, ...response}, origin);
+  }
+});
 
 function selectLinkIconFromCatalog(iconName){
   const editorFrame = document.getElementById("iFrameArea");
@@ -1509,7 +1610,6 @@ function selectLinkIconFromCatalog(iconName){
 function showOperationLog(){
   const operationLogs = getOperationLogs();
   let logHtml = "";
-  logHtml += "<h3>操作ログ</h3>";
   logHtml += "<div>MAX: " + getOperationLogMax() + " / 記録数: " + operationLogs.length + "</div>";
   logHtml += "<div><input type='button' value='CSV出力' onclick='exportOperationLogCsv()' /></div>";
   logHtml += "<table border='1' cellspacing='0' cellpadding='4'>";
@@ -1528,7 +1628,8 @@ function showOperationLog(){
   }
 
   logHtml += "</table>";
-  document.getElementById("areaD").innerHTML = logHtml;
+  document.getElementById("operationLogContent").innerHTML = logHtml;
+  document.getElementById("operationLogDialog").showModal();
 }
 
 function showAreaC(showFlg){
@@ -1622,19 +1723,19 @@ function showAreaC(showFlg){
       
 
 
-      wStr += "<B>" + headingText + "</B>";
+      wStr += "<B>" + escapeHtml(headingText) + "</B>";
       wStr += "</div>";
     }
     wStr += "<label>";
 
     if(typeof key_highlight[ arr[o]["key"] ] !== 'undefined'){
       //---- 強調表示 ----//
-      wStr += "<div class='div_f2_Highlight' style='background-color:"+key_highlight[ arr[o]["key"] ]+"'>";
+      wStr += "<div class='div_f2_Highlight' style='background-color:"+escapeHtml(key_highlight[ arr[o]["key"] ])+"'>";
     }else{
       wStr += "<div class='div_f2'>";
     }
 
-    wStr += "<input type='checkbox' name='areaC1' value='" + arr[o]["key"] + "' onclick='selectEventFlowC(\"checkbox\", this.value, this.checked)' "+checkedAttr +" >" ;
+    wStr += "<input type='checkbox' name='areaC1' value='" + escapeHtml(arr[o]["key"]) + "' onclick='selectEventFlowC(\"checkbox\", this.value, this.checked)' "+checkedAttr +" >" ;
 
     iconMapKey = arr[o]["key"].toLowerCase(); // 小文字変換
 
@@ -1643,7 +1744,7 @@ function showAreaC(showFlg){
       wStr += "<img src='icon/"+ iconMapInfo[ iconMapKey ] +"' height='16'> ";
     }
 
-    wStr += arr[o]["key"];
+    wStr += escapeHtml(arr[o]["key"]);
     wStr += "</div>";
     wStr += "</label>";
     iconMapKey = "";
@@ -1765,69 +1866,33 @@ function showAreaD()
         let headingText = hiraToKana( headStr.toUpperCase() );
         headingText = headingText.normalize('NFD')[0];  // 濁音→静音
         wStr += "<div class='div_f0'>";
-        wStr += "<B>" + headingText + "</B>";
+        wStr += "<B>" + escapeHtml(headingText) + "</B>";
         wStr += "</div>"
       }
 
       wStr += "<div class='div_f1'>";
-      wStr += "<a href='"+ list[lp0]["URL"] +"' target='_blank' rel='noopener noreferrer' onclick='recordOperationLog(\"リンククリック\", this.textContent.trim())'>";
+      const linkUrl = String(list[lp0]["URL"] || "").replace(/&amp;/g, "&").trim().replace(/[\t\r\n]/g, "");
+      const safeUrl = /^(?:javascript|vbscript|data):/i.test(linkUrl) ? "#" : linkUrl;
+      wStr += "<a href='"+ escapeHtml(safeUrl) +"' target='_blank' rel='noopener noreferrer' onclick='recordOperationLog(\"リンククリック\", this.textContent.trim())'>";
 
       // アイコン情報あれば表示
       if(hasIconValue(list[lp0]["icon"])){
-        wStr += "<img src='icon/"+ list[lp0]["icon"] +"' height='70' align='middle' hspace='3px' vspace='3px'>";
+        wStr += "<img src='icon/"+ escapeHtml(list[lp0]["icon"]) +"' height='70' align='middle' hspace='3px' vspace='3px'>";
       }
-      wStr += list[lp0]["Name"];
+      wStr += escapeHtml(list[lp0]["Name"]);
       wStr += "</a>";
       wStr += "<small>";
       wStr += "<div class='div_url'>";
-      wStr += decoUrl;
+      wStr += escapeHtml(decoUrl || "");
       wStr += "</div>";
-      const accounts = getLinkAccounts(list[lp0]);
-      if(accounts.length > 0){
-        wStr += "<div class='div_account'>";
-        for(let accountIndex = 0; accountIndex < accounts.length; accountIndex++){
-          const accountDescription = accounts[accountIndex]["description"];
-          wStr += "account " + (accountIndex + 1);
-          if(accountDescription){
-            wStr += " — " + escapeHtml(accountDescription);
-          }
-          wStr += "<br>";
-          if(hasAccountValue(accounts[accountIndex]["accountId"])){
-            wStr += "　Account ID: " + escapeHtml(accounts[accountIndex]["accountId"]);
-            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"accountId\")'>Copy</button>";
-            wStr += "<br>";
-          }
-          if(hasAccountValue(accounts[accountIndex]["password"])){
-            wStr += "　Password: *****";
-            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"password\")'>Copy</button>";
-            wStr += "<br>";
-          }
-          if(false && hasAccountValue(accounts[accountIndex]["accountId"])){
-            wStr += "繧｢繧ｫ繧ｦ繝ｳ繝・D: " + escapeHtml(accounts[accountIndex]["accountId"]);
-            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"accountId\")'>繧ｳ繝斐・</button>";
-            wStr += "<br>";
-          }
-          if(false && hasAccountValue(accounts[accountIndex]["password"])){
-            wStr += "繝代せ繝ｯ繝ｼ繝・ *****";
-            wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", " + accountIndex + ", \"password\")'>繧ｳ繝斐・</button>";
-            wStr += "<br>";
-          }
-        }
-        wStr += "</div>";
+      const linkItem = list[lp0];
+      const accounts = getLinkAccounts(linkItem);
+      if(accounts.length === 0 && (linkItem.encryptedAccounts || accountVault.plaintext(linkItem).length)){
+        const lockedIndex = linkItem.encryptedAccounts ? " data-locked-account-index='" + lp0 + "'" : "";
+        wStr += "<div class='div_account'" + lockedIndex + "><button type='button' onclick='unlockLinkAccounts(" + lp0 + ")'>アカウントを表示・コピー</button></div>";
       }
-      if(false && (hasAccountValue(list[lp0]["accountId"]) || hasAccountValue(list[lp0]["password"]))){
-        wStr += "<div class='div_account'>";
-        if(hasAccountValue(list[lp0]["accountId"])){
-          wStr += "アカウントID: " + escapeHtml(list[lp0]["accountId"]);
-          wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", \"accountId\")'>コピー</button>";
-          wStr += "<br>";
-        }
-        if(hasAccountValue(list[lp0]["password"])){
-          wStr += "パスワード: *****";
-          wStr += " <button type='button' onclick='copyLinkAccountValue(" + lp0 + ", \"password\")'>コピー</button>";
-          wStr += "<br>";
-        }
-        wStr += "</div>";
+      if(accounts.length > 0){
+        wStr += "<div class='div_account'>" + renderLinkAccountControls(accounts, lp0) + "</div>";
       }
       wStr += "<hr width='100%'>";
 
@@ -1835,16 +1900,18 @@ function showAreaD()
       let noteRows = ( list[lp0]["note"].match( /\n/g ) || [] ).length + 2 ;
       // console.log("noteRows = " + noteRows + ", note = " + list[lp0]["note"]);
       wStr += "<textarea rows='"+ noteRows +"'>";
-      wStr += list[lp0]["note"];
+      wStr += escapeHtml(list[lp0]["note"]);
       wStr += "</textarea><BR />";
 
-      wStr += cateStr;
+      wStr += escapeHtml(cateStr);
       wStr += "</small>";
       wStr += "</div>";
     }
   }
   if(wStr.length <= 0) wStr = "ヒット 0 件";
-  document.getElementById("areaD").innerHTML = wStr;
+  const area = document.getElementById("areaD");
+  area.innerHTML = wStr;
+  showAvailableLinkAccounts(area);
 }
 
 function set_C1key_B1key(){
@@ -1913,22 +1980,22 @@ function checkEventMsg(loTargetDateList){
           const targetDate = new Date(targetStr);
           targetStr = targetStr.replace("YYYY", curYear);
           targetDate.setHours(0, 0, 0, 0);
-          outStr += `${targetDateList[tgt][2]}`;
+          outStr += escapeHtml(targetDateList[tgt][2]);
           outStrA += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_mmdd.png");
       }else if (regex2.test(targetStr)){  // 日のみ指定されている場合
           targetStr = targetStr.replace("YYYY", curYear);
           targetStr = targetStr.replace("MM", curMonth);
-          outStr += `${targetDateList[tgt][2]}`;
+          outStr += escapeHtml(targetDateList[tgt][2]);
           outStrB += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_day.png");
       }else if (regex3.test(targetStr)){  // 月のみ指定されている場合
         targetStr = targetStr.replace("YYYY", curYear);
         targetStr = targetStr.replace("DD", curDay);
-        outStr += `${targetDateList[tgt][2]}`;
+        outStr += escapeHtml(targetDateList[tgt][2]);
         outStrC += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_month.png");
       }else{
         // イベント登録情報に誤りがあるもの
         targetStr = `${curYear}-${curMonth}-${curDay}`;
-        outStr = `<B><font color="red">(${targetDateList[tgt][0]}) ${targetDateList[tgt][2]}</font></B>`;
+        outStr = `<B><font color="red">(${escapeHtml(targetDateList[tgt][0])}) ${escapeHtml(targetDateList[tgt][2])}</font></B>`;
         outStrD += makeCheckEventStr(currentDate, targetStr, targetDateList[tgt][1], outStr,"x_question.png");
       }
   }
@@ -1948,7 +2015,7 @@ function makeCheckEventStr(loCurrentDate, loTargetStr, loIcon, loEventStr, loDef
           icon = loIcon;  // 指定のアイコンにする
       }
       rtnStr += "<p clear='left'>";
-      rtnStr += "<img src='" + iconDir + icon + "' align='left' height='22px'>";
+      rtnStr += "<img src='" + iconDir + escapeHtml(icon) + "' align='left' height='22px'>";
       rtnStr += loEventStr;
       rtnStr += "</p>";
     }
@@ -1989,16 +2056,16 @@ function checkWeekEventMsg(loTargetWeekList){
             icon = iconTarget;  // 指定のアイコンにする
         }
         rtnStr += "<p clear='left'>";
-        rtnStr += "<img src='" + iconDir + icon + "' align='left' height='22px'>";
+        rtnStr += "<img src='" + iconDir + escapeHtml(icon) + "' align='left' height='22px'>";
         //rtnStr += `[${dayOfW}] ${msg}`;
-        rtnStr += `[${dayOfW}] ${msg}`;
+        rtnStr += `[${escapeHtml(dayOfW)}] ${escapeHtml(msg)}`;
         rtnStr += "</p>";
       }
     }else{
       //入力規則に誤りがある週のイベント情報
       rtnStr += "<p clear='left'>";
       rtnStr += `<img src='${iconDir}x_question.png' align='left' height='22px'>`;
-      rtnStr += `<B><font color="red">[${dayOfW}] ${msg}</font></B>`;
+      rtnStr += `<B><font color="red">[${escapeHtml(dayOfW)}] ${escapeHtml(msg)}</font></B>`;
       rtnStr += "</p>";
     }
   }

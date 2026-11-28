@@ -1,9 +1,9 @@
-function serializeLinkExport(linkData, includeAccountInfo, indentation){
-  if(includeAccountInfo){
+function serializeLinkExport(linkData, mode, indentation){
+  if(mode === "encrypted" || mode === "plain"){
     return JSON.stringify(linkData, null, indentation);
   }
   return JSON.stringify(linkData, (key, value) => {
-    if(key === "accounts" || key === "accountId" || key === "password"){
+    if(key === "accounts" || key === "accountId" || key === "password" || key === "encryptedAccounts"){
       return undefined;
     }
     return value;
@@ -15,20 +15,25 @@ function chooseAccountExport(exportData){
   dialog.setAttribute("aria-label", "JSON出力の設定");
   dialog.innerHTML = `
     <form method="dialog">
-      <p><label><input type="checkbox" name="includeAccountInfo">
-        アカウント情報（ID・パスワード・説明）を含める
-      </label></p>
-      <p>含める場合、出力ファイルにパスワードが平文で保存されます。</p>
+      <fieldset><legend>アカウント情報（ID・パスワード・説明）</legend>
+        <label><input type="radio" name="accountMode" value="omit" checked>含めない</label><br>
+        <label><input type="radio" name="accountMode" value="encrypted">暗号化して含める</label><br>
+        <label><input type="radio" name="accountMode" value="plain">平文で含める</label>
+      </fieldset>
+      <p>平文ファイルに含まれるパスワードは、そのファイルを開ける人が読めます。</p>
       <button type="submit" value="cancel">キャンセル</button>
       <button type="submit" value="export">出力</button>
     </form>`;
   const form = dialog.querySelector("form");
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     if(event.submitter?.value === "export"){
+      event.preventDefault();
+      const mode = form.elements.accountMode.value;
+      dialog.close();
       try {
-        exportData(form.elements.includeAccountInfo.checked);
+        await exportData(mode);
       } catch (error) {
-        alert("JSONを出力できませんでした。保存データを確認してください。");
+        alert("JSONを出力できませんでした。\n" + error.message);
       }
     }
   });

@@ -2,6 +2,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="link_export.js"></script>
+  <script src="account_crypto.js"></script>
   <style>
     html { height: 100%; }
     body { height: 100%; margin: 0; }
@@ -161,6 +162,7 @@
 <div class="editor_tabs" role="tablist" aria-label="登録情報の管理">
   <button type="button" id="settings_tab" class="editor_tab_button active" role="tab" aria-selected="true" aria-controls="settings_panel" onclick="showEditorTab('settings')">登録済み情報の設定</button>
   <button type="button" id="update_tab" class="editor_tab_button" role="tab" aria-selected="false" aria-controls="update_panel" onclick="showEditorTab('update')">登録内容の更新</button>
+  <button type="button" id="tools_tab" class="editor_tab_button" role="tab" aria-selected="false" aria-controls="tools_panel" onclick="showEditorTab('tools')">ツールと設定</button>
 </div>
 <section id="settings_panel" class="editor_tab_panel" role="tabpanel" aria-labelledby="settings_tab">
   <div id="link_list_buttons"></div>
@@ -175,6 +177,22 @@
   <div id="form_area">※Web Storageのリンク情報をフォーム形式で表示※</div>
   <div id="savebutton_area">※更新ボタンを表示※</div>
   <div id="message_area">※警告メッセージなどを表示※</div>
+</section>
+<section id="tools_panel" class="editor_tab_panel" role="tabpanel" aria-labelledby="tools_tab" hidden>
+  <section>
+    <h3>操作ログ</h3>
+    <button type="button" onclick="runEditorTool('showLog')">ログ表示</button>
+  </section>
+  <section>
+    <h3>データ移行</h3>
+    <button type="button" onclick="runEditorTool('showMigration')">データ移行</button>
+  </section>
+  <section>
+    <h3>アカウント情報の保護</h3>
+    <p id="browser_trust_status" role="status"></p>
+    <button type="button" id="forget_trust_button" onclick="runEditorTool('forgetTrust')" hidden>このブラウザの信頼を解除</button>
+  </section>
+  <p id="editor_tool_message" role="status"></p>
 </section>
 
 <script>
@@ -204,18 +222,43 @@ function normalizeLinkInfoIds(linkInfoIds){
 }
 
 function showEditorTab(tabName){
-  const showSettings = tabName == "settings";
-  const settingsTab = document.getElementById("settings_tab");
-  const updateTab = document.getElementById("update_tab");
-  const settingsPanel = document.getElementById("settings_panel");
-  const updatePanel = document.getElementById("update_panel");
+  for(const name of ["settings", "update", "tools"]){
+    const selected = name === tabName;
+    const tab = document.getElementById(name + "_tab");
+    tab.classList.toggle("active", selected);
+    tab.setAttribute("aria-selected", String(selected));
+    document.getElementById(name + "_panel").hidden = !selected;
+  }
+  if(tabName === "tools") refreshBrowserTrustStatus();
+}
 
-  settingsTab.classList.toggle("active", showSettings);
-  updateTab.classList.toggle("active", !showSettings);
-  settingsTab.setAttribute("aria-selected", String(showSettings));
-  updateTab.setAttribute("aria-selected", String(!showSettings));
-  settingsPanel.hidden = !showSettings;
-  updatePanel.hidden = showSettings;
+async function refreshBrowserTrustStatus(){
+  const status = document.getElementById("browser_trust_status");
+  const button = document.getElementById("forget_trust_button");
+  button.hidden = true;
+  status.textContent = "信頼設定を確認しています。";
+  try {
+    const trusted = await requestAccountOperation("trustStatus");
+    status.textContent = trusted ? "このブラウザは信頼済みです。" : "このブラウザは信頼されていません。";
+    button.hidden = !trusted || parent === window;
+  } catch {
+    status.textContent = "このブラウザの信頼設定を確認できませんでした。";
+  }
+}
+
+async function runEditorTool(action){
+  const message = document.getElementById("editor_tool_message");
+  message.textContent = "";
+  if(parent === window){
+    message.textContent = "index.html の「登録情報の更新」から操作してください。";
+    return;
+  }
+  try {
+    await requestAccountOperation(action);
+    if(action === "forgetTrust") await refreshBrowserTrustStatus();
+  } catch (error) {
+    message.textContent = "操作できませんでした。 " + error.message;
+  }
 }
 
 function getFirstAvailableListKey(){
@@ -415,13 +458,14 @@ function downloadTextFile(fileName, fileContent, contentType){
   URL.revokeObjectURL(link.href);
 }
 
-function exportStoredLinkData(listKey, includeAccountInfo = false){
+async function exportStoredLinkData(listKey, mode = "omit"){
   const linkData = getLinkDataFromStorage(listKey);
   if(linkData == null){
     return;
   }
   const fileName = makeJsonFileName(linkData);
-  downloadTextFile(fileName, serializeLinkExport(linkData, includeAccountInfo, 2), "application/json");
+  const exportData = mode === "omit" ? linkData : await requestAccountOperation("export", {data:linkData, mode});
+  downloadTextFile(fileName, serializeLinkExport(exportData, mode, 2), "application/json");
   recordOperationLog("JSON出力", fileName);
 }
 
@@ -570,15 +614,15 @@ function renderLinkStorageControls(){
     const areaBDisabledAttr = visibleLinkIds.includes(linkInfoId) ? "" : "disabled='disabled'";
     const searchText = (String(linkInfo["Title"] || "") + " " + String(linkInfo["NOTE"] || "")).toLowerCase();
     controlsHtml += "<div class='div_f1 link_storage_item' data-search-text='" + escapeHtml(searchText) + "'>";
-    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + linkInfoId + "' onclick='updateVisibleLinksFromForm(this.name, this.value, this.checked)' " + checkedAttr + ">";
+    controlsHtml += "<input type='checkbox' name='visibleLinkInfoId' value='" + escapeHtml(linkInfoId) + "' onclick='updateVisibleLinksFromForm(this.name, this.value, this.checked)' " + checkedAttr + ">";
     controlsHtml += " 常時表示";
-    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + linkInfoId + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
+    controlsHtml += "<input type='checkbox' name='areaBVisibleLinkInfoId' value='" + escapeHtml(linkInfoId) + "' onclick='updateAreaBVisibleLinksFromForm(this.name, this.value, this.checked)' " + areaBCheckedAttr + " " + areaBDisabledAttr + ">";
     controlsHtml += " AreaB初期表示";
     controlsHtml += " <input type='button' value='登録内容の更新' onclick='root_flow(\"" + listKey + "\")' />";
     controlsHtml += "<HR>";    
     controlsHtml += "<b>" + escapeHtml(linkInfo["Title"] || "（Title未設定）") + "</b>";
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
-    controlsHtml += " <input type='button' value='JSON出力' onclick='chooseAccountExport(includeAccountInfo => exportStoredLinkData(\"" + listKey + "\", includeAccountInfo))' />";
+    controlsHtml += " <input type='button' value='JSON出力' onclick='chooseAccountExport(mode => exportStoredLinkData(\"" + listKey + "\", mode))' />";
     controlsHtml += "<BR />　<small>" + escapeHtml(linkInfo["NOTE"] || "") + "</small>";
 
     controlsHtml += "</div>";
@@ -851,6 +895,30 @@ wStr = ""
 // 更新対象のWeb Storage情報
 let currentListKey = "";
 let isCreatingNewLinkData = false;
+let editorRevision = 0;
+let editorStoredValue = null;
+let nextAccountRequestId = 0;
+const pendingAccountRequests = new Map();
+
+function requestAccountOperation(action, data){
+  if(parent === window) return accountEditorOperation(action, data);
+  return new Promise((resolve, reject) => {
+    const id = ++nextAccountRequestId;
+    pendingAccountRequests.set(id, {resolve, reject});
+    parent.postMessage({type:"LinkLists.accountRequest", id, action, data},
+      location.protocol === "file:" ? "*" : location.origin);
+  });
+}
+
+window.addEventListener("message", event => {
+  if(event.source !== parent || event.data?.type !== "LinkLists.accountResponse") return;
+  if(location.protocol !== "file:" && event.origin !== location.origin) return;
+  const request = pendingAccountRequests.get(event.data.id);
+  if(!request) return;
+  pendingAccountRequests.delete(event.data.id);
+  if(event.data.error) request.reject(new Error(event.data.error));
+  else request.resolve(event.data.result);
+});
 let activeIconInput = null;
 
 // 更新対象のjson変数
@@ -948,7 +1016,7 @@ function setAccountFormCells(linkItem){
     fieldHtml += '<label>accountId ';
     fieldHtml += '<input type="text" name="accountId" value="' + escapeHtml(account["accountId"]) + '" size="45" >';
     fieldHtml += '</label> <label>password ';
-    fieldHtml += '<input type="text" name="password" value="' + escapeHtml(account["password"]) + '" size="45" >';
+    fieldHtml += '<input type="password" name="password" autocomplete="off" value="' + escapeHtml(account["password"]) + '" size="45" >';
     fieldHtml += '</label><br>';
     fieldHtml += '<label>アカウントの説明（任意） ';
     fieldHtml += '<input type="text" name="accountDescription" value="' + escapeHtml(account["description"] || "") + '" size="45"></label>';
@@ -1018,7 +1086,7 @@ function set_form_flow(itemDefinitions, listItem){
 }
 
 
-function updateLinkStorageFromForm(){
+async function updateLinkStorageFromForm(){
   const isNewLinkData = isCreatingNewLinkData;
   let reassignedInfoId = null;
   if(isNewLinkData && getLinkDataFromStorage(currentListKey) != null){
@@ -1123,7 +1191,17 @@ function updateLinkStorageFromForm(){
   }
 
   try {
-    setLinkDataToStorage(currentListKey, linkData);
+    const revision = editorRevision;
+    const listKey = currentListKey;
+    const storageKey = getLinkStorageKey(listKey);
+    const expectedValue = isNewLinkData ? null : editorStoredValue;
+    const encrypted = await requestAccountOperation("seal", {listKey, data:linkData});
+    if(revision !== editorRevision) return;
+    if(storage.getItem(storageKey) !== expectedValue){
+      throw new Error("登録内容が変更されました。設定一覧から開き直してください。");
+    }
+    setLinkDataToStorage(listKey, encrypted);
+    editorStoredValue = storage.getItem(storageKey);
     if(isNewLinkData){
       addLinkInfoIdToVisibility(linkData["info"]["ID"]);
     }
@@ -1136,7 +1214,7 @@ function updateLinkStorageFromForm(){
       : "編集中の内部IDが使用されたため、別の空きIDを割り当てて更新しました";
   } catch (error) {
     console.error("Failed to update Web Storage:", error);
-    document.getElementById("message_area").innerHTML = '<font color="red">エラーが発生し更新できませんでした</font>';
+    document.getElementById("message_area").textContent = "更新できませんでした。 " + error.message;
   }
 }
 
@@ -1169,6 +1247,7 @@ function parseCategoryInput(categoryInput){
 
 
 function set_init(){
+  editorRevision++;
   document.getElementById("form_area").innerHTML = "";
   document.getElementById("message_area").innerHTML = "";
   wStr = "";
@@ -1189,17 +1268,31 @@ function makeEmptyLinkData(selectedListKey){
 }
 
 
-function root_flow(selectedListKey){
+async function root_flow(selectedListKey){
   set_init();  // 初期値設定
   showEditorTab("update");
+  const revision = editorRevision;
   currentListKey = selectedListKey;
-  wStr += '<form name="linklist" action="" onsubmit="">'
+  const storageKey = getLinkStorageKey(selectedListKey);
+  let storedValue = storage.getItem(storageKey);
 
   let targetData = getLinkDataFromStorage(selectedListKey);
   isCreatingNewLinkData = targetData == null;
   if(targetData == null){
     targetData = makeEmptyLinkData(selectedListKey);
+  }else if(targetData.list.some(item => item.encryptedAccounts || accountVault.plaintext(item).length)){
+    try {
+      const opened = await requestAccountOperation("open", {listKey:selectedListKey, storedValue, data:targetData});
+      targetData = opened.data;
+      storedValue = opened.storedValue;
+    } catch (error) {
+      if(revision === editorRevision) document.getElementById("message_area").textContent = error.message;
+      return;
+    }
   }
+  if(revision !== editorRevision) return;
+  editorStoredValue = storedValue;
+  wStr += '<form name="linklist" onsubmit="return false">';
 
   targetList = targetData["list"];
   targetInfo = targetData["info"];
@@ -1237,7 +1330,7 @@ function root_flow(selectedListKey){
 renderLinkListButtons();
 set_init();  // 初期値設定
 renderLinkStorageControls();
-showEditorTab("settings");
+showEditorTab(location.hash === "#tools" ? "tools" : "settings");
 
 </script>
 </body>
