@@ -351,6 +351,68 @@ function getLinkAccounts(linkItem){
   return linkItem?.encryptedAccounts ? accountVault.cached(linkItem.encryptedAccounts) : [];
 }
 
+const PASSWORD_MASK = "*****";
+let activePasswordPeek = null;
+
+function hidePasswordPeek(){
+  if(!activePasswordPeek) return;
+  activePasswordPeek.value.textContent = PASSWORD_MASK;
+  activePasswordPeek = null;
+}
+
+function showPasswordPeek(button, hold){
+  hidePasswordPeek();
+  const accounts = getLinkAccounts(list[Number(button.dataset.linkIndex)]);
+  const password = accounts[Number(button.dataset.accountIndex)]?.password;
+  if(!hasAccountValue(password)) return;
+  const value = button.previousElementSibling;
+  value.textContent = password;
+  activePasswordPeek = {button, value, ...hold};
+}
+
+document.addEventListener("pointerdown", event => {
+  const button = event.target.closest?.(".password_peek");
+  if(button && event.button === 0 && event.isPrimary){
+    showPasswordPeek(button, {pointerId:event.pointerId});
+  }
+});
+
+for(const type of ["pointerup", "pointercancel"]){
+  window.addEventListener(type, event => {
+    if(activePasswordPeek?.pointerId === event.pointerId) hidePasswordPeek();
+  }, true);
+}
+
+document.addEventListener("pointerout", event => {
+  const peek = activePasswordPeek;
+  if(peek && peek.pointerId === event.pointerId && peek.button.contains(event.target)
+      && !peek.button.contains(event.relatedTarget)){
+    hidePasswordPeek();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if(event.key === "Escape") hidePasswordPeek();
+  const button = event.target.closest?.(".password_peek");
+  if(button && (event.key === " " || event.key === "Enter")){
+    event.preventDefault();
+    if(!event.repeat) showPasswordPeek(button, {key:event.key});
+  }
+});
+
+window.addEventListener("keyup", event => {
+  if(activePasswordPeek?.key === event.key) hidePasswordPeek();
+}, true);
+
+document.addEventListener("focusout", event => {
+  if(activePasswordPeek?.button === event.target) hidePasswordPeek();
+});
+window.addEventListener("blur", hidePasswordPeek);
+window.addEventListener("pagehide", hidePasswordPeek);
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden) hidePasswordPeek();
+});
+
 function renderLinkAccountControls(accounts, linkIndex){
   let html = "";
   for(const [accountIndex, account] of accounts.entries()){
@@ -362,7 +424,9 @@ function renderLinkAccountControls(accounts, linkIndex){
       html += " <button type='button' onclick='copyLinkAccountValue(" + linkIndex + ", " + accountIndex + ", \"accountId\")'>Copy</button><br>";
     }
     if(hasAccountValue(account.password)){
-      html += "　Password: *****";
+      html += "　Password: <span class='password_value'>" + PASSWORD_MASK + "</span>";
+      html += " <button type='button' class='password_peek' aria-label='押している間だけパスワードを表示' title='押している間だけパスワードを表示' data-link-index='" + linkIndex + "' data-account-index='" + accountIndex + "'>";
+      html += "<svg aria-hidden='true' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z'/><circle cx='12' cy='12' r='3'/></svg></button>";
       html += " <button type='button' onclick='copyLinkAccountValue(" + linkIndex + ", " + accountIndex + ", \"password\")'>Copy</button><br>";
     }
   }
@@ -1270,6 +1334,16 @@ function shouldIncludeAreaBUnselectedInSearch(){
 }
 </script>
 <style>
+.password_peek {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  touch-action: none;
+}
+.password_value {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 html { height: 100%; }
 body { height: 100%; margin: 0; }
 main {
@@ -1556,6 +1630,7 @@ function selectEventFilterIcon(argKey){
 
 
 function editLinkInfo(tabName){
+  hidePasswordPeek();
   let iconListHtml = "";
   iconListHtml += "<p>編集フォームのicon欄を選択してから、使用するアイコンをクリックしてください。</p>";
   iconListHtml += "<center>";
@@ -1830,6 +1905,7 @@ function getDisplayedLinkCount(){
 
 function showAreaD()
 {
+  hidePasswordPeek();
   let wStr = "";
   let isSelected = 1;
   let headStr = "";
