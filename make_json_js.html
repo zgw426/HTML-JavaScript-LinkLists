@@ -1,6 +1,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <script src="link_export.js"></script>
   <style>
     html { height: 100%; }
     body { height: 100%; margin: 0; }
@@ -414,13 +415,13 @@ function downloadTextFile(fileName, fileContent, contentType){
   URL.revokeObjectURL(link.href);
 }
 
-function exportStoredLinkData(listKey){
+function exportStoredLinkData(listKey, includeAccountInfo = false){
   const linkData = getLinkDataFromStorage(listKey);
   if(linkData == null){
     return;
   }
   const fileName = makeJsonFileName(linkData);
-  downloadTextFile(fileName, JSON.stringify(linkData, null, 2), "application/json");
+  downloadTextFile(fileName, serializeLinkExport(linkData, includeAccountInfo, 2), "application/json");
   recordOperationLog("JSON出力", fileName);
 }
 
@@ -577,7 +578,7 @@ function renderLinkStorageControls(){
     controlsHtml += "<HR>";    
     controlsHtml += "<b>" + escapeHtml(linkInfo["Title"] || "（Title未設定）") + "</b>";
     controlsHtml += " <input type='button' value='削除' onclick='deleteStoredLinkData(\"" + listKey + "\")' />";
-    controlsHtml += " <input type='button' value='JSON出力' onclick='exportStoredLinkData(\"" + listKey + "\")' />";
+    controlsHtml += " <input type='button' value='JSON出力' onclick='chooseAccountExport(includeAccountInfo => exportStoredLinkData(\"" + listKey + "\", includeAccountInfo))' />";
     controlsHtml += "<BR />　<small>" + escapeHtml(linkInfo["NOTE"] || "") + "</small>";
 
     controlsHtml += "</div>";

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>リンクリスト</title>
+  <script src="link_export.js"></script>
   <script src="icon_catalog.json.js"></script>
   <script src="area_c_icon_mapinfo.js"></script>
   <script src="function_enhancement.js"></script>
@@ -1046,9 +1047,17 @@ function collectBackupEntries(){
   return entries;
 }
 
-function exportStorageBackup(){
+function exportStorageBackup(includeAccountInfo = false){
   const exportedAt = new Date().toISOString();
-  const backup = {format: BACKUP_FORMAT, version: BACKUP_FORMAT_VERSION, exportedAt, entries: collectBackupEntries()};
+  const entries = collectBackupEntries();
+  if(!includeAccountInfo){
+    for(const key of Object.keys(entries)){
+      if(key.startsWith(LINK_STORAGE_PREFIX)){
+        entries[key] = serializeLinkExport(JSON.parse(entries[key]), false);
+      }
+    }
+  }
+  const backup = {format: BACKUP_FORMAT, version: BACKUP_FORMAT_VERSION, exportedAt, entries};
   const timestamp = exportedAt.slice(0, 19).replace(/:/g, "-");
   downloadTextFile("LinkLists-backup-" + timestamp + "Z.json", JSON.stringify(backup, null, 2), "application/json");
 }
@@ -1140,7 +1149,7 @@ async function importStorageBackup(fileInput){
   }
 }
 
-function exportAllLinkJsonFiles(){
+function exportAllLinkJsonFiles(includeAccountInfo = false){
   refreshLoadArrFromStorage();
   const enhancementData = getEnhancementDataFromStorage();
   if(load_arr.length == 0 && enhancementData == null){
@@ -1150,7 +1159,7 @@ function exportAllLinkJsonFiles(){
   for(let linkIndex = 0; linkIndex < load_arr.length; linkIndex++){
     const linkData = load_arr[linkIndex];
     const fileName = makeJsonFileName(linkData);
-    downloadTextFile(fileName, JSON.stringify(linkData, null, 2), "application/json");
+    downloadTextFile(fileName, serializeLinkExport(linkData, includeAccountInfo, 2), "application/json");
     recordOperationLog("JSON出力", fileName);
   }
   if(enhancementData != null){
@@ -1359,9 +1368,10 @@ textarea{
 <dialog id="storageBackupDialog" aria-labelledby="storageBackupTitle">
   <h2 id="storageBackupTitle">データ移行</h2>
   <p>リンク情報、表示設定、拡張設定、操作ログを1つのJSONに出力し、別のブラウザで復元できます。</p>
-  <p>登録済みのIDやパスワードも含まれます。自分で出力したファイルを使い、安全な場所に保管してください。</p>
+  <p>出力時にアカウント情報を含めるか選べます。自分で出力したファイルを使い、安全な場所に保管してください。</p>
   <p>復元すると、このブラウザの登録内容が置き換わります。</p>
-  <button type="button" onclick="exportStorageBackup()">完全バックアップを出力</button>
+  <button type="button" onclick="chooseAccountExport(exportStorageBackup)">完全バックアップを出力</button>
+  <button type="button" onclick="chooseAccountExport(exportAllLinkJsonFiles)">個別JSONを一括出力</button>
   <input type="file" id="storageBackupFile" accept=".json,application/json" hidden onchange="importStorageBackup(this)">
   <button type="button" onclick="document.getElementById('storageBackupFile').click()">バックアップを復元</button>
   <form method="dialog"><button type="submit">閉じる</button></form>
